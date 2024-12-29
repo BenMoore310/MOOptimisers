@@ -10,13 +10,101 @@ from PIL import Image
 from datetime import datetime
 import scienceplots
 from scipy.stats import norm
+import functionBank as func
+from sklearn.preprocessing import MinMaxScaler
+
+
+
+
+def MOobjective_function(vec, currentFunction, nObjectives):
+    """Objective function wrapper for optimization.
+    Args:
+        vec (np.ndarray): A vector representing candidate solution (x, y).
+        make zbests an array of shape (0, n_objs)
+    Returns:
+        float: Fitness value of the solution.
+    """
+    objectiveArray = np.empty((1, nObjectives))
+
+    if currentFunction == func.fonsecaFleming:
+        objectiveArray[0] = currentFunction(vec)
+        # objectiveArray = np.empty((1,nObjectives))
+
+    else:
+        x, y = vec
+
+        # this gives the separate objective values to be returned for pareto plotting purposes
+        objectiveArray[0] = currentFunction(x, y)
+        #  print(objectiveArray.shape)
+
+    # noww scalarise the objectives
+    # scalarisedObjective, newZBests = scalarisingFunction(objectiveArray, zbests, weights)
+
+    # print(objectiveArray, scalarisedObjective)
+
+    return objectiveArray
+
+
+def scalariseValues(
+    scalarisingFunction, objectiveArray, zBests, weights, currentGen, maxGen
+):
+    scaler = MinMaxScaler(feature_range=(0, 1))
+
+    objsNormalised = scaler.fit_transform(objectiveArray)
+
+    print(objsNormalised)
+
+    z0 = np.zeros_like(zBests)
+
+    if scalarisingFunction == func.PAPBI:
+        print("using PAPBI!")
+        scalarisedArray = scalarisingFunction(
+            objsNormalised, z0, weights, currentGen, maxGen
+        )
+
+    else:
+        scalarisedArray = np.empty(len(objectiveArray))
+        for i in range(0, len(objectiveArray)):
+            scalarisedArray[i] = scalarisingFunction(objsNormalised[i], z0, weights)
+
+    # print(scalarisedArray)
+    # unNormalisedScalarArray = scaler.inverse_transform(scalarisedArray)
+    # print(unNormalisedScalarArray)
+
+    return scalarisedArray
+
+
+def removeNans(features, targets):
+    """
+    Removes NaN values from the outputs array and corresponding entries in the inputs array.
+
+    Parameters:
+        features (np.ndarray): Input array with function inputs.
+        targets (np.ndarray): Output array with function outputs.
+
+    Returns:
+        tuple: A tuple containing cleaned inputs and outputs arrays.
+    """
+    # Create a boolean mask for non-NaN values in the outputs array
+    mask = ~np.isnan(targets)
+
+    # Log the indices of NaN values
+    nan_indices = np.where(~mask)[0]
+    if nan_indices.size > 0:
+        print(f"NaN values found at indices: {nan_indices}")
+    else:
+        print("No NaN values found.")
+
+    # Return the cleaned arrays
+    return features[mask], targets[mask]
 
 # plt.style.available
 # plt.style.use(['science', 'notebook'])
 class ExactGPModel(gpytorch.models.ExactGP):
     def __init__(self, train_x, train_y, likelihood, meanPrior):
         super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
-        if meanPrior == 'max':
+
+        if meanPrior == "max":
             # self.mean_module = gpytorch.means.ZeroMean()
             self.mean_module = gpytorch.means.ConstantMean()
             # self.mean_module.constant = torch.nn.Parameter(torch.tensor(torch.max(train_y)))
@@ -30,14 +118,15 @@ class ExactGPModel(gpytorch.models.ExactGP):
     def forward(self, x):
         mean_x = self.mean_module(x)
         covar_x = self.covar_module(x)
-        return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
-    
-def GPTrain(features, targets, meanPrior):
 
+        return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
+
+
+def GPTrain(features, targets, meanPrior):
     tensorSamplesXY = torch.from_numpy(features)
     tensorSamplesZ = torch.from_numpy(targets)
 
-    likelihood = gpytorch.likelihoods.GaussianLikelihood() 
+    likelihood = gpytorch.likelihoods.GaussianLikelihood()
     model = ExactGPModel(tensorSamplesXY, tensorSamplesZ, likelihood, meanPrior)
     likelihood.noise = 1e-4
     likelihood.noise_covar.raw_noise.requires_grad_(False)
@@ -48,7 +137,9 @@ def GPTrain(features, targets, meanPrior):
     likelihood.train()
 
     # Use the adam optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.05)  # Includes GaussianLikelihood parameters
+    optimizer = torch.optim.Adam(
+        model.parameters(), lr=0.05
+    )  # Includes GaussianLikelihood parameters
 
     # "Loss" for GPs - the marginal log likelihood
     mll = gpytorch.mlls.ExactMarginalLogLikelihood(likelihood, model)
@@ -67,7 +158,7 @@ def GPTrain(features, targets, meanPrior):
         #     model.likelihood.noise.item()
         # ))
         optimizer.step()
-    
+
     return model
 
 
@@ -83,10 +174,19 @@ def GPEval(model, newFeatures):
 
 
 class DifferentialEvolution:
-    def __init__(self, bounds, objective_function, pop_size=50, mutation_factor=0.8, crossover_prob=0.7, max_generations=200, method='random'):
+    def __init__(
+        self,
+        bounds,
+        objective_function,
+        pop_size=50,
+        mutation_factor=0.8,
+        crossover_prob=0.7,
+        max_generations=200,
+        method="random",
+    ):
         """
         Initialize the Differential Evolution (DE) optimizer.
-        
+
         Parameters:
         bounds (list of tuple): List of (min, max) bounds for each dimension.
         pop_size (int): Number of candidate solutions in the population.
@@ -102,16 +202,16 @@ class DifferentialEvolution:
         self.crossover_prob = crossover_prob
         self.max_generations = max_generations
         self.method = method
-        
+
         # Initialize population
         self.population = self.initialize_population()
         self.best_solution = None
         self.best_fitness = np.inf
         self.objective_function = objective_function
-    
+
     def initialize_population(self):
         """Initialize population using random sampling or Latin Hypercube Sampling."""
-        if self.method == 'lhs':
+        if self.method == "lhs":
             # Latin Hypercube Sampling
             sampler = qmc.LatinHypercube(d=self.dimensions)
             sample = sampler.random(n=self.pop_size)
@@ -120,25 +220,26 @@ class DifferentialEvolution:
             # Random Sampling
             population = np.random.rand(self.pop_size, self.dimensions)
             for i in range(self.dimensions):
-                population[:, i] = self.bounds[i, 0] + population[:, i] * (self.bounds[i, 1] - self.bounds[i, 0])
-        
+                population[:, i] = self.bounds[i, 0] + population[:, i] * (
+                    self.bounds[i, 1] - self.bounds[i, 0]
+                )
+
         # print(population.shape)
         return population
-    
+
     def mutate(self, target_idx):
         """Mutation using DE/best/1 strategy."""
         # Choose three random and distinct individuals different from target_idx
         indices = [idx for idx in range(self.pop_size) if idx != target_idx]
         np.random.shuffle(indices)
-        r1, r2 , r3= indices[:3]
-        
+        r1, r2, r3 = indices[:3]
+
         # Best individual in current population
 
         # print(self.population.shape)
 
-        #TODO  instead of this list comprehension bollocks just evaluate them all at once
-        #as thats what i think it wants, then find the minimum of the results. 
-
+        # TODO  instead of this list comprehension bollocks just evaluate them all at once
+        # as thats what i think it wants, then find the minimum of the results.
 
         predictedValues = GPEval(self.objective_function, self.population)
 
@@ -148,46 +249,54 @@ class DifferentialEvolution:
 
         # best_idx = np.argmin([self.objective_function.predict(ind) for ind in self.population])
         # best = self.population[best_idx]
-        
+
         # Mutant vector: v = best + F * (r1 - r2)
-        mutant = best + self.mutation_factor * (self.population[r1] - self.population[r2])
-        
+        mutant = best + self.mutation_factor * (
+            self.population[r1] - self.population[r2]
+        )
+
         # Ensure mutant vector is within bounds
         mutant = np.clip(mutant, self.bounds[:, 0], self.bounds[:, 1])
-        
+
         return mutant
-    
+
     def crossover(self, target, mutant):
         """Crossover to create trial vector."""
         trial = np.copy(target)
         # print(trial.shape)
         # print(mutant.shape)
         for i in range(self.dimensions):
-            if np.random.rand() < self.crossover_prob or i == np.random.randint(self.dimensions):
+            if np.random.rand() < self.crossover_prob or i == np.random.randint(
+                self.dimensions
+            ):
                 # print(trial[i], mutant[i])
                 trial[i] = mutant[i]
         return trial
-    
+
     def select(self, target, trial):
         """Selection: Return the individual with the better fitness."""
-        if self.objective_function.predict(trial) < self.objective_function.predict(target):
+        if self.objective_function.predict(trial) < self.objective_function.predict(
+            target
+        ):
             return trial
         return target
 
     def select(self, target, trial):
         """Selection: Return the individual with the better fitness."""
-        if GPEval(self.objective_function, trial) < GPEval(self.objective_function, target):
+        if GPEval(self.objective_function, trial) < GPEval(
+            self.objective_function, target
+        ):
             return trial
         return target
-    
+
     def optimize(self):
         """Run the Differential Evolution optimization."""
         # x_range = np.linspace(-5, 5, 100)
         # y_range = np.linspace(-5, 5, 100)
         # X, Y = np.meshgrid(x_range, y_range)
         # Z = ackley_function(X, Y)
-        x_range = np.linspace(self.bounds[0,0], self.bounds[0,1],50)
-        y_range = np.linspace(self.bounds[1,0], self.bounds[1,1],50)
+        x_range = np.linspace(self.bounds[0, 0], self.bounds[0, 1], 50)
+        y_range = np.linspace(self.bounds[1, 0], self.bounds[1, 1], 50)
         fullRange = list(product(x_range, y_range))
         fullRangeArray = np.array(fullRange)
         # y_pred = self.objective_function.predict(fullRangeArray)
@@ -207,18 +316,18 @@ class DifferentialEvolution:
                 mutant = np.reshape(mutant, (2,))
                 # print(mutant)
                 trial = self.crossover(target, mutant)
-                trial = np.reshape(trial, (1,-1))
-                target = np.reshape(target, (1,-1))
+                trial = np.reshape(trial, (1, -1))
+                target = np.reshape(target, (1, -1))
                 # print('for select', trial.shape, target.shape)
                 new_population[i] = self.select(target, trial)
-            
+
             # Update the population
             self.population = new_population
-            
+
             # Track the best solution
             # best_idx = np.argmin([self.objective_function.predict(ind) for ind in self.population])
             # best_fitness = self.objective_function.predict(self.population[best_idx])
-            
+
             # predictedValues = self.objective_function.predict(self.population)
             predictedValues = GPEval(self.objective_function, self.population)
 
@@ -230,7 +339,7 @@ class DifferentialEvolution:
             if best_fitness < self.best_fitness:
                 self.best_fitness = best_fitness
                 self.best_solution = self.population[best_idx]
-            
+
             # plt.contourf(x_range, y_range, y_pred, levels=50, cmap='viridis')
         # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = y_pred)
 
@@ -246,12 +355,15 @@ class DifferentialEvolution:
         # plt.show()
         # # Debug information
         print(f"Generation {generation + 1}: Best RBF Fitness = {self.best_fitness}")
-        
+
         return self.best_solution, self.best_fitness
+
+
 def ackley_function(x, y, a=20, b=0.2, c=2 * np.pi):
     term1 = -a * np.exp(-b * np.sqrt(0.5 * (x**2 + y**2)))
     term2 = -np.exp(0.5 * (np.cos(c * x) + np.cos(c * y)))
     return term1 + term2 + a + np.exp(1)
+
 
 def objective_function(vec):
     """Objective function wrapper for optimization.
@@ -262,20 +374,233 @@ def objective_function(vec):
     """
     x, y = vec
     return ackley_function(x, y)
+
+
+class BayesianDifferentialEvolution:
+    def __init__(
+        self,
+        surrogateModel,
+        bounds,
+        bestTarget,
+        pop_size=75,
+        mutation_factor=0.8,
+        crossover_prob=0.7,
+        max_generations=40,
+        method="random",
+    ):
+        """
+        Initialize the Differential Evolution (DE) optimizer for use with BO.
+
+        Parameters:
+        bounds (list of tuple): List of (min, max) bounds for each dimension.
+        pop_size (int): Number of candidate solutions in the population.
+        mutation_factor (float): Scaling factor for mutation [0, 2].
+        crossover_prob (float): Crossover probability [0, 1].
+        max_generations (int): Maximum number of generations to evolve.
+        method (str): Population initialization method ('random' or 'lhs').
+        """
+        self.bounds = np.array(bounds)
+        self.dimensions = len(bounds)
+        self.pop_size = pop_size
+        self.mutation_factor = mutation_factor
+        self.crossover_prob = crossover_prob
+        self.max_generations = max_generations
+        self.method = method
+        self.surrogateModel = surrogateModel
+        self.bestTarget = bestTarget
+
+        # Initialize population
+        self.population = self.initialize_population()
+        self.best_solution = None
+        self.best_fitness = 0
+
+    def initialize_population(self):
+        """Initialize population using random sampling or Latin Hypercube Sampling."""
+        if self.method == "lhs":
+            # Latin Hypercube Sampling
+            sampler = qmc.LatinHypercube(d=self.dimensions)
+            sample = sampler.random(n=self.pop_size)
+            population = qmc.scale(sample, self.bounds[:, 0], self.bounds[:, 1])
+        else:
+            # Random Sampling
+            population = np.random.rand(self.pop_size, self.dimensions)
+            for i in range(self.dimensions):
+                population[:, i] = self.bounds[i, 0] + population[:, i] * (
+                    self.bounds[i, 1] - self.bounds[i, 0]
+                )
+
+        return population
+
+    def mutate(self, target_idx):
+        """Mutation using DE/best/1 strategy."""
+        # Choose three random and distinct individuals different from target_idx
+        indices = [idx for idx in range(self.pop_size) if idx != target_idx]
+        np.random.shuffle(indices)
+        r1, r2, r3 = indices[:3]
+
+        # Best individual in current population
+        # best_idx = np.argmin([expectedImprovement(self.surrogateModel, ind, self.bestTarget, 0.01) for ind in self.population])
+
+        predictedEI = expectedImprovement(
+            self.surrogateModel, self.population, self.bestTarget, 0.01
+        )
+
+        best_idx = np.argsort(predictedEI)[-1]
+        # print('in mutate function, best = ', predictedEI[best_idx], self.population[best_idx])
+        best = self.population[best_idx]
+
+        # Mutant vector: v = best + F * (r1 - r2)
+        mutant = best + self.mutation_factor * (
+            self.population[r1] - self.population[r2]
+        )
+
+        # Ensure mutant vector is within bounds
+        mutant = np.clip(mutant, self.bounds[:, 0], self.bounds[:, 1])
+
+        return mutant
+
+    def crossover(self, target, mutant):
+        """Crossover to create trial vector."""
+        trial = np.copy(target)
+        for i in range(self.dimensions):
+            if np.random.rand() < self.crossover_prob or i == np.random.randint(
+                self.dimensions
+            ):
+                # print(trial[i], mutant[i])
+                # print(trial.shape, mutant.shape)
+                trial[i] = mutant[i]
+        return trial
+
+    def select(self, target, trial):
+        """Selection: Return the individual with the better fitness."""
+        # print(trial.shape)
+
+        trialEI = expectedImprovement(self.surrogateModel, trial, self.bestTarget, 0.01)
+        targetEI = expectedImprovement(
+            self.surrogateModel, target, self.bestTarget, 0.01
+        )
+
+        selectedValues = np.copy(target)
+
+        for i in range(self.pop_size):
+            if trialEI[i] > targetEI[i]:
+                selectedValues[i] = trial[i]
+
+        return selectedValues
+        # if expectedImprovement(self.surrogateModel, trial, self.bestTarget,  0.01) < expectedImprovement(self.surrogateModel, target, self.bestTarget,  0.01):
+        #     return trial
+        # return target
+
+    def optimize(self):
+        """Run the Differential Evolution optimization."""
+        x_range = np.linspace(0, 5, 100)
+        y_range = np.linspace(0, 3, 100)
+        fullRange = list(product(x_range, y_range))
+        fullRangeArray = np.array(fullRange)
+        Z = expectedImprovement(
+            self.surrogateModel, fullRangeArray, self.bestTarget, 0.01
+        )
+
+        for generation in range(self.max_generations):
+            new_population = np.zeros_like(self.population)
+
+            targetArray = np.zeros_like(self.population)
+            trialArray = np.zeros_like(self.population)
+
+            for i in range(self.pop_size):
+                target = self.population[i]
+                mutant = self.mutate(i)
+                mutant = np.reshape(mutant, (2,))
+
+                trial = self.crossover(target, mutant)
+
+                targetArray[i] = target
+                trialArray[i] = trial
+
+            new_population = self.select(targetArray, trialArray)
+
+            # Update the population
+            self.population = new_population
+
+            # Track the best solution
+
+            predictedEI = expectedImprovement(
+                self.surrogateModel, self.population, self.bestTarget, 0.01
+            )
+
+            # print(predictedEI)
+
+            best_idx = np.argsort(predictedEI)[-1]
+
+            best_fitness = np.max(predictedEI)
+
+            # print(best_fitness)
+
+            # best_idx = np.argmin([expectedImprovement(self.surrogateModel, ind, self.bestTarget, 0.01) for ind in self.population])
+            # best_fitness = expectedImprovement(self.surrogateModel, self.population[best_idx], self.bestTarget, 0.01)
+
+            if best_fitness > self.best_fitness:
+                self.best_fitness = best_fitness
+                self.best_solution = self.population[best_idx]
+                # print('"best solution"', self.best_solution)
+
+            # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+
+            # plt.contourf(x_range, y_range, Z, levels=50, cmap='viridis')
+        # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = Z, alpha = 0.5)
+        # plt.scatter(self.population[:, 0], self.population[:, 1], color='red', label='Population', s=10, marker='x')
+        # plt.scatter(self.best_solution[0], self.best_solution[1], color='blue', label='Best Solution', s=10)
+        # plt.legend()
+        # plt.title("DE Optimisation of Expected Improvement")
+        # plt.colorbar()
+        # # plt.yscale('log')
+        # plt.clim(np.min(Z), np.max(Z))
+        # plt.savefig('eiDE.png')
+        # # plt.show()
+        # plt.close()
+        # # Debug information
+        # print(f"Generation {generation + 1}: Best Fitness = {self.best_fitness}")
+
+        return self.best_solution, self.best_fitness
+
+
 class TS_DDEO:
-    def __init__(self, bounds, pop_size, c1=2.05, c2=2.05, PSOFE=50, BDDOFE=15, mutation_factor=0.8, crossover_prob=0.7):
+    def __init__(
+        self,
+        bounds,
+        pop_size,
+        objFunction,
+        scalarisingFunction,
+        nObjectives,
+        weights,
+        c1=2.05,
+        c2=2.05,
+        PSOFE=50,
+        BDDOFE=15,
+        mutation_factor=0.8,
+        crossover_prob=0.7,
+    ):
         self.globalBounds = np.array(bounds)
         self.dimensions = len(bounds)
         self.pop_size = pop_size
         self.max_generations = PSOFE
         self.feFeatures = np.empty((0, self.dimensions))  # Consistent with dimensions
         self.globalBestFeature = None
-        self.feTargets = np.empty(0) 
+        self.nObjectives = nObjectives
+        self.objectiveTargets = np.empty((0, self.nObjectives))
+        self.scalarisedTargets = np.empty(0)
+
+        # self.feTargets = np.empty(0)
         self.globalBestTarget = np.inf  # Initialize as infinity
         self.popBestFeature = np.empty((self.pop_size, self.dimensions))
         self.popBestTargets = np.full(self.pop_size, np.inf)  # Initialize with inf
         self.generator = np.random.default_rng()
         self.BBDOIter = BDDOFE
+        self.objFunction = objFunction
+
+        self.scalarisingFunction = scalarisingFunction
+        self.zbests = np.empty((0))
+        self.weights = weights
         # Initialize population and velocities
         self.population = self.initialisePopulation()
         self.velocities = self.initialiseVelocities()
@@ -295,20 +620,36 @@ class TS_DDEO:
         sample = sampler.random(n=self.pop_size)
         population = qmc.scale(sample, self.globalBounds[:, 0], self.globalBounds[:, 1])
 
-        for particle in population:
-            # Evaluate the objective function
-            target = objective_function(particle)
-            self.feTargets = np.append(self.feTargets, target)
-            self.feFeatures = np.vstack((self.feFeatures, particle))
+        for i in range(0, len(population)):
+            newObjectiveTargets = MOobjective_function(
+                population[i], self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
+            self.feFeatures = np.vstack((self.feFeatures, population[i]))
+
+        # find minimum in boths columns - new zbest values
+
+        self.zbests = np.min(self.objectiveTargets, axis=0)
+
+        self.scalarisedTargets = scalariseValues(
+            self.scalarisingFunction,
+            self.objectiveTargets,
+            self.zbests,
+            self.weights,
+            0,
+            100,
+        )
 
         # Initialize the personal bests
         self.popBestFeature = self.feFeatures.copy()
-        self.popBestTargets = self.feTargets.copy()
+        self.popBestTargets = self.scalarisedTargets.copy()
 
         # Initialize the global best
-        bestIdx = np.argmin(self.feTargets)
+        bestIdx = np.argmin(self.scalarisedTargets)
         self.globalBestFeature = self.feFeatures[bestIdx]
-        self.globalBestTarget = self.feTargets[bestIdx]
+        self.globalBestTarget = self.scalarisedTargets[bestIdx]
 
         # Plot initial population
         # plt.scatter(self.feFeatures[:, 0], self.feFeatures[:, 1], c=self.feTargets, cmap='viridis')
@@ -321,7 +662,11 @@ class TS_DDEO:
     def initialiseVelocities(self):
         """Initializes particle velocities as a small fraction of the bounds range."""
         velocity_range = (self.globalBounds[:, 1] - self.globalBounds[:, 0]) * 0.001
-        return self.generator.uniform(low=-velocity_range, high=velocity_range, size=(self.pop_size, self.dimensions))
+        return self.generator.uniform(
+            low=-velocity_range,
+            high=velocity_range,
+            size=(self.pop_size, self.dimensions),
+        )
 
     def updateVelocity(self):
         """Updates the velocities of the particles."""
@@ -340,7 +685,9 @@ class TS_DDEO:
 
     def clipPositions(self):
         """Clips particle positions to stay within bounds."""
-        self.population = np.clip(self.population, self.globalBounds[:, 0], self.globalBounds[:, 1])
+        self.population = np.clip(
+            self.population, self.globalBounds[:, 0], self.globalBounds[:, 1]
+        )
 
     def stage1(self):
         """Runs the PSO optimization loop."""
@@ -353,20 +700,38 @@ class TS_DDEO:
 
         while len(self.feFeatures) < (self.pop_size + self.max_generations):
             # Train surrogate model and find a solution
-            GPModel = GPTrain(self.feFeatures, self.feTargets, meanPrior='zero')
+            GPModel = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="zero")
             globalDE = DifferentialEvolution(self.globalBounds, GPModel)
             bestGPSolution, bestGPFitness = globalDE.optimize()
 
             # Evaluate the found solution
-            bestGPSolution = np.reshape(bestGPSolution, (1, self.dimensions))
-            target = objective_function(bestGPSolution[0])
-            self.feTargets = np.append(self.feTargets, target)
+            bestGPSolution = np.reshape(bestGPSolution, (self.dimensions,))
+            print(bestGPSolution.shape)
+            newObjectiveTargets = MOobjective_function(
+                bestGPSolution, self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
             self.feFeatures = np.vstack((self.feFeatures, bestGPSolution))
 
+            # find minimum in boths columns - new zbest values
+
+            self.zbests = np.min(self.objectiveTargets, axis=0)
+
+            self.scalarisedTargets = scalariseValues(
+                self.scalarisingFunction,
+                self.objectiveTargets,
+                self.zbests,
+                self.weights,
+                iteration,
+                self.max_generations,
+            )
+
             # Update global best if necessary
-            if target < self.globalBestTarget:
-                self.globalBestFeature = bestGPSolution[0]
-                self.globalBestTarget = target
+            bestIdx = np.argmin(self.scalarisedTargets)
+            self.globalBestFeature = self.feFeatures[bestIdx]
+            self.globalBestTarget = self.scalarisedTargets[bestIdx]
 
             # Update velocities and positions
             self.updateVelocity()
@@ -381,22 +746,36 @@ class TS_DDEO:
             toEvaluate = np.where(betterThanPBest)[0]
             for idx in toEvaluate:
                 particle = self.population[idx]
-                target = objective_function(particle)
-
-                # Update feature and target logs
-                self.feTargets = np.append(self.feTargets, target)
+                newObjectiveTargets = MOobjective_function(
+                    particle, self.objFunction, self.nObjectives
+                )
+                self.objectiveTargets = np.vstack(
+                    (self.objectiveTargets, newObjectiveTargets)
+                )
                 self.feFeatures = np.vstack((self.feFeatures, particle))
 
+                # find minimum in boths columns - new zbest values
+
+                self.zbests = np.min(self.objectiveTargets, axis=0)
+
+                self.scalarisedTargets = scalariseValues(
+                    self.scalarisingFunction,
+                    self.objectiveTargets,
+                    self.zbests,
+                    self.weights,
+                    iteration,
+                    self.max_generations,
+                )
+
                 # Update personal best if necessary
-                if target < self.popBestTargets[idx]:
-                    self.popBestTargets[idx] = target
+                if self.scalarisedTargets[-1] < self.popBestTargets[idx]:
+                    self.popBestTargets[idx] = self.scalarisedTargets[-1]
                     self.popBestFeature[idx] = particle
 
-
-            #refind best values
-            bestIdx = np.argmin(self.feTargets)
+            # refind best values
+            bestIdx = np.argmin(self.scalarisedTargets)
             self.globalBestFeature = self.feFeatures[bestIdx]
-            self.globalBestTarget = self.feTargets[bestIdx]
+            self.globalBestTarget = self.scalarisedTargets[bestIdx]
             iteration += 1
             # Plot the optimization progress
             # plt.contourf(X, Y, Z, levels=50, cmap='viridis')
@@ -411,18 +790,19 @@ class TS_DDEO:
             # plt.title('Initial Population')
             # plt.colorbar()
             # plt.show()
-            np.savetxt('TSDDEOFeatures.txt', self.feFeatures)
-            np.savetxt('TSDDEOTargets.txt', self.feTargets)
+            np.savetxt("TSDDEOFeatures.txt", self.feFeatures)
+            np.savetxt("TSDDEOTargets.txt", self.scalarisedTargets)
+            np.savetxt("TSDDEOObjectiveTargets.txt", self.objectiveTargets)
 
             # Debug information
             print(f"Iteration {iteration}: Best Fitness = {self.globalBestTarget}")
-    
+
     def mutate(self, target_idx, currentGP):
         """Mutation using DE/best/1 strategy."""
         # Choose three random and distinct individuals different from target_idx
         indices = [idx for idx in range(self.pop_size) if idx != target_idx]
         np.random.shuffle(indices)
-        r1, r2 , r3= indices[:3]
+        r1, r2, r3 = indices[:3]
 
         predictedValues = GPEval(currentGP, self.population)
 
@@ -431,38 +811,38 @@ class TS_DDEO:
         best = self.population[best_idx]
 
         # Mutant vector: v = best + F * (r1 - r2)
-        mutant = best + self.mutation_factor * (self.population[r1] - self.population[r2])
-        
+        mutant = best + self.mutation_factor * (
+            self.population[r1] - self.population[r2]
+        )
+
         # Ensure mutant vector is within bounds
         mutant = np.clip(mutant, self.globalBounds[:, 0], self.globalBounds[:, 1])
-        
+
         return mutant
-    
+
     def crossover(self, target, mutant):
         """Crossover to create trial vector."""
         trial = np.copy(target)
         # print(trial.shape)
         # print(mutant.shape)
         for i in range(self.dimensions):
-            if np.random.rand() < self.crossover_prob or i == np.random.randint(self.dimensions):
+            if np.random.rand() < self.crossover_prob or i == np.random.randint(
+                self.dimensions
+            ):
                 # print(trial[i], mutant[i])
                 trial[i] = mutant[i]
         return trial
 
     def localRBF(self, numSolutions):
-
-        bestFeatures = np.empty((numSolutions,2))
+        bestFeatures = np.empty((numSolutions, 2))
         bestTargets = np.empty(numSolutions)
 
-        #find c best solutions
-        bestIndices = np.argsort(self.feTargets)[:numSolutions]
+        # find c best solutions
+        bestIndices = np.argsort(self.scalarisedTargets)[:numSolutions]
 
         for i in range(numSolutions):
             bestFeatures[i] = self.feFeatures[bestIndices[i]]
-            bestTargets[i] = self.feTargets[bestIndices[i]]
-
-
-
+            bestTargets[i] = self.scalarisedTargets[bestIndices[i]]
 
         x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
         y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
@@ -472,33 +852,32 @@ class TS_DDEO:
         # pairwiseDistancesLocal = np.linalg.norm(bestFeatures[:, np.newaxis] - bestFeatures, axis=2)
         # avgDistanceLocal = np.mean(pairwiseDistancesLocal)
 
-        localGP = GPTrain(bestFeatures, bestTargets, meanPrior='max')
+        localGP = GPTrain(bestFeatures, bestTargets, meanPrior="max")
 
         # localRBF = RBFSurrogateModel(epsilon=1.0)
         # localRBF.fit(bestFeatures, bestTargets)
 
         # functionEval = localRBF.predict()
-        localDE = DifferentialEvolution(bounds, localGP )
+        localDE = DifferentialEvolution(bounds, localGP)
         bestLocalSolution, bestLocalFitness = localDE.optimize()
 
         return bestLocalSolution
-    
-    def fullCrossover(self):
 
-        #build surrogate using all points in population
-        crossoverGP = GPTrain(self.feFeatures, self.feTargets, meanPrior='max')
+    def fullCrossover(self, iteration):
+        # build surrogate using all points in population
+        crossoverGP = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="max")
 
-        best_idx = np.argmin(self.feTargets)
+        best_idx = np.argmin(self.scalarisedTargets)
         bestFeature = self.feFeatures[best_idx]
-        bestTarget = self.feTargets[best_idx]
+        bestTarget = self.scalarisedTargets[best_idx]
 
         RVS = random.sample(range(0, self.dimensions), self.dimensions)
 
         print(self.feFeatures.shape)
         print(bestFeature)
 
-        x_range = np.linspace(self.globalBounds[0,0], self.globalBounds[0,1],100)
-        y_range = np.linspace(self.globalBounds[1,0], self.globalBounds[1,1],100)
+        x_range = np.linspace(self.globalBounds[0, 0], self.globalBounds[0, 1], 100)
+        y_range = np.linspace(self.globalBounds[1, 0], self.globalBounds[1, 1], 100)
         fullRange = list(product(x_range, y_range))
         fullRangeArray = np.array(fullRange)
         # y_pred = self.objective_function.predict(fullRangeArray)
@@ -511,7 +890,7 @@ class TS_DDEO:
         for i in RVS:
             # print(i)
 
-            tempPop[:,i] = self.feFeatures[:,i]
+            tempPop[:, i] = self.feFeatures[:, i]
 
             tempPopEval = GPEval(crossoverGP, tempPop)
 
@@ -528,28 +907,37 @@ class TS_DDEO:
             tempPopBestIdx = np.argmin(tempPopEval)
             if tempPopEval[tempPopBestIdx] > bestTarget:
                 tempPop = np.full_like((self.feFeatures), tempPop[tempPopBestIdx])
-                print('new best value!')
+                print("new best value!")
 
-            
-
-        #take final best predicted value and explicitely evaluate
-        self.feTargets = np.append(self.feTargets, objective_function(tempPop[tempPopBestIdx]))
+        # take final best predicted value and explicitely evaluate
+        newObjectiveTargets = MOobjective_function(
+            tempPop[tempPopBestIdx], self.objFunction, self.nObjectives
+        )
+        self.objectiveTargets = np.vstack((self.objectiveTargets, newObjectiveTargets))
         self.feFeatures = np.vstack((self.feFeatures, tempPop[tempPopBestIdx]))
 
+        # find minimum in boths columns - new zbest values
 
+        self.zbests = np.min(self.objectiveTargets, axis=0)
 
-
+        self.scalarisedTargets = scalariseValues(
+            self.scalarisingFunction,
+            self.objectiveTargets,
+            self.zbests,
+            self.weights,
+            iteration,
+            self.BBDOIter,
+        )
 
     def stage2(self):
-
         iteration = 0
-        
+
         while iteration < self.BBDOIter:
-            #DE screening stage
-            GPModel = GPTrain(self.feFeatures, self.feTargets, meanPrior='max')
+            # DE screening stage
+            GPModel = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="max")
 
             new_population = np.zeros_like(self.population)
-                
+
             for i in range(self.pop_size):
                 # print(i)
                 target = self.population[i]
@@ -557,31 +945,50 @@ class TS_DDEO:
                 mutant = np.reshape(mutant, (2,))
 
                 trial = self.crossover(target, mutant)
-                trial = np.reshape(trial, (1,-1))
-                target = np.reshape(target, (1,-1))
+                trial = np.reshape(trial, (1, -1))
+                target = np.reshape(target, (1, -1))
                 new_population[i] = trial
-                
+
                 # Update the population
             self.population = new_population
 
             popOnGP = GPEval(GPModel, self.population)
 
-            #evaluating whole landscape on RBF for plotting reasons:
-            x_range = np.linspace(-5,5,50)
-            y_range = np.linspace(-5,5,50)
+            # evaluating whole landscape on RBF for plotting reasons:
+            x_range = np.linspace(-5, 5, 50)
+            y_range = np.linspace(-5, 5, 50)
             fullRange = list(product(x_range, y_range))
             fullRangeArray = np.array(fullRange)
             y_pred = GPEval(GPModel, fullRangeArray)
 
-            #function evaluation of best predicted child
+            # function evaluation of best predicted child
             best_idx = np.argmin(popOnGP)
 
             bestFeature = self.population[best_idx]
+            # self.population[best_idx]
 
             # print('best index =', best_idx)
-            #evaluate best child and add results to global stores of FE features and targets
-            self.feTargets = np.append(self.feTargets, objective_function(self.population[best_idx]))
+            # evaluate best child and add results to global stores of FE features and targets
+            newObjectiveTargets = MOobjective_function(
+                self.population[best_idx], self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
             self.feFeatures = np.vstack((self.feFeatures, self.population[best_idx]))
+
+            # find minimum in boths columns - new zbest values
+
+            self.zbests = np.min(self.objectiveTargets, axis=0)
+
+            self.scalarisedTargets = scalariseValues(
+                self.scalarisingFunction,
+                self.objectiveTargets,
+                self.zbests,
+                self.weights,
+                iteration,
+                self.BBDOIter,
+            )
 
             # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = y_pred)
 
@@ -593,29 +1000,47 @@ class TS_DDEO:
             # plt.clim(0,14)
             # plt.show()
 
-
-            #construct local RBF using c best solutions, find minima using DE, and evaluate at that minima
-
+            # construct local RBF using c best solutions, find minima using DE, and evaluate at that minima
 
             bestLocalSolution = self.localRBF(15)
 
             bestLocalSolution = np.reshape(bestLocalSolution, (2,))
 
-            print('best local Solution', bestLocalSolution)
+            print("best local Solution", bestLocalSolution)
 
-            self.feTargets = np.append(self.feTargets, objective_function(bestLocalSolution))
-            self.feFeatures = np.vstack((self.feFeatures, bestLocalSolution)) 
+            newObjectiveTargets = MOobjective_function(
+                bestLocalSolution, self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
+            self.feFeatures = np.vstack((self.feFeatures, bestLocalSolution))
 
-            self.fullCrossover()
+            # find minimum in boths columns - new zbest values
+
+            self.zbests = np.min(self.objectiveTargets, axis=0)
+
+            self.scalarisedTargets = scalariseValues(
+                self.scalarisingFunction,
+                self.objectiveTargets,
+                self.zbests,
+                self.weights,
+                iteration,
+                self.BBDOIter,
+            )
+
+            self.fullCrossover(iteration)
 
             iteration += 1
-            bestIdx = np.argmin(self.feTargets)
+            bestIdx = np.argmin(self.scalarisedTargets)
 
-            np.savetxt('TSDDEOFeatures.txt', self.feFeatures)
-            np.savetxt('TSDDEOTargets.txt', self.feTargets)
+            np.savetxt("TSDDEOFeatures.txt", self.feFeatures)
+            np.savetxt("TSDDEOTargets.txt", self.scalarisedTargets)
+            np.savetxt("TSDDEOObjectiveTargets.txt", self.objectiveTargets)
 
-            print(f"Iteration {iteration}: Best Fitness = {self.feTargets[bestIdx]}")
-
+            print(
+                f"Iteration {iteration}: Best Fitness = {self.scalarisedTargets[bestIdx]}"
+            )
 
 
 def lipschitz_global_underestimate(f_values, samplesXY, L, test_points):
@@ -642,29 +1067,31 @@ def lipschitz_global_underestimate(f_values, samplesXY, L, test_points):
     # Loop over all sample points to compute their individual underestimates
     for i, (x_i, y_i) in enumerate(samplesXY):
         f_x_i_y_i = f_values[i]
-        
+
         # Compute the distance from each test point to the sample point (x_i, y_i)
-        distances = np.sqrt((test_points[:, 0] - x_i)**2 + (test_points[:, 1] - y_i)**2)
-        
+        distances = np.sqrt(
+            (test_points[:, 0] - x_i) ** 2 + (test_points[:, 1] - y_i) ** 2
+        )
+
         # Compute the local Lipschitz underestimate for this sample
         Z_local_under = f_x_i_y_i - L * distances
-        
+
         # Update the global underestimate by taking the maximum across samples
         Z_under = np.maximum(Z_under, Z_local_under)
-    
+
     return Z_under
 
-def estimate_lipschitz_constant(samplesXY, f_values):
 
+def estimate_lipschitz_constant(samplesXY, f_values):
     """
     Estimate the Lipschitz constant based on known sample points and their function values.
-    
+
     Parameters:
     samplesXY: np.ndarray of shape (n_samples, 2)
         Array of the sampled (x, y) points.
     f_values: np.ndarray of shape (n_samples,)
         Array of function values at the sampled points.
-    
+
     Returns:
     L_est: float
         The estimated Lipschitz constant.
@@ -673,7 +1100,7 @@ def estimate_lipschitz_constant(samplesXY, f_values):
     # print(samplesXY.shape)
     # print(n_samples)
     L_est = 0.0
-    
+
     # Loop over all pairs of points to estimate L
     for i in range(n_samples):
         for j in range(i + 1, n_samples):
@@ -685,14 +1112,28 @@ def estimate_lipschitz_constant(samplesXY, f_values):
                 # Compute the slope and update the maximum
                 # print(L_est, f_diff/dist)
                 L_est = max(L_est, f_diff / dist)
-    
+
     return L_est
 
+
 class LSADE:
-    def __init__(self, bounds, pop_size=50, mutation_factor=0.8, crossover_prob=0.7, method='random'):
+    def __init__(
+        self,
+        bounds,
+        pop_size,
+        objFunction,
+        scalarisingFunction,
+        nObjectives,
+        weights,
+        DEPop=50,
+        mutation_factor=0.8,
+        crossover_prob=0.7,
+        method="lhs",
+        max_generations=33,
+    ):
         """
         Initialize the Differential Evolution (DE) optimizer.
-        
+
         Parameters:
         bounds (list of tuple): List of (min, max) bounds for each dimension.
         pop_size (int): Number of candidate solutions in the population.
@@ -704,23 +1145,33 @@ class LSADE:
         self.bounds = np.array(bounds)
         self.dimensions = len(bounds)
         self.pop_size = pop_size
+        self.nObjectives = nObjectives
+        self.objectiveTargets = np.empty((0, self.nObjectives))
+        self.scalarisedTargets = np.empty(0)
+        self.feFeatures = np.empty((0, 2))
         self.mutation_factor = mutation_factor
         self.crossover_prob = crossover_prob
-        # self.max_generations = max_generations
+        self.DEPop = np.empty((DEPop, self.dimensions))
+        self.max_generations = max_generations
         self.method = method
-        self.feFeatures = np.empty((0,2))
-        self.feTargets = np.empty(0)        
+        self.feFeatures = np.empty((0, 2))
+        # self.feTargets = np.empty(0)
         # Initialize population
+        self.objFunction = objFunction
+
+        self.scalarisingFunction = scalarisingFunction
+        self.zbests = np.full((1, self.nObjectives), np.inf)
+        self.weights = weights
         self.population = self.initialize_population()
 
         self.best_solution = None
         self.best_fitness = np.inf
-    
+
     def initialize_population(self):
         """Initialize population using random sampling or Latin Hypercube Sampling."""
 
         # print('initial shape', self.feFeatures.shape)
-        if self.method == 'lhs':
+        if self.method == "lhs":
             # Latin Hypercube Sampling
             sampler = qmc.LatinHypercube(d=self.dimensions)
             sample = sampler.random(n=self.pop_size)
@@ -729,72 +1180,99 @@ class LSADE:
             # Random Sampling
             population = np.random.rand(self.pop_size, self.dimensions)
             for i in range(self.dimensions):
-                population[:, i] = self.bounds[i, 0] + population[:, i] * (self.bounds[i, 1] - self.bounds[i, 0])
+                population[:, i] = self.bounds[i, 0] + population[:, i] * (
+                    self.bounds[i, 1] - self.bounds[i, 0]
+                )
 
         for i in range(0, len(population)):
-            self.feTargets = np.append(self.feTargets, objective_function(population[i]))
+            newObjectiveTargets = MOobjective_function(
+                population[i], self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
             self.feFeatures = np.vstack((self.feFeatures, population[i]))
-        
-        # print('final shape', self.feFeatures.shape)
+
+        # find minimum in boths columns - new zbest values
+
+        self.zbests = np.min(self.objectiveTargets, axis=0)
+
+        self.scalarisedTargets = scalariseValues(
+            self.scalarisingFunction,
+            self.objectiveTargets,
+            self.zbests,
+            self.weights,
+            0,
+            100,
+        )
+
+        # for i in range(len(self.objectiveTargets)):
+        #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
+
+        # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
+        # plt.title('Initial Population')
+        # plt.colorbar()
+        # plt.show()
 
         return population
-    
-    def mutate(self, target_idx):
+
+    def mutate(self, target_idx, currentGP):
         """Mutation using DE/best/1 strategy."""
         # Choose three random and distinct individuals different from target_idx
         indices = [idx for idx in range(self.pop_size) if idx != target_idx]
         np.random.shuffle(indices)
-        r1, r2 , r3= indices[:3]
-        
-        # Best individual in current population
-        best_idx = np.argmin([objective_function(ind) for ind in self.population])
+        r1, r2, r3 = indices[:3]
+
+        predictedValues = GPEval(currentGP, self.population)
+
+        best_idx = np.argsort(predictedValues)[:1]
+
         best = self.population[best_idx]
-        
+
         # Mutant vector: v = best + F * (r1 - r2)
-        mutant = best + self.mutation_factor * (self.population[r1] - self.population[r2])
-        
+        mutant = best + self.mutation_factor * (
+            self.population[r1] - self.population[r2]
+        )
+
         # Ensure mutant vector is within bounds
         mutant = np.clip(mutant, self.bounds[:, 0], self.bounds[:, 1])
-        
+
         return mutant
-    
+
     def crossover(self, target, mutant):
         """Crossover to create trial vector.
-        This loops through the features in the vector (dimensions) and sees if any of them crossover. 
-        allows the retention of some original vector features but not others. 
+        This loops through the features in the vector (dimensions) and sees if any of them crossover.
+        allows the retention of some original vector features but not others.
         """
 
         trial = np.copy(target)
         # print(trial.shape)
         # print(mutant.shape)
         for i in range(self.dimensions):
-            if np.random.rand() < self.crossover_prob or i == np.random.randint(self.dimensions):
+            if np.random.rand() < self.crossover_prob or i == np.random.randint(
+                self.dimensions
+            ):
                 # print(trial[i], mutant[i])
 
                 trial[i] = mutant[i]
         return trial
-            
 
     # def select(self, target, trial):
     #     """Selection: Return the individual with the better fitness."""
     #     if objective_function(trial) < objective_function(target):
     #         return trial
     #     return target
-    
-    def localRBF(self, numSolutions):
 
-        bestFeatures = np.empty((numSolutions,2))
+    def localRBF(self, numSolutions):
+        bestFeatures = np.empty((numSolutions, 2))
         bestTargets = np.empty(numSolutions)
 
-        #find c best solutions
-        bestIndices = np.argsort(self.feTargets)[:numSolutions]
+        # find c best solutions
+        bestIndices = np.argsort(self.scalarisedTargets)[:numSolutions]
 
         for i in range(numSolutions):
             bestFeatures[i] = self.feFeatures[bestIndices[i]]
-            bestTargets[i] = self.feTargets[bestIndices[i]]
-
-
-
+            bestTargets[i] = self.scalarisedTargets[bestIndices[i]]
 
         x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
         y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
@@ -804,138 +1282,186 @@ class LSADE:
         # pairwiseDistancesLocal = np.linalg.norm(bestFeatures[:, np.newaxis] - bestFeatures, axis=2)
         # avgDistanceLocal = np.mean(pairwiseDistancesLocal)
 
-        localGP = GPTrain(bestFeatures, bestTargets, meanPrior='max')
+        localGP = GPTrain(bestFeatures, bestTargets, meanPrior="max")
 
         # localRBF = RBFSurrogateModel(epsilon=1.0)
         # localRBF.fit(bestFeatures, bestTargets)
 
         # functionEval = localRBF.predict()
-        localDE = DifferentialEvolution(bounds, localGP )
+        localDE = DifferentialEvolution(bounds, localGP)
         bestLocalSolution, bestLocalFitness = localDE.optimize()
 
         return bestLocalSolution
-    
+
     def optimizerStep(self):
         """Run the Differential Evolution optimization."""
         # x_range = np.linspace(-5, 5, 100)
         # y_range = np.linspace(-5, 5, 100)
         # X, Y = np.meshgrid(x_range, y_range)
         # Z = ackley_function(X, Y)
+        iteration = 0
+        while iteration < self.max_generations:
+            GPModel = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="max")
 
-        # for generation in range(self.max_generations):
-        new_population = np.zeros_like(self.population)
-            
-        for i in range(self.pop_size):
-            # print(i)
-            target = self.population[i]
-            mutant = self.mutate(i)
-            trial = self.crossover(target, mutant)
-            #do not evaluate target/trial vectors, instead just save the trial vectors as the new population
-            #so they can be evaluated on the global RBF and Lipschitz surrogates later
-            # new_population[i] = self.select(target, trial)
-            new_population[i] = trial
-            
-            # Update the population
-        self.population = new_population
-        # print(new_population.shape)
-        # pairwise_distances = np.linalg.norm(self.feFeatures[:,np.newaxis] - self.feFeatures, axis=2)
-        # avg_distance = np.mean(pairwise_distances)
-        # globalRBF = RBFSurrogateModel(epsilon=1.0)
+            new_population = np.zeros_like(self.population)
 
-        # globalRBF.fit(self.feFeatures, self.feTargets)
+            for i in range(self.pop_size):
+                # print(i)
+                target = self.population[i]
+                mutant = self.mutate(i, GPModel)
+                mutant = np.reshape(mutant, (2,))
 
-        GPModel = GPTrain(self.feFeatures, self.feTargets, meanPrior='zero')
+                trial = self.crossover(target, mutant)
+                trial = np.reshape(trial, (1, -1))
+                target = np.reshape(target, (1, -1))
+                new_population[i] = trial
 
-        popOnGP = GPEval(GPModel, self.population)
+                # Update the population
+            self.population = new_population
+            popOnGP = GPEval(GPModel, self.population)
 
-        
-        #evaluating whole landscape on RBF for plotting reasons:
-        x_range = np.linspace(-5,5,50)
-        y_range = np.linspace(-5,5,50)
-        fullRange = list(product(x_range, y_range))
-        fullRangeArray = np.array(fullRange)
-        y_pred = GPEval(GPModel, fullRangeArray)
+            # evaluating whole landscape on RBF for plotting reasons:
+            x_range = np.linspace(-5, 5, 50)
+            y_range = np.linspace(-5, 5, 50)
+            fullRange = list(product(x_range, y_range))
+            fullRangeArray = np.array(fullRange)
+            y_pred = GPEval(GPModel, fullRangeArray)
 
+            # evaluate current population (children) on RBF
+            # popOnRBF = globalRBF.predict(self.population)
 
-        #evaluate current population (children) on RBF
-        # popOnRBF = globalRBF.predict(self.population)
+            # function evaluation of best predicted child
+            best_idx = np.argmin(popOnGP)
 
-        #function evaluation of best predicted child
-        best_idx = np.argmin(popOnGP)
+            bestFeature = self.population[best_idx]
 
-        bestFeature = self.population[best_idx]
+            # print('best index =', best_idx)
+            # evaluate best child and add results to global stores of FE features and targets
+            newObjectiveTargets = MOobjective_function(
+                self.population[best_idx], self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
+            self.feFeatures = np.vstack((self.feFeatures, self.population[best_idx]))
 
-        # print('best index =', best_idx)
-        #evaluate best child and add results to global stores of FE features and targets
-        self.feTargets = np.append(self.feTargets, objective_function(self.population[best_idx]))
-        self.feFeatures = np.vstack((self.feFeatures, self.population[best_idx]))
+            # find minimum in boths columns - new zbest values
 
-        # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = y_pred)
+            self.zbests = np.min(self.objectiveTargets, axis=0)
 
-        # plt.scatter(self.population[:, 0], self.population[:, 1], color='red', label='Final Population', s=5)
-        # plt.scatter(bestFeature[0], bestFeature[1], color='blue', label='Best Solution', s=10)
-        # # plt.legend()
-        # plt.title("Global Surrogate")
-        # plt.colorbar()
-        # plt.clim(0,14)
-        # plt.savefig('globalGP.png')
-        # plt.close()
-        #generate Lipschitz surrogate, evaluate children, FE evaluate best potential child and add to bank
+            self.scalarisedTargets = scalariseValues(
+                self.scalarisingFunction,
+                self.objectiveTargets,
+                self.zbests,
+                self.weights,
+                iteration,
+                self.max_generations,
+            )
 
-        # print(self.feTargets, self.feFeatures)
-        # print('final shape', self.feFeatures.shape)
+            # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = y_pred)
 
-        L_est = estimate_lipschitz_constant(self.feFeatures, self.feTargets)
+            # plt.scatter(self.population[:, 0], self.population[:, 1], color='red', label='Final Population', s=5)
+            # plt.scatter(bestFeature[0], bestFeature[1], color='blue', label='Best Solution', s=10)
+            # # plt.legend()
+            # plt.title("Global Surrogate")
+            # plt.colorbar()
+            # plt.clim(0,14)
+            # plt.savefig('globalGP.png')
+            # plt.close()
+            # generate Lipschitz surrogate, evaluate children, FE evaluate best potential child and add to bank
 
-        popOnLipschitz = lipschitz_global_underestimate(self.feTargets, self.feFeatures, L_est, self.population)
-        best_idx = np.argmin(popOnLipschitz)
-        bestFeature = self.population[best_idx]
+            # print(self.feTargets, self.feFeatures)
+            # print('final shape', self.feFeatures.shape)
 
-        self.feTargets = np.append(self.feTargets, objective_function(self.population[best_idx]))
-        self.feFeatures = np.vstack((self.feFeatures, self.population[best_idx]))        
+            L_est = estimate_lipschitz_constant(self.feFeatures, self.scalarisedTargets)
 
-        #evaluating all points in function on Lipschitz for plotting purposes
-        Z_under = lipschitz_global_underestimate(self.feTargets, self.feFeatures, L_est, fullRangeArray)
+            popOnLipschitz = lipschitz_global_underestimate(
+                self.scalarisedTargets, self.feFeatures, L_est, self.population
+            )
+            best_idx = np.argmin(popOnLipschitz)
+            bestFeature = self.population[best_idx]
 
-        # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = Z_under)
+            newObjectiveTargets = MOobjective_function(
+                self.population[best_idx], self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
+            self.feFeatures = np.vstack((self.feFeatures, self.population[best_idx]))
 
-        # plt.scatter(self.population[:, 0], self.population[:, 1], color='red', label='Final Population', s=5)
-        # plt.scatter(bestFeature[0], bestFeature[1], color='blue', label='Best Solution', s=10)
-        # # plt.legend()
-        # plt.title("Lipschitz Underestimation")
-        # plt.colorbar()
-        # plt.clim(0,14)
-        # plt.savefig('lipschitz.png')
-        # plt.close()
+            # find minimum in boths columns - new zbest values
 
+            self.zbests = np.min(self.objectiveTargets, axis=0)
 
+            self.scalarisedTargets = scalariseValues(
+                self.scalarisingFunction,
+                self.objectiveTargets,
+                self.zbests,
+                self.weights,
+                iteration,
+                self.max_generations,
+            )
 
-        #construct local RBF using c best solutions, find minima using DE, and evaluate at that minima
+            # evaluating all points in function on Lipschitz for plotting purposes
+            Z_under = lipschitz_global_underestimate(
+                self.scalarisedTargets, self.feFeatures, L_est, fullRangeArray
+            )
 
-        bestLocalSolution = self.localRBF(15)
+            # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = Z_under)
 
-        bestLocalSolution = np.reshape(bestLocalSolution, (2,))
+            # plt.scatter(self.population[:, 0], self.population[:, 1], color='red', label='Final Population', s=5)
+            # plt.scatter(bestFeature[0], bestFeature[1], color='blue', label='Best Solution', s=10)
+            # # plt.legend()
+            # plt.title("Lipschitz Underestimation")
+            # plt.colorbar()
+            # plt.clim(0,14)
+            # plt.savefig('lipschitz.png')
+            # plt.close()
 
-        print('best local Solution', bestLocalSolution)
+            # construct local RBF using c best solutions, find minima using DE, and evaluate at that minima
 
-        self.feTargets = np.append(self.feTargets, objective_function(bestLocalSolution))
-        self.feFeatures = np.vstack((self.feFeatures, bestLocalSolution)) 
+            bestLocalSolution = self.localRBF(15)
 
-        # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
-        # plt.title('Evaluated Population')
-        # plt.colorbar()
-        # plt.clim(0,14)
-        # plt.savefig('population.png')
-        # plt.close()
+            bestLocalSolution = np.reshape(bestLocalSolution, (2,))
 
-        # Track the best solution
-        # best_idx = np.argmin([objective_function(ind) for ind in self.population])
-        # best_fitness = objective_function(self.population[best_idx])
-        
-        # if best_fitness < self.best_fitness:
-        #     self.best_fitness = best_fitness
-        #     self.best_solution = self.population[best_idx]
-            
+            print("best local Solution", bestLocalSolution)
+
+            newObjectiveTargets = MOobjective_function(
+                bestLocalSolution, self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
+            self.feFeatures = np.vstack((self.feFeatures, bestLocalSolution))
+
+            # find minimum in boths columns - new zbest values
+
+            self.zbests = np.min(self.objectiveTargets, axis=0)
+
+            self.scalarisedTargets = scalariseValues(
+                self.scalarisingFunction,
+                self.objectiveTargets,
+                self.zbests,
+                self.weights,
+                iteration,
+                self.max_generations,
+            )
+
+            # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
+            # plt.title('Evaluated Population')
+            # plt.colorbar()
+            # plt.clim(0,14)
+            # plt.savefig('population.png')
+            # plt.close()
+
+            # Track the best solution
+            # best_idx = np.argmin([objective_function(ind) for ind in self.population])
+            # best_fitness = objective_function(self.population[best_idx])
+
+            # if best_fitness < self.best_fitness:
+            #     self.best_fitness = best_fitness
+            #     self.best_solution = self.population[best_idx]
+
             # plt.contourf(X, Y, Z, levels=50, cmap='viridis')
             # plt.scatter(de.population[:, 0], de.population[:, 1], color='red', label='Final Population', s=5)
             # # plt.scatter(best_solution[0], best_solution[1], color='blue', label='Best Solution', s=100)
@@ -945,46 +1471,67 @@ class LSADE:
             # plt.show()
             # Debug information
             # print(f"Generation {generation + 1}: Best Fitness = {self.best_fitness}")
-        print('Best found solution = ', min(self.feTargets))
+            print("Best found solution = ", min(self.scalarisedTargets))
 
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            # localGP = Image.open('localGP.png')
+            # globalGP = Image.open('globalGP.png')
+            # lipschitz = Image.open('lipschitz.png')
+            # population = Image.open('population.png')
 
-        # localGP = Image.open('localGP.png')
-        # globalGP = Image.open('globalGP.png')
-        # lipschitz = Image.open('lipschitz.png')
-        # population = Image.open('population.png')
+            # width, height = localGP.size
+            # combinedImage = Image.new('RGB', (2 * width, 2 * height))
+            # combinedImage.paste(localGP, (0, 0))
+            # combinedImage.paste(lipschitz, (width, 0))
+            # combinedImage.paste(globalGP, (0, height))
+            # combinedImage.paste(population, (width, height))
 
-        # width, height = localGP.size
-        # combinedImage = Image.new('RGB', (2 * width, 2 * height))
-        # combinedImage.paste(localGP, (0, 0))
-        # combinedImage.paste(lipschitz, (width, 0))
-        # combinedImage.paste(globalGP, (0, height))
-        # combinedImage.paste(population, (width, height))
+            # combinedImage.save(f'plots/{timestamp}.png')
 
-        # combinedImage.save(f'plots/{timestamp}.png')
-
-        np.savetxt('LSADEFeatures.txt', self.feFeatures)
-        np.savetxt('LSADETargets.txt', self.feTargets)
+            np.savetxt("LSADEFeatures.txt", self.feFeatures)
+            np.savetxt("LSADEScalarisedTargets.txt", self.scalarisedTargets)
+            np.savetxt("LSADEObjectiveTargets.txt", self.objectiveTargets)
+            iteration += 1
 
         return self.best_solution, self.best_fitness
-    
 
-        
+
 class ESA:
-    def __init__(self, bounds, pop_size, localPopSize, alpha, gamma, maxFE, mutation_factor=0.8, crossover_prob=0.7):
-
+    def __init__(
+        self,
+        bounds,
+        pop_size,
+        localPopSize,
+        alpha,
+        objFunction,
+        scalarisingFunction,
+        nObjectives,
+        weights,
+        gamma,
+        maxFE,
+        mutation_factor=0.8,
+        crossover_prob=0.7,
+    ):
         self.globalBounds = np.array(bounds)
         self.dimensions = len(bounds)
         self.pop_size = pop_size
-        self.feFeatures = np.empty((0,2))
-        self.feTargets = np.empty(0) 
+        self.nObjectives = nObjectives
+        self.objectiveTargets = np.empty((0, self.nObjectives))
+        self.scalarisedTargets = np.empty(0)
+        self.feFeatures = np.empty((0, 2))
+        # self.feTargets = np.empty(0)
         # self.k = k
+        self.objFunction = objFunction
+
+        self.scalarisingFunction = scalarisingFunction
+        self.zbests = np.full((1, self.nObjectives), np.inf)
+        self.weights = weights
         self.population = self.initialiseDatabase()
         self.localPopSize = localPopSize
 
-        #initialise 4actions x 8states array, all entries initialised to 0.25
-        self.qTable = np.full((8,4), 0.1)
+        # initialise 4actions x 8states array, all entries initialised to 0.25
+        self.qTable = np.full((8, 4), 0.1)
         self.x_best = 0
         self.x_bestSolution = 0
         self.alpha = alpha
@@ -994,14 +1541,31 @@ class ESA:
         self.crossover_prob = crossover_prob
 
     def initialiseDatabase(self):
-
         sampler = qmc.LatinHypercube(d=self.dimensions)
         sample = sampler.random(n=self.pop_size)
         population = qmc.scale(sample, self.globalBounds[:, 0], self.globalBounds[:, 1])
 
         for i in range(0, len(population)):
-            self.feTargets = np.append(self.feTargets, objective_function(population[i]))
+            newObjectiveTargets = MOobjective_function(
+                population[i], self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
             self.feFeatures = np.vstack((self.feFeatures, population[i]))
+
+        # find minimum in boths columns - new zbest values
+
+        self.zbests = np.min(self.objectiveTargets, axis=0)
+
+        self.scalarisedTargets = scalariseValues(
+            self.scalarisingFunction,
+            self.objectiveTargets,
+            self.zbests,
+            self.weights,
+            0,
+            100,
+        )
 
         # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
         # plt.title('Initial Population')
@@ -1009,167 +1573,181 @@ class ESA:
         # plt.show()
 
         return population
-    
-    
-    def mutate(self, target_idx):
+
+    def mutate(self, target_idx, currentGP):
         """Mutation using DE/best/1 strategy."""
         # Choose three random and distinct individuals different from target_idx
         indices = [idx for idx in range(self.pop_size) if idx != target_idx]
         np.random.shuffle(indices)
-        r1, r2 , r3= indices[:3]
-        
-        # Best individual in current population
-        best_idx = np.argmin([objective_function(ind) for ind in self.population])
+        r1, r2, r3 = indices[:3]
+
+        predictedValues = GPEval(currentGP, self.population)
+
+        best_idx = np.argsort(predictedValues)[:1]
+
         best = self.population[best_idx]
-        
+
         # Mutant vector: v = best + F * (r1 - r2)
-        mutant = best + self.mutation_factor * (self.population[r1] - self.population[r2])
-        
+        mutant = best + self.mutation_factor * (
+            self.population[r1] - self.population[r2]
+        )
+
         # Ensure mutant vector is within bounds
         mutant = np.clip(mutant, self.globalBounds[:, 0], self.globalBounds[:, 1])
-        
+
         return mutant
-    
+
     def crossover(self, target, mutant):
         """Crossover to create trial vector.
-        This loops through the features in the vector (dimensions) and sees if any of them crossover. 
-        allows the retention of some original vector features but not others. 
+        This loops through the features in the vector (dimensions) and sees if any of them crossover.
+        allows the retention of some original vector features but not others.
         """
 
         trial = np.copy(target)
         # print(trial.shape)
         # print(mutant.shape)
         for i in range(self.dimensions):
-            if np.random.rand() < self.crossover_prob or i == np.random.randint(self.dimensions):
+            if np.random.rand() < self.crossover_prob or i == np.random.randint(
+                self.dimensions
+            ):
                 # print(trial[i], mutant[i])
 
                 trial[i] = mutant[i]
         return trial
-    
-    def runNextAction(self, currentAction):
 
+    def runNextAction(self, currentAction, iteration):
         if currentAction == 0:
-            print('Running a1!')
-            newBestFeature, newBestTarget = self.a1()
+            print("Running a1!")
+            newBestFeature, newBestTarget = self.a1(iteration)
 
             if newBestTarget < self.x_bestSolution:
                 self.x_bestSolution = newBestTarget
                 currentState = 1
                 r = 1
-            
+
             else:
                 currentState = 0
-                r=0
+                r = 0
 
         if currentAction == 1:
-            print('Running a2!')
+            print("Running a2!")
 
-            newBestFeature, newBestTarget = self.a2()
+            newBestFeature, newBestTarget = self.a2(iteration)
 
             if newBestTarget < self.x_bestSolution:
                 self.x_bestSolution = newBestTarget
                 currentState = 3
                 r = 1
-            
+
             else:
                 currentState = 2
-                r=0
+                r = 0
 
         if currentAction == 2:
-            print('Running a3!')
+            print("Running a3!")
 
-            newBestFeature, newBestTarget = self.a3()
+            newBestFeature, newBestTarget = self.a3(iteration)
 
             if newBestTarget < self.x_bestSolution:
                 self.x_bestSolution = newBestTarget
                 currentState = 5
                 r = 1
-            
+
             else:
                 currentState = 4
-                r=0
-            
+                r = 0
+
         if currentAction == 3:
-            print('Running a4!')
+            print("Running a4!")
 
-            newBestFeature, newBestTarget = self.a4()
+            returnedFeatures, returnedTargets = self.a4(iteration)
+            # print('returned', returnedTargets, returnedTargets.shape)
 
-            if newBestTarget < self.x_bestSolution:
-                self.x_bestSolution = newBestTarget
-                currentState = 7
-                r = 1
-            
-            else:
-                currentState = 6
-                r=0
+            for i in range(0, 3):
+                if returnedTargets[i] < self.x_bestSolution:
+                    self.x_bestSolution = returnedTargets[i]
+                    currentState = 7
+                    r = 1
+
+                else:
+                    currentState = 6
+                    r = 0
+
+            newBestTarget = np.min(returnedTargets)
 
         return currentState, r, newBestTarget
 
     def mainMenu(self, initialAction):
-        '''
+        """
         handle all the q-value and q-table stuff here
         such as calculating rewards, probabilities of selecting next states,
         and running the next algorithm
 
         set initialAction to be a random number (from 0-3) to select initial algorithm to use
-        '''
+        """
 
-        bestIndex = np.argmin(self.feTargets)
+        bestIndex = np.argmin(self.scalarisedTargets)
         self.x_best = self.feFeatures[bestIndex]
 
-        self.x_bestSolution = self.feTargets[bestIndex]
+        self.x_bestSolution = self.scalarisedTargets[bestIndex]
 
         currentAction = initialAction
 
-        currentState, r, mostRecentValue = self.runNextAction(currentAction)
+        iteration = 0
 
-        #calculate softmax selection strategy
+        currentState, r, mostRecentValue = self.runNextAction(currentAction, iteration)
+
+        # calculate softmax selection strategy
 
         actions = np.arange(4)
 
+        # loop from here?
 
-        #loop from here?
-        iteration = 0
-        while iteration < self.maxFE:
+        while len(self.feFeatures) < (self.pop_size + self.maxFE):
+            actionProb = np.empty((1, 4))
 
-            actionProb = np.empty((1,4))
-
-            for i in range(0,4):
-
-                actionProb[0,i] = (np.exp(self.qTable[currentState, i])) / np.sum(np.exp(self.qTable[currentState]))
+            for i in range(0, 4):
+                actionProb[0, i] = (np.exp(self.qTable[currentState, i])) / np.sum(
+                    np.exp(self.qTable[currentState])
+                )
 
             previousState = currentState
 
             # Select an action based on the probabilities in actionProb[1]
             next_action = np.random.choice(actions, p=actionProb[0])
 
-            currentState, r, mostRecentValue = self.runNextAction(next_action)
-            print('At iteration: ', iteration, ' current state: ' , currentState)
+            currentState, r, mostRecentValue = self.runNextAction(
+                next_action, iteration
+            )
+            print("At iteration: ", iteration, " current state: ", currentState)
 
-            #calculate the new q value for the action taken in the PREVIOUS state
+            # calculate the new q value for the action taken in the PREVIOUS state
 
-            self.qTable[previousState, next_action] += self.alpha * (r + (self.gamma * np.max(self.qTable[currentState,:]))
-                                                                    - self.qTable[previousState, next_action])
-            
-            print('QTable at iteration ', iteration)
+            self.qTable[previousState, next_action] += self.alpha * (
+                r
+                + (self.gamma * np.max(self.qTable[currentState, :]))
+                - self.qTable[previousState, next_action]
+            )
+
+            print("QTable at iteration ", iteration)
             print(self.qTable)
 
             # if iteration % 5 == 0:
-                        # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
-                        # plt.title(f'Population at iteration {iteration}')
-                        # plt.colorbar()
-                        # plt.savefig(f'ESAIteration{iteration}.png')
+            # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
+            # plt.title(f'Population at iteration {iteration}')
+            # plt.colorbar()
+            # plt.savefig(f'ESAIteration{iteration}.png')
 
-                        # plt.close()
+            # plt.close()
 
-            print(f'Best result at iteration {iteration}', self.x_bestSolution)
+            print(f"Best result at iteration {iteration}", self.x_bestSolution)
 
             # fig, ax = plt.subplots()
             # cax = ax.matshow(np.ndarray.transpose(self.qTable), cmap="binary", vmin = 0, vmax = 1, aspect=1)
 
             # # Add color bar to show scale
             # fig.colorbar(cax)
-            
+
             # # Set custom tick labels for x and y axes
             # x_labels = ['1', '2', '3', '4', '5', '6', '7', '8']  # 8 columns
             # y_labels = ['A1', 'A2', 'A3', 'A4']       # 4 rows
@@ -1197,88 +1775,87 @@ class ESA:
 
             # plt.savefig(f"ESAQTablePlots/{iteration}.png")
             # plt.close()
-            np.savetxt('ESAFeatures.txt', self.feFeatures)
-            np.savetxt('ESATargets.txt', self.feTargets)
+            np.savetxt("ESAFeatures.txt", self.feFeatures)
+            np.savetxt("ESAScalarisedTargets.txt", self.scalarisedTargets)
+            np.savetxt("ESAObjectiveTargets.txt", self.objectiveTargets)
 
             iteration += 1
 
-        #algorithm:
-        #select initial action randomly
-        #run action to determine initial state, updating no values yet
-        #choose new action and run algorithm. This gives FIRST state-action pair
-        #depending on result, update q value for state action pair. 
-        #repeat. 
+        # algorithm:
+        # select initial action randomly
+        # run action to determine initial state, updating no values yet
+        # choose new action and run algorithm. This gives FIRST state-action pair
+        # depending on result, update q value for state action pair.
+        # repeat.
 
-
-        
-
-    def a1(self):
+    def a1(self, globalIteration):
+        GPModel = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="max")
 
         new_population = np.zeros_like(self.population)
-            
+
         for i in range(self.pop_size):
             # print(i)
             target = self.population[i]
-            mutant = self.mutate(i)
+            mutant = self.mutate(i, GPModel)
+            mutant = np.reshape(mutant, (2,))
+
             trial = self.crossover(target, mutant)
-            #do not evaluate target/trial vectors, instead just save the trial vectors as the new population
-            #so they can be evaluated on the global RBF and Lipschitz surrogates later
-            # new_population[i] = self.select(target, trial)
+            trial = np.reshape(trial, (1, -1))
+            target = np.reshape(target, (1, -1))
             new_population[i] = trial
-            
+
             # Update the population
         self.population = new_population
-        # print(new_population.shape)
-        # pairwise_distances = np.linalg.norm(self.feFeatures[:,np.newaxis] - self.feFeatures, axis=2)
-        # avg_distance = np.mean(pairwise_distances)
-        # globalRBF = RBFSurrogateModel(epsilon=1.0)
-
-        # globalRBF.fit(self.feFeatures, self.feTargets)
-
-        GPModel = GPTrain(self.feFeatures, self.feTargets, meanPrior='zero')
-
         popOnGP = GPEval(GPModel, self.population)
 
-        
-        #evaluating whole landscape on RBF for plotting reasons:
-        x_range = np.linspace(-5,5,50)
-        y_range = np.linspace(-5,5,50)
+        # evaluating whole landscape on RBF for plotting reasons:
+        x_range = np.linspace(-5, 5, 50)
+        y_range = np.linspace(-5, 5, 50)
         fullRange = list(product(x_range, y_range))
         fullRangeArray = np.array(fullRange)
         y_pred = GPEval(GPModel, fullRangeArray)
 
-
-        #evaluate current population (children) on RBF
+        # evaluate current population (children) on RBF
         # popOnRBF = globalRBF.predict(self.population)
 
-        #function evaluation of best predicted child
+        # function evaluation of best predicted child
         best_idx = np.argmin(popOnGP)
 
         bestFeature = self.population[best_idx]
 
         # print('best index =', best_idx)
-        #evaluate best child and add results to global stores of FE features and targets
-        self.feTargets = np.append(self.feTargets, objective_function(self.population[best_idx]))
-        self.feFeatures = np.vstack((self.feFeatures, self.population[best_idx]))
+        # evaluate best child and add results to global stores of FE features and targets
+        newObjectiveTargets = MOobjective_function(
+            bestFeature, self.objFunction, self.nObjectives
+        )
+        self.objectiveTargets = np.vstack((self.objectiveTargets, newObjectiveTargets))
+        self.feFeatures = np.vstack((self.feFeatures, bestFeature))
 
-        return self.feFeatures[-1], self.feTargets[-1]
+        # find minimum in boths columns - new zbest values
 
-    
-    def a2(self):
+        self.zbests = np.min(self.objectiveTargets, axis=0)
 
-        
-        bestFeatures = np.empty((self.localPopSize,2))
+        self.scalarisedTargets = scalariseValues(
+            self.scalarisingFunction,
+            self.objectiveTargets,
+            self.zbests,
+            self.weights,
+            globalIteration,
+            self.maxFE,
+        )
+
+        return self.feFeatures[-1], self.scalarisedTargets[-1]
+
+    def a2(self, globalIteration):
+        bestFeatures = np.empty((self.localPopSize, 2))
         bestTargets = np.empty(self.localPopSize)
 
-        #find c best solutions
-        bestIndices = np.argsort(self.feTargets)[:self.localPopSize]
+        # find c best solutions
+        bestIndices = np.argsort(self.scalarisedTargets)[: self.localPopSize]
 
         for i in range(self.localPopSize):
             bestFeatures[i] = self.feFeatures[bestIndices[i]]
-            bestTargets[i] = self.feTargets[bestIndices[i]]
-
-
-
+            bestTargets[i] = self.scalarisedTargets[bestIndices[i]]
 
         x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
         y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
@@ -1288,33 +1865,44 @@ class ESA:
         # pairwiseDistancesLocal = np.linalg.norm(bestFeatures[:, np.newaxis] - bestFeatures, axis=2)
         # avgDistanceLocal = np.mean(pairwiseDistancesLocal)
 
-        localGP = GPTrain(bestFeatures, bestTargets, meanPrior='max')
+        localGP = GPTrain(bestFeatures, bestTargets, meanPrior="max")
 
         # localRBF = RBFSurrogateModel(epsilon=1.0)
         # localRBF.fit(bestFeatures, bestTargets)
 
         # functionEval = localRBF.predict()
-        localDE = DifferentialEvolution(bounds, localGP )
+        localDE = DifferentialEvolution(bounds, localGP)
         bestLocalSolution, bestLocalFitness = localDE.optimize()
         bestLocalSolution = np.reshape(bestLocalSolution, (2,))
 
-        self.feTargets = np.append(self.feTargets, objective_function(bestLocalSolution))
-        self.feFeatures = np.vstack((self.feFeatures, bestLocalSolution)) 
+        newObjectiveTargets = MOobjective_function(
+            bestLocalSolution, self.objFunction, self.nObjectives
+        )
+        self.objectiveTargets = np.vstack((self.objectiveTargets, newObjectiveTargets))
+        self.feFeatures = np.vstack((self.feFeatures, bestLocalSolution))
 
-        #TODO
-        #add in step to evaluate best found solution on objective function and return:
-        return self.feFeatures[-1], self.feTargets[-1]
+        # find minimum in boths columns - new zbest values
 
+        self.zbests = np.min(self.objectiveTargets, axis=0)
 
+        self.scalarisedTargets = scalariseValues(
+            self.scalarisingFunction,
+            self.objectiveTargets,
+            self.zbests,
+            self.weights,
+            globalIteration,
+            self.maxFE,
+        )
 
-    def a3(self):
+        return self.feFeatures[-1], self.scalarisedTargets[-1]
 
-        #build surrogate using all points in population
-        crossoverGP = GPTrain(self.feFeatures, self.feTargets, meanPrior='zero')
+    def a3(self, globalIteration):
+        # build surrogate using all points in population
+        crossoverGP = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="zero")
 
-        best_idx = np.argmin(self.feTargets)
+        best_idx = np.argmin(self.scalarisedTargets)
         bestFeature = self.feFeatures[best_idx]
-        bestTarget = self.feTargets[best_idx]
+        bestTarget = self.scalarisedTargets[best_idx]
 
         RVS = random.sample(range(0, self.dimensions), self.dimensions)
 
@@ -1328,7 +1916,7 @@ class ESA:
         for i in RVS:
             # print(i)
 
-            tempPop[:,i] = self.feFeatures[:,i]
+            tempPop[:, i] = self.feFeatures[:, i]
 
             tempPopEval = GPEval(crossoverGP, tempPop)
 
@@ -1337,54 +1925,67 @@ class ESA:
                 tempPop = np.full_like((self.feFeatures), tempPop[tempPopBestIdx])
                 # print('new best value!')
 
-        #take final best predicted value and explicitely evaluate
-        self.feTargets = np.append(self.feTargets, objective_function(tempPop[tempPopBestIdx]))
+        # take final best predicted value and explicitely evaluate
+        newObjectiveTargets = MOobjective_function(
+            tempPop[tempPopBestIdx], self.objFunction, self.nObjectives
+        )
+        self.objectiveTargets = np.vstack((self.objectiveTargets, newObjectiveTargets))
         self.feFeatures = np.vstack((self.feFeatures, tempPop[tempPopBestIdx]))
 
-        return self.feFeatures[-1], self.feTargets[-1]
+        # find minimum in boths columns - new zbest values
 
+        self.zbests = np.min(self.objectiveTargets, axis=0)
+
+        self.scalarisedTargets = scalariseValues(
+            self.scalarisingFunction,
+            self.objectiveTargets,
+            self.zbests,
+            self.weights,
+            globalIteration,
+            self.maxFE,
+        )
+
+        return self.feFeatures[-1], self.scalarisedTargets[-1]
 
     def find_closest_points(self, points, selected_point_index, n):
         # Convert points to a NumPy array for easier manipulation
         # points = np.array(points)
-        
+
         # Get the selected point from the array
         selected_point = points[selected_point_index]
-        
+
         # Calculate the Euclidean distance from the selected point to each other point
         distances = np.linalg.norm(points - selected_point, axis=1)
-        
+
         # Exclude the selected point itself by setting its distance to infinity
         distances[selected_point_index] = np.inf
-        
+
         # Find the indices of the n smallest distances
         closest_indices = np.argpartition(distances, n)[:n]
-        
+
         # Get the n closest points
         closest_points = points[closest_indices]
-        
-        return closest_points
-    
-    
-    def a4(self):
 
+        return closest_points
+
+    def a4(self, globalIteration):
         iteration = 0
 
         while iteration < 3:
+            print("iteration = ", iteration)
 
-            print('iteration = ', iteration)
-
-            #this handles x_best updating
-            bestIndex = np.argmin(self.feTargets)
+            # this handles x_best updating
+            bestIndex = np.argmin(self.scalarisedTargets)
             x_best = self.feFeatures[bestIndex]
 
-            x_bestSolution = self.feTargets[bestIndex]
+            x_bestSolution = self.scalarisedTargets[bestIndex]
 
             if iteration == 0:
-
                 nPoints = self.dimensions * 5
 
-                closestPoints = self.find_closest_points(self.feFeatures, bestIndex, nPoints)
+                closestPoints = self.find_closest_points(
+                    self.feFeatures, bestIndex, nPoints
+                )
 
                 x_min, x_max = np.min(closestPoints[:, 0]), np.max(closestPoints[:, 0])
                 y_min, y_max = np.min(closestPoints[:, 1]), np.max(closestPoints[:, 1])
@@ -1392,14 +1993,13 @@ class ESA:
                 # print('x min max', x_min, x_max)
                 # print('y min max', y_min, y_max)
 
-
-                sigma = np.empty((1,self.dimensions))
+                sigma = np.empty((1, self.dimensions))
 
                 # print(sigma.shape)
 
-                #hard coded to two dimensions for now
-                sigma[0,0] = ((x_max - x_min)/2)
-                sigma[0,1] = ((y_max) - (y_min)/2)
+                # hard coded to two dimensions for now
+                sigma[0, 0] = (x_max - x_min) / 2
+                sigma[0, 1] = (y_max) - (y_min) / 2
 
                 # print('sigma', sigma)
 
@@ -1409,26 +2009,34 @@ class ESA:
             upper_bound_trust = x_best + sigma
 
             # print('lower bound trust shape:  ', lower_bound_trust.shape)
-    
+
             # print(lower_bound_trust)
 
-            trustRegionBounds = [(lower_bound_trust[0,0], upper_bound_trust[0,0]), (lower_bound_trust[0,1], upper_bound_trust[0,1])]
+            trustRegionBounds = [
+                (lower_bound_trust[0, 0], upper_bound_trust[0, 0]),
+                (lower_bound_trust[0, 1], upper_bound_trust[0, 1]),
+            ]
 
+            in_area = (
+                (self.feFeatures[:, 0] >= lower_bound_trust[0, 0])
+                & (self.feFeatures[:, 0] <= upper_bound_trust[0, 0])
+                & (self.feFeatures[:, 1] >= lower_bound_trust[0, 1])
+                & (self.feFeatures[:, 1] <= upper_bound_trust[0, 1])
+            )
 
-            in_area = (self.feFeatures[:, 0] >= lower_bound_trust[0,0]) & (self.feFeatures[:, 0] <= upper_bound_trust[0,0]) & \
-                    (self.feFeatures[:, 1] >= lower_bound_trust[0,1]) & (self.feFeatures[:, 1] <= upper_bound_trust[0,1])
-            
             # print(in_area)
 
-            #in_area is a 'boolean mask', which evaluates to True if all above conditions are achieved. 
-            #when setting the points below it automatically chooses only ones which are true. 
+            # in_area is a 'boolean mask', which evaluates to True if all above conditions are achieved.
+            # when setting the points below it automatically chooses only ones which are true.
 
             trustRegionFeatures = self.feFeatures[in_area]
-            trustRegionTargets = self.feTargets[in_area]
+            trustRegionTargets = self.scalarisedTargets[in_area]
 
             try:
-            #build surrogate on points in the trust region
-                trustRegionGP = GPTrain(trustRegionFeatures, trustRegionTargets, meanPrior='max')
+                # build surrogate on points in the trust region
+                trustRegionGP = GPTrain(
+                    trustRegionFeatures, trustRegionTargets, meanPrior="max"
+                )
 
                 trustRegionDE = DifferentialEvolution(trustRegionBounds, trustRegionGP)
                 trustBestSolution, trustBestFitness = trustRegionDE.optimize()
@@ -1437,15 +2045,32 @@ class ESA:
 
                 # print('trust region best Solution', trustBestSolution)
 
+                newObjectiveTargets = MOobjective_function(
+                    trustBestSolution, self.objFunction, self.nObjectives
+                )
+                self.objectiveTargets = np.vstack(
+                    (self.objectiveTargets, newObjectiveTargets)
+                )
+                self.feFeatures = np.vstack((self.feFeatures, trustBestSolution))
 
-                trustBestFE =  objective_function(trustBestSolution)
+                # find minimum in boths columns - new zbest values
 
-                self.feTargets = np.append(self.feTargets, objective_function(trustBestSolution))
-                self.feFeatures = np.vstack((self.feFeatures, trustBestSolution)) 
+                self.zbests = np.min(self.objectiveTargets, axis=0)
 
-                #calculate trust ratio
+                self.scalarisedTargets = scalariseValues(
+                    self.scalarisingFunction,
+                    self.objectiveTargets,
+                    self.zbests,
+                    self.weights,
+                    globalIteration,
+                    self.maxFE,
+                )
 
-                rho_k = (x_bestSolution - trustBestFE)/(x_bestSolution - trustBestFitness)
+                # calculate trust ratio
+
+                rho_k = (x_bestSolution - self.scalarisedTargets[-1]) / (
+                    x_bestSolution - trustBestFitness
+                )
 
                 # print('rho_k = ', rho_k)
                 # print('old sigma =', sigma)
@@ -1456,7 +2081,7 @@ class ESA:
                     sigma = 0.25 * sigma
 
                 elif rho_k > 0.25 and rho_k < 0.75:
-                    sigma = sigma #is there something smarter i can do?
+                    sigma = sigma  # is there something smarter i can do?
 
                 elif rho_k > 0.75:
                     sigma = epsilon * sigma
@@ -1470,11 +2095,11 @@ class ESA:
 
                 iteration += 1
             except RuntimeError:
-                print('Error in training GP Surrogate, skipping...')
-                iteration +=1
-            
-            #return however many iterations worth of features/targets
-        return self.feFeatures[-1], self.feTargets[-1]
+                print("Error in training GP Surrogate, skipping...")
+                iteration += 1
+
+            # return however many iterations worth of features/targets
+        return self.feFeatures[-3:], self.scalarisedTargets[-3:]
 
 
 def BOGPEval(model, newFeatures):
@@ -1488,54 +2113,84 @@ def BOGPEval(model, newFeatures):
 
     return mean_pred, stdDev
 
+
 def expectedImprovement(currentGP, feature, bestY, epsilon):
-    yPred, yStd = GPEval(currentGP, feature)
+    yPred, yStd = BOGPEval(currentGP, feature)
 
-    #TODO check that signs are the correct way round in ei and z equations.
+    # TODO check that signs are the correct way round in ei and z equations.
 
-    z = (bestY - yPred - epsilon)/yStd
-    ei = ((bestY - yPred - epsilon) * norm.cdf(z)) + yStd*norm.pdf(z)
+    z = (bestY - yPred - epsilon) / yStd
+    ei = ((bestY - yPred - epsilon) * norm.cdf(z)) + yStd * norm.pdf(z)
     return ei
 
 
 def upperConfidenceBounds(currentGP, feature, bestY, Lambda):
-    yPred, yStd = GPEval(currentGP, feature)
+    yPred, yStd = BOGPEval(currentGP, feature)
 
     a = yPred + (Lambda * yStd)
 
     return a
 
+
 def probabilityOfImprovement(currentGP, feature, bestY, epsilon):
-    #NO EPSILON IN THIS EQUATION. THATS ONLY FOR EI
-    #THIS Z EQUATION IS FOR MAXIMISATION.
-    yPred, yStd = GPEval(currentGP, feature)
-    z = (bestY - yPred)/yStd
+    # NO EPSILON IN THIS EQUATION. THATS ONLY FOR EI
+    # THIS Z EQUATION IS FOR MAXIMISATION.
+    yPred, yStd = BOGPEval(currentGP, feature)
+    z = (bestY - yPred) / yStd
     pi = norm.cdf(z)
 
     return pi
 
+
 class bayesianOptimiser:
-    def __init__(self, bounds, pop_size ):
+    def __init__(
+        self, bounds, pop_size, objFunction, scalarisingFunction, nObjectives, weights
+    ):
         self.globalBounds = np.array(bounds)
         self.dimensions = len(bounds)
-        self.feFeatures = np.empty((0,2))
+        self.feFeatures = np.empty((0, 2))
         self.pop_size = pop_size
-
-        self.feTargets = np.empty(0) 
-        self.population = self.initialiseDatabase()
+        self.nObjectives = nObjectives
+        self.objectiveTargets = np.empty((0, self.nObjectives))
+        self.scalarisedTargets = np.empty(0)
         self.x_bestSolution = 0
         self.bestEI = 100
+        self.objFunction = objFunction
 
+        self.scalarisingFunction = scalarisingFunction
+        self.zbests = np.empty((0))
+        self.weights = weights
+        self.population = self.initialiseDatabase()
 
     def initialiseDatabase(self):
-
         sampler = qmc.LatinHypercube(d=self.dimensions)
         sample = sampler.random(n=self.pop_size)
         population = qmc.scale(sample, self.globalBounds[:, 0], self.globalBounds[:, 1])
 
         for i in range(0, len(population)):
-            self.feTargets = np.append(self.feTargets, objective_function(population[i]))
+            newObjectiveTargets = MOobjective_function(
+                population[i], self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
             self.feFeatures = np.vstack((self.feFeatures, population[i]))
+
+        # find minimum in boths columns - new zbest values
+
+        self.zbests = np.min(self.objectiveTargets, axis=0)
+
+        self.scalarisedTargets = scalariseValues(
+            self.scalarisingFunction,
+            self.objectiveTargets,
+            self.zbests,
+            self.weights,
+            0,
+            100,
+        )
+
+        # for i in range(len(self.objectiveTargets)):
+        #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
 
         # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
         # plt.title('Initial Population')
@@ -1544,41 +2199,70 @@ class bayesianOptimiser:
 
         return population
 
-
     def runOptimiser(self):
         iteration = 0
 
-        while self.bestEI > 1e-5:
-            best_idx = np.argmin(self.feTargets)
+        # while self.bestEI > 1e-7:
+        while iteration < 50:
+            best_idx = np.argmin(self.scalarisedTargets)
             bestFeature = self.feFeatures[best_idx]
-            bestTarget = self.feTargets[best_idx]
+            bestTarget = self.scalarisedTargets[best_idx]
             print(bestTarget)
 
-            globalGP = GPTrain(self.feFeatures, self.feTargets, meanPrior='zero')
+            globalGP = GPTrain(
+                self.feFeatures, self.scalarisedTargets, meanPrior="zero"
+            )
 
-            #evaluating whole landscape on RBF for plotting reasons:
-            x_range = np.linspace(-5,5,100)
-            y_range = np.linspace(-5,5,100)
+            # evaluating whole landscape on RBF for plotting reasons:
+            x_range = np.linspace(0, 5, 100)
+            y_range = np.linspace(0, 3, 100)
             fullRange = list(product(x_range, y_range))
             fullRangeArray = np.array(fullRange)
-            y_pred, ystd = GPEval(globalGP, fullRangeArray)
+            y_pred, ystd = BOGPEval(globalGP, fullRangeArray)
 
             # print(fullRangeArray.shape, y_pred.shape)
 
             # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c=y_pred)
             # plt.title("Global Surrogate")
             # plt.colorbar()
-            # plt.clim(0,14)
+            # plt.clim(1e-5, 1e2)
+            # # plt.yscale('log')
+
             # plt.savefig('eiGS.png')
             # plt.close()
 
-            eiDE = DifferentialEvolution(globalGP, self.globalBounds, bestTarget )
+            eiDE = BayesianDifferentialEvolution(
+                globalGP, self.globalBounds, bestTarget
+            )
             newSolution, newFitness = eiDE.optimize()
 
-            self.feTargets = np.append(self.feTargets, objective_function(newSolution))
+            print("newsol", newSolution.shape)
+
+            newObjectiveTargets = MOobjective_function(
+                newSolution, self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
             self.feFeatures = np.vstack((self.feFeatures, newSolution))
 
-            print('Best found solution = ', bestTarget)
+            # find minimum in boths columns - new zbest values
+
+            self.zbests = np.min(self.objectiveTargets, axis=0)
+
+            self.scalarisedTargets = scalariseValues(
+                self.scalarisingFunction,
+                self.objectiveTargets,
+                self.zbests,
+                self.weights,
+                iteration,
+                50,
+            )
+
+            # for i in range(len(self.objectiveTargets)):
+            #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
+
+            print("Best found solution = ", bestTarget)
 
             # surrogate = Image.open('eiGS.png')
             # population = Image.open('eiDE.png')
@@ -1588,12 +2272,26 @@ class bayesianOptimiser:
             # combinedImage.paste(population, (0, 0))
             # combinedImage.paste(surrogate, (width, 0))
 
-            # combinedImage.save(f'BOEIPlots/{iteration}.png')
+            # combinedImage.save(f'{iteration}.png')
 
             self.bestEI = newFitness
 
-            np.savetxt('BOFeatures.txt', self.feFeatures)
-            np.savetxt('BOTargets.txt', self.feTargets)
+            positions = np.arange(len(self.scalarisedTargets))
+
+            plt.scatter(
+                self.objectiveTargets[:, 0], self.objectiveTargets[:, 1], c=positions
+            )
+            plt.title(f"Pareto Front, iteration {iteration}")
+            plt.colorbar()
+            plt.clim(0, 50)
+            plt.xlabel("f2(x)")
+            plt.ylabel("f1(x)")
+            plt.savefig("BOPareto.png")
+            plt.close()
+
+            np.savetxt("BOFeatures.txt", self.feFeatures)
+            np.savetxt("BOScalarisedTargets.txt", self.scalarisedTargets)
+            np.savetxt("BOObjectiveTargets.txt", self.objectiveTargets)
 
             iteration += 1
 
