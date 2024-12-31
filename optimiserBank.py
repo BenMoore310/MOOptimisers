@@ -108,6 +108,9 @@ class ExactGPModel(gpytorch.models.ExactGP):
             # self.mean_module = gpytorch.means.ZeroMean()
             self.mean_module = gpytorch.means.ConstantMean()
             # self.mean_module.constant = torch.nn.Parameter(torch.tensor(torch.max(train_y)))
+            print(train_y)
+            print(train_y.shape)
+            print(train_y.numel())
             self.mean_module.constant.data = torch.max(train_y).clone().detach()
 
 
