@@ -52,7 +52,7 @@ def scalariseValues(
 
     objsNormalised = scaler.fit_transform(objectiveArray)
 
-    print(objsNormalised)
+    #print(objsNormalised)
 
     z0 = np.zeros_like(zBests)
 
@@ -108,7 +108,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
             # self.mean_module = gpytorch.means.ZeroMean()
             self.mean_module = gpytorch.means.ConstantMean()
             # self.mean_module.constant = torch.nn.Parameter(torch.tensor(torch.max(train_y)))
-            self.mean_module.constant.data = torch.tensor(torch.max(train_y))
+            self.mean_module.constant.data = torch.max(train_y).clone().detach()
+
 
         else:
             # self.mean_module = gpytorch.means.ConstantMean(constant_prior=torch.max(train_y))
@@ -573,6 +574,8 @@ class TS_DDEO:
         scalarisingFunction,
         nObjectives,
         weights,
+        useInitialPopulation,
+        initialPopulation,
         c1=2.05,
         c2=2.05,
         PSOFE=50,
@@ -602,7 +605,10 @@ class TS_DDEO:
         self.zbests = np.empty((0))
         self.weights = weights
         # Initialize population and velocities
-        self.population = self.initialisePopulation()
+        if useInitialPopulation == True:
+            self.population = initialPopulation
+        else:
+            self.population = self.initialisePopulation()
         self.velocities = self.initialiseVelocities()
 
         # PSO coefficients
@@ -935,6 +941,7 @@ class TS_DDEO:
         )
         self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
+
     def stage2(self):
         iteration = 0
 
@@ -1133,6 +1140,8 @@ class LSADE:
         scalarisingFunction,
         nObjectives,
         weights,
+        useInitialPopulation,
+        initialPopulation,
         DEPop=50,
         mutation_factor=0.8,
         crossover_prob=0.7,
@@ -1170,12 +1179,14 @@ class LSADE:
         self.scalarisingFunction = scalarisingFunction
         self.zbests = np.full((1, self.nObjectives), np.inf)
         self.weights = weights
-        self.population = self.initialize_population()
-
+        if useInitialPopulation == True:
+            self.population = initialPopulation
+        else:
+            self.population = self.initialisePopulation()
         self.best_solution = None
         self.best_fitness = np.inf
 
-    def initialize_population(self):
+    def initialisePopulation(self):
         """Initialize population using random sampling or Latin Hypercube Sampling."""
 
         # print('initial shape', self.feFeatures.shape)
@@ -1522,6 +1533,8 @@ class ESA:
         weights,
         gamma,
         maxFE,
+        useInitialPopulation,
+        initialPopulation,
         mutation_factor=0.8,
         crossover_prob=0.7,
     ):
@@ -1539,7 +1552,10 @@ class ESA:
         self.scalarisingFunction = scalarisingFunction
         self.zbests = np.full((1, self.nObjectives), np.inf)
         self.weights = weights
-        self.population = self.initialiseDatabase()
+        if useInitialPopulation == True:
+            self.population = initialPopulation
+        else:
+            self.population = self.initialiseDatabase()
         self.localPopSize = localPopSize
 
         # initialise 4actions x 8states array, all entries initialised to 0.25
@@ -2161,7 +2177,8 @@ def probabilityOfImprovement(currentGP, feature, bestY, epsilon):
 
 class bayesianOptimiser:
     def __init__(
-        self, bounds, pop_size, objFunction, scalarisingFunction, nObjectives, weights
+        self, bounds, pop_size, objFunction, scalarisingFunction, nObjectives, weights, useInitialPopulation,
+        initialPopulation,
     ):
         self.globalBounds = np.array(bounds)
         self.dimensions = len(bounds)
@@ -2177,7 +2194,10 @@ class bayesianOptimiser:
         self.scalarisingFunction = scalarisingFunction
         self.zbests = np.empty((0))
         self.weights = weights
-        self.population = self.initialiseDatabase()
+        if useInitialPopulation == True:
+            self.population = initialPopulation
+        else:
+            self.population = self.initialiseDatabase()
 
     def initialiseDatabase(self):
         sampler = qmc.LatinHypercube(d=self.dimensions)
