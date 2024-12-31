@@ -8,7 +8,7 @@ import gpytorch
 import random
 from PIL import Image
 from datetime import datetime
-import scienceplots
+#import scienceplots
 from scipy.stats import norm
 import functionBank as func
 from sklearn.preprocessing import MinMaxScaler
