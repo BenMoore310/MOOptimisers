@@ -30,11 +30,14 @@ for key, value in functionDict.items():
 
     print(key.__name__, value)
 
+    bounds = np.array(value)
+
+
     #generate one LHS for each test function, to be used for all optimisers/scalarisers
-    #using a population size of 15
-    sampler = qmc.LatinHypercube(d=len(value))
-    sample = sampler.random(n=15)
-    initPopulation = qmc.scale(sample, value[:, 0], value[:, 1])
+    #using a population size of 20
+    sampler = qmc.LatinHypercube(d=len(bounds))
+    sample = sampler.random(n=20)
+    initPopulation = qmc.scale(sample, bounds[:, 0], bounds[:, 1])
     print('Initial Population:')
     print(initPopulation)
 
@@ -42,7 +45,7 @@ for key, value in functionDict.items():
 
         print(scalarisingFunction.__name__)
 
-        LSADE = opt.LSADE(value, 15, key, scalarisingFunction, 2, weights, useInitialPopulation=True, initialPopulation=initPopulation)
+        LSADE = opt.LSADE(value, 20, key, scalarisingFunction, 2, weights, useInitialPopulation=True, initialPopulation=initPopulation)
         LSADE.optimizerStep()
 
         features = np.loadtxt('LSADEFeatures.txt')
@@ -54,7 +57,7 @@ for key, value in functionDict.items():
         objtTargets = np.loadtxt('LSADEObjectiveTargets.txt')
         np.savetxt(f'LSADEObjtvTargets{key.__name__}{scalarisingFunction.__name__}.txt', objtTargets)
 
-        PSO = opt.TS_DDEO(value, 15, key, scalarisingFunction, 2, weights, useInitialPopulation=True, initialPopulation=initPopulation)
+        PSO = opt.TS_DDEO(value, 20, key, scalarisingFunction, 2, weights, useInitialPopulation=True, initialPopulation=initPopulation)
         PSO.stage1()
         PSO.stage2()
 
@@ -81,7 +84,7 @@ for key, value in functionDict.items():
         np.savetxt(f'BOObjtvTargets{key.__name__}{scalarisingFunction.__name__}.txt', objtTargets)
 
 
-        ESA = opt.ESA(value, 15, 10, 0.25, key, scalarisingFunction, 2, weights, 0.9, 80, useInitialPopulation=True, initialPopulation=initPopulation)
+        ESA = opt.ESA(value, 20, 10, 0.25, key, scalarisingFunction, 2, weights, 0.9, 80, useInitialPopulation=True, initialPopulation=initPopulation)
         ESA.mainMenu(initialAction=2)
 
         features = np.loadtxt('ESAFeatures.txt')
