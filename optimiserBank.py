@@ -74,7 +74,7 @@ def scalariseValues(
     return scalarisedArray
 
 
-def removeNans(features, targets):
+def removeNans(features, targets, objTargets):
     """
     Removes NaN values from the outputs array and corresponding entries in the inputs array.
 
@@ -96,7 +96,7 @@ def removeNans(features, targets):
         print("No NaN values found.")
 
     # Return the cleaned arrays
-    return features[mask], targets[mask]
+    return features[mask], targets[mask], objTargets[mask]
 
 # plt.style.available
 # plt.style.use(['science', 'notebook'])
@@ -642,6 +642,8 @@ class TS_DDEO:
             100,
         )
 
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+
         # Initialize the personal bests
         self.popBestFeature = self.feFeatures.copy()
         self.popBestTargets = self.scalarisedTargets.copy()
@@ -728,6 +730,8 @@ class TS_DDEO:
                 self.max_generations,
             )
 
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+
             # Update global best if necessary
             bestIdx = np.argmin(self.scalarisedTargets)
             self.globalBestFeature = self.feFeatures[bestIdx]
@@ -766,6 +770,7 @@ class TS_DDEO:
                     iteration,
                     self.max_generations,
                 )
+                self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
                 # Update personal best if necessary
                 if self.scalarisedTargets[-1] < self.popBestTargets[idx]:
@@ -928,6 +933,7 @@ class TS_DDEO:
             iteration,
             self.BBDOIter,
         )
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
     def stage2(self):
         iteration = 0
@@ -989,6 +995,7 @@ class TS_DDEO:
                 iteration,
                 self.BBDOIter,
             )
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
             # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = y_pred)
 
@@ -1028,6 +1035,7 @@ class TS_DDEO:
                 iteration,
                 self.BBDOIter,
             )
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
             self.fullCrossover(iteration)
 
@@ -1205,6 +1213,7 @@ class LSADE:
             0,
             100,
         )
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
         # for i in range(len(self.objectiveTargets)):
         #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
@@ -1357,6 +1366,7 @@ class LSADE:
                 iteration,
                 self.max_generations,
             )
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
             # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = y_pred)
 
@@ -1401,6 +1411,7 @@ class LSADE:
                 iteration,
                 self.max_generations,
             )
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
             # evaluating all points in function on Lipschitz for plotting purposes
             Z_under = lipschitz_global_underestimate(
@@ -1446,6 +1457,7 @@ class LSADE:
                 iteration,
                 self.max_generations,
             )
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
             # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
             # plt.title('Evaluated Population')
@@ -1566,6 +1578,7 @@ class ESA:
             0,
             100,
         )
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
         # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
         # plt.title('Initial Population')
@@ -1843,6 +1856,7 @@ class ESA:
             globalIteration,
             self.maxFE,
         )
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
         return self.feFeatures[-1], self.scalarisedTargets[-1]
 
@@ -1893,6 +1907,7 @@ class ESA:
             globalIteration,
             self.maxFE,
         )
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
         return self.feFeatures[-1], self.scalarisedTargets[-1]
 
@@ -1944,6 +1959,7 @@ class ESA:
             globalIteration,
             self.maxFE,
         )
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
         return self.feFeatures[-1], self.scalarisedTargets[-1]
 
@@ -2065,6 +2081,7 @@ class ESA:
                     globalIteration,
                     self.maxFE,
                 )
+                self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
                 # calculate trust ratio
 
@@ -2188,6 +2205,7 @@ class bayesianOptimiser:
             0,
             100,
         )
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
         # for i in range(len(self.objectiveTargets)):
         #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
@@ -2258,6 +2276,7 @@ class bayesianOptimiser:
                 iteration,
                 50,
             )
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
             # for i in range(len(self.objectiveTargets)):
             #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
