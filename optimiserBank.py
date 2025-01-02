@@ -656,8 +656,20 @@ class TS_DDEO:
 
         self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
+        #this is a wastefull hack to prevent nans in the initial population
+        #halting TSDDEO - as here the initial population is tracked throughout
+        #TSDDEO stage 1, and has to have the same shape as the initial number of 
+        #features (after nans have been removed)
+
+        #have also updated self.pop_size to the post-nan removal value
+
+        self.population = self.feFeatures.copy()
+
+        self.pop_size = len(self.feFeatures)
+
         # Initialize the personal bests
         self.popBestFeature = self.feFeatures.copy()
+        print(self.popBestFeature.shape)
         self.popBestTargets = self.scalarisedTargets.copy()
 
         # Initialize the global best
@@ -685,6 +697,7 @@ class TS_DDEO:
         """Updates the velocities of the particles."""
         r1 = self.generator.random(size=(self.pop_size, self.dimensions))
         r2 = self.generator.random(size=(self.pop_size, self.dimensions))
+        # print(r1.shape, self.popBestFeature.shape, self.population.shape)
         cognitive = self.c1 * r1 * (self.popBestFeature - self.population)
         social = self.c2 * r2 * (self.globalBestFeature - self.population)
         self.velocities = self.chi * (self.velocities + cognitive + social)
@@ -781,12 +794,12 @@ class TS_DDEO:
                     iteration,
                     self.max_generations,
                 )
-                self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
                 # Update personal best if necessary
                 if self.scalarisedTargets[-1] < self.popBestTargets[idx]:
                     self.popBestTargets[idx] = self.scalarisedTargets[-1]
                     self.popBestFeature[idx] = particle
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
             # refind best values
             bestIdx = np.argmin(self.scalarisedTargets)
