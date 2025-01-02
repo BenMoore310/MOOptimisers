@@ -108,9 +108,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
             # self.mean_module = gpytorch.means.ZeroMean()
             self.mean_module = gpytorch.means.ConstantMean()
             # self.mean_module.constant = torch.nn.Parameter(torch.tensor(torch.max(train_y)))
-            print(train_y)
-            print(train_y.shape)
-            print(train_y.numel())
             self.mean_module.constant.data = torch.max(train_y).clone().detach()
 
 
@@ -612,6 +609,8 @@ class TS_DDEO:
             self.population = initialPopulation
         else:
             self.population = self.initialisePopulation()
+        self.evaluateInitialPopulation()
+
         self.velocities = self.initialiseVelocities()
 
         # PSO coefficients
@@ -629,14 +628,18 @@ class TS_DDEO:
         sample = sampler.random(n=self.pop_size)
         population = qmc.scale(sample, self.globalBounds[:, 0], self.globalBounds[:, 1])
 
-        for i in range(0, len(population)):
+        return population
+    
+    def evaluateInitialPopulation(self):
+
+        for i in range(0, len(self.population)):
             newObjectiveTargets = MOobjective_function(
-                population[i], self.objFunction, self.nObjectives
+                self.population[i], self.objFunction, self.nObjectives
             )
             self.objectiveTargets = np.vstack(
                 (self.objectiveTargets, newObjectiveTargets)
             )
-            self.feFeatures = np.vstack((self.feFeatures, population[i]))
+            self.feFeatures = np.vstack((self.feFeatures, self.population[i]))
 
         # find minimum in boths columns - new zbest values
 
@@ -668,7 +671,6 @@ class TS_DDEO:
         # plt.colorbar()
         # plt.show()
 
-        return population
 
     def initialiseVelocities(self):
         """Initializes particle velocities as a small fraction of the bounds range."""
@@ -1186,6 +1188,8 @@ class LSADE:
             self.population = initialPopulation
         else:
             self.population = self.initialisePopulation()
+        self.evaluateInitialPopulation()
+
         self.best_solution = None
         self.best_fitness = np.inf
 
@@ -1206,14 +1210,18 @@ class LSADE:
                     self.bounds[i, 1] - self.bounds[i, 0]
                 )
 
-        for i in range(0, len(population)):
+        return population 
+    
+    def evaluateInitialPopulation(self):
+
+        for i in range(0, len(self.population)):
             newObjectiveTargets = MOobjective_function(
-                population[i], self.objFunction, self.nObjectives
+                self.population[i], self.objFunction, self.nObjectives
             )
             self.objectiveTargets = np.vstack(
                 (self.objectiveTargets, newObjectiveTargets)
             )
-            self.feFeatures = np.vstack((self.feFeatures, population[i]))
+            self.feFeatures = np.vstack((self.feFeatures, self.population[i]))
 
         # find minimum in boths columns - new zbest values
 
@@ -1237,7 +1245,6 @@ class LSADE:
         # plt.colorbar()
         # plt.show()
 
-        return population
 
     def mutate(self, target_idx, currentGP):
         """Mutation using DE/best/1 strategy."""
@@ -1559,6 +1566,7 @@ class ESA:
             self.population = initialPopulation
         else:
             self.population = self.initialiseDatabase()
+        self.evaluateInitialPopulation()
         self.localPopSize = localPopSize
 
         # initialise 4actions x 8states array, all entries initialised to 0.25
@@ -1576,14 +1584,18 @@ class ESA:
         sample = sampler.random(n=self.pop_size)
         population = qmc.scale(sample, self.globalBounds[:, 0], self.globalBounds[:, 1])
 
-        for i in range(0, len(population)):
+        return population
+    
+    def evaluateInitialPopulation(self):
+
+        for i in range(0, len(self.population)):
             newObjectiveTargets = MOobjective_function(
-                population[i], self.objFunction, self.nObjectives
+                self.population[i], self.objFunction, self.nObjectives
             )
             self.objectiveTargets = np.vstack(
                 (self.objectiveTargets, newObjectiveTargets)
             )
-            self.feFeatures = np.vstack((self.feFeatures, population[i]))
+            self.feFeatures = np.vstack((self.feFeatures, self.population[i]))
 
         # find minimum in boths columns - new zbest values
 
@@ -1603,8 +1615,6 @@ class ESA:
         # plt.title('Initial Population')
         # plt.colorbar()
         # plt.show()
-
-        return population
 
     def mutate(self, target_idx, currentGP):
         """Mutation using DE/best/1 strategy."""
@@ -2201,20 +2211,25 @@ class bayesianOptimiser:
             self.population = initialPopulation
         else:
             self.population = self.initialiseDatabase()
+        self.evaluateInitialPopulation()
 
     def initialiseDatabase(self):
         sampler = qmc.LatinHypercube(d=self.dimensions)
         sample = sampler.random(n=self.pop_size)
         population = qmc.scale(sample, self.globalBounds[:, 0], self.globalBounds[:, 1])
 
-        for i in range(0, len(population)):
+        return population
+
+    def evaluateInitialPopulation(self):
+
+        for i in range(0, len(self.population)):
             newObjectiveTargets = MOobjective_function(
-                population[i], self.objFunction, self.nObjectives
+                self.population[i], self.objFunction, self.nObjectives
             )
             self.objectiveTargets = np.vstack(
                 (self.objectiveTargets, newObjectiveTargets)
             )
-            self.feFeatures = np.vstack((self.feFeatures, population[i]))
+            self.feFeatures = np.vstack((self.feFeatures, self.population[i]))
 
         # find minimum in boths columns - new zbest values
 
@@ -2238,7 +2253,6 @@ class bayesianOptimiser:
         # plt.colorbar()
         # plt.show()
 
-        return population
 
     def runOptimiser(self):
         iteration = 0
@@ -2337,4 +2351,4 @@ class bayesianOptimiser:
 
             iteration += 1
 
-        #
+        
