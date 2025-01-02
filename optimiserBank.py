@@ -132,7 +132,7 @@ def GPTrain(features, targets, meanPrior):
     likelihood.noise = 1e-4
     likelihood.noise_covar.raw_noise.requires_grad_(False)
 
-    training_iter = 250
+    training_iter = 150
     # Find optimal model hyperparameters
     model.train()
     likelihood.train()
