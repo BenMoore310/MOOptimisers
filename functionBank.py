@@ -58,6 +58,8 @@ def chankongHaimes(x, y):
     f1 = 2 + (x - 2) ** 2 + (y - 1) ** 2
     f2 = (9 * x) - (y - 1) ** 2
 
+    # return [f1, f2]
+
     if x**2 + y**2 <= 225 and x - 3*y + 10 <= 0:
 
         return [f1, f2]
@@ -170,7 +172,7 @@ def weightedSum(objs, z, w):
 
 def EWC(objs, z, w):
     # from chugh: p=100
-    p = 100
+    p = 1
 
     objSum = 0
 

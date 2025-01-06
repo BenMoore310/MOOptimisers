@@ -30,14 +30,35 @@ for key, value in functionDict.items():
 
     print(key.__name__, value)
 
+    initSampleSize = 20
     bounds = np.array(value)
+    lowBounds = bounds[:,0]
+    highBounds = bounds[:,1]
 
 
     #generate one LHS for each test function, to be used for all optimisers/scalarisers
     #using a population size of 20
     sampler = qmc.LatinHypercube(d=len(bounds))
-    sample = sampler.random(n=20)
-    initPopulation = qmc.scale(sample, bounds[:, 0], bounds[:, 1])
+    sample = sampler.random(n=initSampleSize)
+    initPopulation = qmc.scale(sample, lowBounds, highBounds)
+
+    #check for and systematically replace nan values in initial population
+    #(requires evaluating initial population)
+    #TODO: this evaluation is currently repeated when initiating each SAEA.
+    
+    objvTargets = np.empty((0,2))
+
+    for i in range(0, initSampleSize):
+
+        newObjvTgt = opt.MOobjective_function(initPopulation[i], key, len(bounds))
+        # print(newObjvTgt)
+        while np.any(np.isnan(newObjvTgt)):
+            newSample = np.random.uniform(lowBounds, high=highBounds, size=(2,))
+            newObjvTgt = opt.MOobjective_function(newSample, key, len(bounds))
+            initPopulation[i] = newSample
+
+        # objvTargets = np.vstack((objvTargets, newObjvTgt))
+
     print('Initial Population:')
     print(initPopulation)
 
