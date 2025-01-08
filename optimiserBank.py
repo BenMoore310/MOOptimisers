@@ -61,6 +61,9 @@ def scalariseValues(
         scalarisedArray = scalarisingFunction(
             objsNormalised, z0, weights, currentGen, maxGen
         )
+    elif scalarisingFunction == func.HypI:
+        # print('using HypI')
+        scalarisedArray = scalarisingFunction(objsNormalised)
 
     else:
         scalarisedArray = np.empty(len(objectiveArray))

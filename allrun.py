@@ -16,7 +16,8 @@ functionDict = {func.binhAndKorn:[(0,5), (0,3)],
                 func.testFunction4:[(-7,4), (-7,4)]}
 
 weights = np.array((0.5, 0.5))
-scalarisingList = [func.chebyshev,
+scalarisingList = [ func.HypI,
+                    func.chebyshev,
                     func.weightedSum, 
                     func.EWC, 
                     func.weightedPower,

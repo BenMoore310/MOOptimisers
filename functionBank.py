@@ -362,8 +362,15 @@ def hypervolumeImprovement(x, ref_point, paretoShells):
 
 def HypI(objs):
 
+    print('before function - ', objs)
+
+
     #compute nadir vector (to be the reference vector)
-    refVector = np.max(objs, axis=0)
+    #problem occurs if nan value encountered - refVector set as nan??
+    #does setting refVector to 1,1 (as values are normalised) fix this?
+    # refVector = np.max(objs, axis=0)
+
+    refVector = np.array((1,1))
 
     print('refVector =', refVector)
 
@@ -375,6 +382,7 @@ def HypI(objs):
 
     for i in range(0, len(objs)):
         scalarisedValues[i] = hypervolumeImprovement(objs[i], refVector, paretoShells)
-    
-    return (1-scalarisedValues), paretoShells
+    print('after function - ', (1-scalarisedValues))
+    # return (1-scalarisedValues), paretoShells
+    return (1-scalarisedValues)
 
