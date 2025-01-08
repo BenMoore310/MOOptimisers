@@ -10,6 +10,8 @@ from PIL import Image
 from datetime import datetime
 #import scienceplots
 from scipy.stats import norm
+from pymoo.indicators.hv import HV
+from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 
 
 # def MOobjective_function(vec, currentFunction, nObjectives, scalarisingFunction, zbests, weights):
@@ -306,3 +308,73 @@ def PAPBI(objs, z, w, currentGen, maxGen, thetaStore={"previousTheta": 1.0}):
         scalarisedArray[i] = PBI(objs[i], z, w, theta=selectedTheta)
 
     return scalarisedArray
+
+
+#method and functions for HypI hypervolume improvement scalarising function
+
+def computeParetoShells(X):
+    remaining = X.copy()
+    shells = []
+
+    while len(remaining) > 0:
+        # Compute non-dominated front
+        nds = NonDominatedSorting().do(remaining, only_non_dominated_front=True)
+        paretoFront = remaining[nds]
+        shells.append(paretoFront)
+
+        # Remove selected Pareto front from remaining points
+        remaining = np.delete(remaining, nds, axis=0)
+
+    return shells
+
+#calculate worst set of objective values in current dataset (nadir)
+
+
+
+# Step 2: Compute hypervolume indicator
+def computeHypervolume(X, ref_point):
+    hv = HV(ref_point)
+    return hv.do(X)
+
+# Step 3: Compute hypervolume improvement
+def hypervolumeImprovement(x, ref_point, paretoShells):
+    # Find the first Pareto shell that does not dominate x
+    # pareto_shells = compute_pareto_shells(X)
+
+    pareto_k = None
+    # for shell in paretoShells:
+    #     if not np.any(np.all(shell <= x, axis=1)):
+    #         pareto_k = shell
+    #         break
+    for i in range(0, len(paretoShells)-1):
+        if not np.any(np.all(paretoShells[i] <= x, axis=1)):
+            pareto_k = paretoShells[i+1]
+
+    # Check if pareto_k was assigned; if not, default to the last shell
+    if pareto_k is None:
+        pareto_k = paretoShells[-1]
+
+    # Compute hypervolume with x added to the shell
+    hv_before = computeHypervolume(pareto_k, ref_point)
+    hv_after = computeHypervolume(np.vstack([pareto_k, x]), ref_point)
+
+    return hv_after - hv_before
+
+def HypI(objs):
+
+    #compute nadir vector (to be the reference vector)
+    refVector = np.max(objs, axis=0)
+
+    print('refVector =', refVector)
+
+    paretoShells = computeParetoShells(objs)
+
+    # np.savetxt('paretoShells.txt', np.array(paretoShells))
+
+    scalarisedValues = np.empty(len(objs))
+
+    for i in range(0, len(objs)):
+        scalarisedValues[i] = hypervolumeImprovement(objs[i], refVector, paretoShells)
+    
+    return (1-scalarisedValues), paretoShells
+
