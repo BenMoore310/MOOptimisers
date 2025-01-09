@@ -362,7 +362,7 @@ def hypervolumeImprovement(x, ref_point, paretoShells):
 
 def HypI(objs):
 
-    print('before function - ', objs)
+    # print('before function - ', objs)
 
 
     #compute nadir vector (to be the reference vector)
@@ -372,7 +372,7 @@ def HypI(objs):
 
     refVector = np.array((1,1))
 
-    print('refVector =', refVector)
+    # print('refVector =', refVector)
 
     paretoShells = computeParetoShells(objs)
 
@@ -382,7 +382,7 @@ def HypI(objs):
 
     for i in range(0, len(objs)):
         scalarisedValues[i] = hypervolumeImprovement(objs[i], refVector, paretoShells)
-    print('after function - ', (1-scalarisedValues))
+    # print('after function - ', (1-scalarisedValues))
     # return (1-scalarisedValues), paretoShells
     return (1-scalarisedValues)
 
