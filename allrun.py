@@ -16,16 +16,20 @@ functionDict = {func.binhAndKorn:[(0,5), (0,3)],
                 func.testFunction4:[(-7,4), (-7,4)]}
 
 weights = np.array((0.5, 0.5))
-scalarisingList = [ func.HypI,
-                    func.chebyshev,
-                    func.weightedSum, 
-                    func.EWC, 
-                    func.weightedPower,
-                    func.weightedNorm, 
-                    func.augmentedChebychev, 
-                    func.modifiedChebychev, 
-                    func.PBI, 
-                    func.PAPBI]
+# scalarisingList = [ func.HypI,
+#                     func.chebyshev,
+#                     func.weightedSum, 
+#                     func.EWC, 
+#                     func.weightedPower,
+#                     func.weightedNorm, 
+#                     func.augmentedChebychev, 
+#                     func.modifiedChebychev, 
+#                     func.PBI, 
+#                     func.PAPBI]
+
+
+#temporary list to run only the new HypI scalarising function
+scalarisingList = [func.HypI]
 
 for key, value in functionDict.items():
 
