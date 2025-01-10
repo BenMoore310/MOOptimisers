@@ -255,7 +255,12 @@ def PBI(objs, z, w, theta=5.0):
     # theta = 5
 
     # calculating values for d1
+
     d1term1 = np.linalg.norm(np.dot((np.transpose((objs - z))), w))
+
+    #d1 term calculation changed from norm to abs:
+    # d1term1 = np.abs(np.dot((np.transpose((objs - z))), w))
+
     d1term2 = np.linalg.norm(w)
 
     d1 = d1term1 / d1term2

@@ -79,27 +79,64 @@ def scalariseValues(
 
 def removeNans(features, targets, objTargets):
     """
-    Removes NaN values from the outputs array and corresponding entries in the inputs array.
+    Finds the location of NaN values in the targets array, identifies the worst (largest) value in the targets array,
+    and replaces the corresponding values in the targets and objTargets arrays with the worst value.
 
     Parameters:
         features (np.ndarray): Input array with function inputs.
         targets (np.ndarray): Output array with function outputs.
+        objTargets (np.ndarray): Array with additional output targets.
 
     Returns:
-        tuple: A tuple containing cleaned inputs and outputs arrays.
+        tuple: A tuple containing modified inputs and outputs arrays.
     """
-    # Create a boolean mask for non-NaN values in the outputs array
-    mask = ~np.isnan(targets)
+    import numpy as np
 
     # Log the indices of NaN values
-    nan_indices = np.where(~mask)[0]
+    nan_indices = np.where(np.isnan(targets))[0]
     if nan_indices.size > 0:
         print(f"NaN values found at indices: {nan_indices}")
     else:
         print("No NaN values found.")
+        return features, targets, objTargets
 
-    # Return the cleaned arrays
-    return features[mask], targets[mask], objTargets[mask]
+    # Find the index of the worst (largest) value in the targets array
+    valid_indices = ~np.isnan(targets)
+    worst_index = np.argmax(targets[valid_indices])
+    worst_value_targets = targets[valid_indices][worst_index]
+    worst_value_objTargets = objTargets[valid_indices][worst_index]
+
+    # Replace NaN values with the worst values
+    for idx in nan_indices:
+        targets[idx] = worst_value_targets
+        objTargets[idx] = worst_value_objTargets
+
+    return features, targets, objTargets
+
+
+# def removeNans(features, targets, objTargets):
+#     """
+#     Removes NaN values from the outputs array and corresponding entries in the inputs array.
+
+#     Parameters:
+#         features (np.ndarray): Input array with function inputs.
+#         targets (np.ndarray): Output array with function outputs.
+
+#     Returns:
+#         tuple: A tuple containing cleaned inputs and outputs arrays.
+#     """
+#     # Create a boolean mask for non-NaN values in the outputs array
+#     mask = ~np.isnan(targets)
+
+#     # Log the indices of NaN values
+#     nan_indices = np.where(~mask)[0]
+#     if nan_indices.size > 0:
+#         print(f"NaN values found at indices: {nan_indices}")
+#     else:
+#         print("No NaN values found.")
+
+#     # Return the cleaned arrays
+#     return features[mask], targets[mask], objTargets[mask]
 
 # plt.style.available
 # plt.style.use(['science', 'notebook'])
@@ -348,14 +385,16 @@ class DifferentialEvolution:
         # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = y_pred)
 
         # plt.scatter(self.population[:, 0], self.population[:, 1], color='red', label='Final Population', s=5)
-        # plt.scatter(best_solution[0], best_solution[1], color='blue', label='Best Solution', s=100)
+        # plt.scatter(self.best_solution[0,0], self.best_solution[0,1], color='blue', label='Best Solution', s=100)
         # plt.legend()
         # plt.title("Local Surrogate")
         # plt.colorbar()
-        # plt.clim(0,14)
+        # plt.clim(np.min(y_pred), np.max(y_pred))
         # plt.xlim(self.bounds[0,0], self.bounds[0,1])
         # plt.ylim(self.bounds[1,0], self.bounds[1,1])
         # plt.savefig('localGP.png')
+        # plt.close()
+
         # plt.show()
         # # Debug information
         print(f"Generation {generation + 1}: Best RBF Fitness = {self.best_fitness}")
@@ -497,8 +536,8 @@ class BayesianDifferentialEvolution:
 
     def optimize(self):
         """Run the Differential Evolution optimization."""
-        x_range = np.linspace(0, 5, 100)
-        y_range = np.linspace(0, 3, 100)
+        x_range = np.linspace(self.bounds[0, 0], self.bounds[0, 1], 50)
+        y_range = np.linspace(self.bounds[1, 0], self.bounds[1, 1], 50)
         fullRange = list(product(x_range, y_range))
         fullRangeArray = np.array(fullRange)
         Z = expectedImprovement(
@@ -559,11 +598,11 @@ class BayesianDifferentialEvolution:
         # plt.colorbar()
         # # plt.yscale('log')
         # plt.clim(np.min(Z), np.max(Z))
-        # plt.savefig('eiDE.png')
-        # # plt.show()
+        # # plt.savefig('eiDE.png')
+        # plt.show()
         # plt.close()
-        # # Debug information
-        # print(f"Generation {generation + 1}: Best Fitness = {self.best_fitness}")
+        # Debug information
+        print(f"Generation {generation + 1}: Best Fitness = {self.best_fitness}")
 
         return self.best_solution, self.best_fitness
 
@@ -932,7 +971,7 @@ class TS_DDEO:
             # plt.legend()
             # plt.title("Full-Crossover")
             # plt.colorbar()
-            # plt.clim(0, 14)
+            # # plt.clim(0, 14)
             # # plt.savefig(f'DEPlots/{generation}.png')
             # plt.show()
 
@@ -1367,8 +1406,8 @@ class LSADE:
             popOnGP = GPEval(GPModel, self.population)
 
             # evaluating whole landscape on RBF for plotting reasons:
-            x_range = np.linspace(-5, 5, 50)
-            y_range = np.linspace(-5, 5, 50)
+            x_range = np.linspace(self.bounds[0,0], self.bounds[0,1], 100)
+            y_range = np.linspace(self.bounds[1,0], self.bounds[1,1], 100)
             fullRange = list(product(x_range, y_range))
             fullRangeArray = np.array(fullRange)
             y_pred = GPEval(GPModel, fullRangeArray)
@@ -1412,7 +1451,7 @@ class LSADE:
             # # plt.legend()
             # plt.title("Global Surrogate")
             # plt.colorbar()
-            # plt.clim(0,14)
+            # plt.clim(np.min(y_pred), np.max(y_pred))
             # plt.savefig('globalGP.png')
             # plt.close()
             # generate Lipschitz surrogate, evaluate children, FE evaluate best potential child and add to bank
@@ -1462,7 +1501,7 @@ class LSADE:
             # # plt.legend()
             # plt.title("Lipschitz Underestimation")
             # plt.colorbar()
-            # plt.clim(0,14)
+            # plt.clim(np.min(Z_under), np.max(Z_under))
             # plt.savefig('lipschitz.png')
             # plt.close()
 
@@ -1496,10 +1535,10 @@ class LSADE:
             )
             self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
 
-            # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
+            # plt.scatter(self.objectiveTargets[:,0], self.objectiveTargets[:,1], c = self.scalarisedTargets)
             # plt.title('Evaluated Population')
             # plt.colorbar()
-            # plt.clim(0,14)
+            # plt.clim(np.min(self.scalarisedTargets), np.max(self.scalarisedTargets))
             # plt.savefig('population.png')
             # plt.close()
 
@@ -1522,7 +1561,7 @@ class LSADE:
             # print(f"Generation {generation + 1}: Best Fitness = {self.best_fitness}")
             print("Best found solution = ", min(self.scalarisedTargets))
 
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
             # localGP = Image.open('localGP.png')
             # globalGP = Image.open('globalGP.png')
@@ -1536,7 +1575,7 @@ class LSADE:
             # combinedImage.paste(globalGP, (0, height))
             # combinedImage.paste(population, (width, height))
 
-            # combinedImage.save(f'plots/{timestamp}.png')
+            # combinedImage.save(f'surrogatePlots/{iteration}.png')
 
             np.savetxt("LSADEFeatures.txt", self.feFeatures)
             np.savetxt("LSADEScalarisedTargets.txt", self.scalarisedTargets)
@@ -2279,17 +2318,47 @@ class bayesianOptimiser:
             bestFeature = self.feFeatures[best_idx]
             bestTarget = self.scalarisedTargets[best_idx]
             print(bestTarget)
+            
+            numSolutions = self.pop_size
 
-            globalGP = GPTrain(
-                self.feFeatures, self.scalarisedTargets, meanPrior="zero"
-            )
+            bestFeatures = np.empty((numSolutions, 2))
+            bestTargets = np.empty(numSolutions)
+
+            # find c best solutions
+            bestIndices = np.argsort(self.scalarisedTargets)[:numSolutions]
+
+            for i in range(numSolutions):
+                bestFeatures[i] = self.feFeatures[bestIndices[i]]
+                bestTargets[i] = self.scalarisedTargets[bestIndices[i]]
+
+            x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
+            y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
+
+            localBounds = [(x_min, x_max), (y_min, y_max)]
+
+            # pairwiseDistancesLocal = np.linalg.norm(bestFeatures[:, np.newaxis] - bestFeatures, axis=2)
+            # avgDistanceLocal = np.mean(pairwiseDistancesLocal)
+
+            localGP = GPTrain(bestFeatures, bestTargets, meanPrior="max")
+
+            # localRBF = RBFSurrogateModel(epsilon=1.0)
+            # localRBF.fit(bestFeatures, bestTargets)
+
+            # functionEval = localRBF.predict()
+            # localDE = DifferentialEvolution(bounds, localGP)
+
+
+            #this is the original training call
+            # globalGP = GPTrain(
+            #     self.feFeatures, self.scalarisedTargets, meanPrior="zero"
+            # )
 
             # evaluating whole landscape on RBF for plotting reasons:
-            x_range = np.linspace(0, 5, 100)
-            y_range = np.linspace(0, 3, 100)
+            x_range = np.linspace(self.globalBounds[0,0], self.globalBounds[0,1], 100)
+            y_range = np.linspace(self.globalBounds[1,0], self.globalBounds[1,1], 100)
             fullRange = list(product(x_range, y_range))
             fullRangeArray = np.array(fullRange)
-            y_pred, ystd = BOGPEval(globalGP, fullRangeArray)
+            y_pred, ystd = BOGPEval(localGP, fullRangeArray)
 
             # print(fullRangeArray.shape, y_pred.shape)
 
@@ -2303,11 +2372,21 @@ class bayesianOptimiser:
             # plt.close()
 
             eiDE = BayesianDifferentialEvolution(
-                globalGP, self.globalBounds, bestTarget
+                localGP, localBounds, bestTarget
             )
             newSolution, newFitness = eiDE.optimize()
 
-            print("newsol", newSolution.shape)
+            # print("newsol", newSolution.shape)
+
+            # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = y_pred, alpha = 0.5)
+            # plt.scatter(newSolution[0], newSolution[1], color='blue', label='Best Solution', s=10)
+            # plt.legend()
+            # plt.title("DE Optimisation of Expected Improvement")
+            # plt.colorbar()
+            # # plt.yscale('log')
+            # plt.clim(np.min(y_pred), np.max(y_pred))
+            # # plt.savefig('eiDE.png')
+            # plt.show()
 
             newObjectiveTargets = MOobjective_function(
                 newSolution, self.objFunction, self.nObjectives
@@ -2350,16 +2429,17 @@ class bayesianOptimiser:
 
             positions = np.arange(len(self.scalarisedTargets))
 
-            plt.scatter(
-                self.objectiveTargets[:, 0], self.objectiveTargets[:, 1], c=positions
-            )
-            plt.title(f"Pareto Front, iteration {iteration}")
-            plt.colorbar()
-            plt.clim(0, 50)
-            plt.xlabel("f2(x)")
-            plt.ylabel("f1(x)")
-            plt.savefig("BOPareto.png")
-            plt.close()
+            # plt.scatter(
+            #     self.objectiveTargets[:, 0], self.objectiveTargets[:, 1], c=positions
+            # )
+            # plt.title(f"Pareto Front, iteration {iteration}")
+            # plt.colorbar()
+            # plt.clim(0, len(self.scalarisedTargets))
+            # plt.xlabel("f2(x)")
+            # plt.ylabel("f1(x)")
+            # # plt.savefig("BOPareto.png")
+            # # plt.close()
+            # plt.show()
 
             np.savetxt("BOFeatures.txt", self.feFeatures)
             np.savetxt("BOScalarisedTargets.txt", self.scalarisedTargets)

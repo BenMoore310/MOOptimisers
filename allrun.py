@@ -8,6 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import qmc 
 
+#run with:
+
+#nohup python3.11 -u allrun.py > hypIRunLogNormalised 2>&1 &
+
 functionDict = {func.binhAndKorn:[(0,5), (0,3)], 
                 func.chankongHaimes:[(-20,20), (-20,20)], 
                 func.fonsecaFleming:[(-4,4), (-4,4)], 
@@ -16,20 +20,20 @@ functionDict = {func.binhAndKorn:[(0,5), (0,3)],
                 func.testFunction4:[(-7,4), (-7,4)]}
 
 weights = np.array((0.5, 0.5))
-# scalarisingList = [ func.HypI,
-#                     func.chebyshev,
-#                     func.weightedSum, 
-#                     func.EWC, 
-#                     func.weightedPower,
-#                     func.weightedNorm, 
-#                     func.augmentedChebychev, 
-#                     func.modifiedChebychev, 
-#                     func.PBI, 
-#                     func.PAPBI]
+scalarisingList = [ func.HypI,
+                    func.chebyshev,
+                    func.weightedSum, 
+                    func.EWC, 
+                    func.weightedPower,
+                    func.weightedNorm, 
+                    func.augmentedChebychev, 
+                    func.modifiedChebychev, 
+                    func.PBI, 
+                    func.PAPBI]
 
 
 #temporary list to run only the new HypI scalarising function
-scalarisingList = [func.HypI]
+# scalarisingList = [func.HypI]
 
 for key, value in functionDict.items():
 
