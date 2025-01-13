@@ -397,7 +397,7 @@ class DifferentialEvolution:
 
         # plt.show()
         # # Debug information
-        print(f"Generation {generation + 1}: Best RBF Fitness = {self.best_fitness}")
+        # print(f"Generation {generation + 1}: Best RBF Fitness = {self.best_fitness}")
 
         return self.best_solution, self.best_fitness
 
@@ -602,7 +602,7 @@ class BayesianDifferentialEvolution:
         # plt.show()
         # plt.close()
         # Debug information
-        print(f"Generation {generation + 1}: Best Fitness = {self.best_fitness}")
+        # print(f"Generation {generation + 1}: Best Fitness = {self.best_fitness}")
 
         return self.best_solution, self.best_fitness
 
@@ -711,7 +711,7 @@ class TS_DDEO:
 
         # Initialize the personal bests
         self.popBestFeature = self.feFeatures.copy()
-        print(self.popBestFeature.shape)
+        # print(self.popBestFeature.shape)
         self.popBestTargets = self.scalarisedTargets.copy()
 
         # Initialize the global best
@@ -774,7 +774,7 @@ class TS_DDEO:
 
             # Evaluate the found solution
             bestGPSolution = np.reshape(bestGPSolution, (self.dimensions,))
-            print(bestGPSolution.shape)
+            # print(bestGPSolution.shape)
             newObjectiveTargets = MOobjective_function(
                 bestGPSolution, self.objFunction, self.nObjectives
             )
@@ -866,7 +866,7 @@ class TS_DDEO:
             np.savetxt("TSDDEOObjectiveTargets.txt", self.objectiveTargets)
 
             # Debug information
-            print(f"Iteration {iteration}: Best Fitness = {self.globalBestTarget}")
+            print(f"PSO Iteration {iteration}: Best Fitness = {self.scalarisedTargets[bestIdx]}")
 
     def mutate(self, target_idx, currentGP):
         """Mutation using DE/best/1 strategy."""
@@ -944,8 +944,8 @@ class TS_DDEO:
 
         RVS = random.sample(range(0, self.dimensions), self.dimensions)
 
-        print(self.feFeatures.shape)
-        print(bestFeature)
+        # print(self.feFeatures.shape)
+        # print(bestFeature)
 
         x_range = np.linspace(self.globalBounds[0, 0], self.globalBounds[0, 1], 100)
         y_range = np.linspace(self.globalBounds[1, 0], self.globalBounds[1, 1], 100)
@@ -978,7 +978,7 @@ class TS_DDEO:
             tempPopBestIdx = np.argmin(tempPopEval)
             if tempPopEval[tempPopBestIdx] > bestTarget:
                 tempPop = np.full_like((self.feFeatures), tempPop[tempPopBestIdx])
-                print("new best value!")
+                # print("new best value!")
 
         # take final best predicted value and explicitely evaluate
         newObjectiveTargets = MOobjective_function(
@@ -1080,7 +1080,7 @@ class TS_DDEO:
 
             bestLocalSolution = np.reshape(bestLocalSolution, (2,))
 
-            print("best local Solution", bestLocalSolution)
+            # print("best local Solution", bestLocalSolution)
 
             newObjectiveTargets = MOobjective_function(
                 bestLocalSolution, self.objFunction, self.nObjectives
@@ -1114,7 +1114,7 @@ class TS_DDEO:
             np.savetxt("TSDDEOObjectiveTargets.txt", self.objectiveTargets)
 
             print(
-                f"Iteration {iteration}: Best Fitness = {self.scalarisedTargets[bestIdx]}"
+                f"BDDO Iteration {iteration}: Best Fitness = {self.scalarisedTargets[bestIdx]}"
             )
 
 
@@ -1511,7 +1511,7 @@ class LSADE:
 
             bestLocalSolution = np.reshape(bestLocalSolution, (2,))
 
-            print("best local Solution", bestLocalSolution)
+            # print("best local Solution", bestLocalSolution)
 
             newObjectiveTargets = MOobjective_function(
                 bestLocalSolution, self.objFunction, self.nObjectives
@@ -1559,7 +1559,7 @@ class LSADE:
             # plt.show()
             # Debug information
             # print(f"Generation {generation + 1}: Best Fitness = {self.best_fitness}")
-            print("Best found solution = ", min(self.scalarisedTargets))
+            print(f"LSADE Iteration {iteration}, Best found solution = ", min(self.scalarisedTargets))
 
             # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
@@ -1816,7 +1816,7 @@ class ESA:
             currentState, r, mostRecentValue = self.runNextAction(
                 next_action, iteration
             )
-            print("At iteration: ", iteration, " current state: ", currentState)
+            # print("At iteration: ", iteration, " current state: ", currentState)
 
             # calculate the new q value for the action taken in the PREVIOUS state
 
@@ -1830,14 +1830,16 @@ class ESA:
             print(self.qTable)
 
             # if iteration % 5 == 0:
-            # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
+            # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c=self.scalarisedTargets)
+            # plt.scatter(self.feFeatures[-1,0], self.feFeatures[-1,1], color='black', marker='x')
             # plt.title(f'Population at iteration {iteration}')
             # plt.colorbar()
+            # plt.show()
             # plt.savefig(f'ESAIteration{iteration}.png')
 
             # plt.close()
 
-            print(f"Best result at iteration {iteration}", self.x_bestSolution)
+            print(f"ESA Best result at iteration {iteration}", self.x_bestSolution)
 
             # fig, ax = plt.subplots()
             # cax = ax.matshow(np.ndarray.transpose(self.qTable), cmap="binary", vmin = 0, vmax = 1, aspect=1)
@@ -1906,11 +1908,11 @@ class ESA:
         popOnGP = GPEval(GPModel, self.population)
 
         # evaluating whole landscape on RBF for plotting reasons:
-        x_range = np.linspace(-5, 5, 50)
-        y_range = np.linspace(-5, 5, 50)
-        fullRange = list(product(x_range, y_range))
-        fullRangeArray = np.array(fullRange)
-        y_pred = GPEval(GPModel, fullRangeArray)
+        # x_range = np.linspace(-5, 5, 50)
+        # y_range = np.linspace(-5, 5, 50)
+        # fullRange = list(product(x_range, y_range))
+        # fullRangeArray = np.array(fullRange)
+        # y_pred = GPEval(GPModel, fullRangeArray)
 
         # evaluate current population (children) on RBF
         # popOnRBF = globalRBF.predict(self.population)
@@ -2072,7 +2074,7 @@ class ESA:
         iteration = 0
 
         while iteration < 3:
-            print("iteration = ", iteration)
+            print("Trust Region iteration = ", iteration+1)
 
             # this handles x_best updating
             bestIndex = np.argmin(self.scalarisedTargets)
@@ -2142,6 +2144,8 @@ class ESA:
                 trustBestSolution, trustBestFitness = trustRegionDE.optimize()
 
                 trustBestSolution = np.reshape(trustBestSolution, (2,))
+                
+                trustBestSolution = np.clip(trustBestSolution, self.globalBounds[:, 0], self.globalBounds[:, 1])
 
                 # print('trust region best Solution', trustBestSolution)
 
@@ -2169,10 +2173,17 @@ class ESA:
 
                 # calculate trust ratio
 
-                rho_k = (x_bestSolution - self.scalarisedTargets[-1]) / (
-                    x_bestSolution - trustBestFitness
+                rho_k = (x_bestSolution - self.scalarisedTargets[-1] + 1e-6) / (
+                    x_bestSolution - trustBestFitness + 1e-6
                 )
 
+                # print('x_bestSolution =', x_bestSolution)
+                # print('last solution =', self.scalarisedTargets[-1])
+                # print('trustBestFitness =', trustBestFitness)
+                # print('top =', (x_bestSolution - self.scalarisedTargets[-1]))
+                # print('bottom =', (
+                #     x_bestSolution - trustBestFitness
+                # ))
                 # print('rho_k = ', rho_k)
                 # print('old sigma =', sigma)
 
@@ -2317,7 +2328,7 @@ class bayesianOptimiser:
             best_idx = np.argmin(self.scalarisedTargets)
             bestFeature = self.feFeatures[best_idx]
             bestTarget = self.scalarisedTargets[best_idx]
-            print(bestTarget)
+            # print(bestTarget)
             
             numSolutions = self.pop_size
 
@@ -2413,7 +2424,7 @@ class bayesianOptimiser:
             # for i in range(len(self.objectiveTargets)):
             #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
 
-            print("Best found solution = ", bestTarget)
+            print(f"BO Iteration {iteration}, Best found solution = ", bestTarget)
 
             # surrogate = Image.open('eiGS.png')
             # population = Image.open('eiDE.png')

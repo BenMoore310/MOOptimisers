@@ -10,7 +10,7 @@ from scipy.stats import qmc
 
 #run with:
 
-#nohup python3.11 -u allrun.py > hypIRunLogNormalised 2>&1 &
+#nohup python3.11 -u allrun.py > allRunLogNormalised 2>&1 &
 
 functionDict = {func.binhAndKorn:[(0,5), (0,3)], 
                 func.chankongHaimes:[(-20,20), (-20,20)], 
@@ -92,7 +92,7 @@ for key, value in functionDict.items():
         PSO.stage2()
 
         features = np.loadtxt('TSDDEOFeatures.txt')
-        np.savetxt(f'BOFeatures{key.__name__}{scalarisingFunction.__name__}.txt', features)
+        np.savetxt(f'TSDDEOFeatures{key.__name__}{scalarisingFunction.__name__}.txt', features)
 
         scalarisedTargets = np.loadtxt('TSDDEOTargets.txt')
         np.savetxt(f'TSDDEOScalarisedTargets{key.__name__}{scalarisingFunction.__name__}.txt', scalarisedTargets)
