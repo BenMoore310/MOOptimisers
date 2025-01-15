@@ -620,8 +620,8 @@ class TS_DDEO:
         initialPopulation,
         c1=2.05,
         c2=2.05,
-        PSOFE=50,
-        BDDOFE=15,
+        PSOFE=40,
+        BDDOFE=40,
         mutation_factor=0.8,
         crossover_prob=0.7,
     ):
@@ -867,6 +867,7 @@ class TS_DDEO:
 
             # Debug information
             print(f"PSO Iteration {iteration}: Best Fitness = {self.scalarisedTargets[bestIdx]}")
+            print(f'Evaluated points = {len(self.feFeatures)}')
 
     def mutate(self, target_idx, currentGP):
         """Mutation using DE/best/1 strategy."""
@@ -1005,7 +1006,7 @@ class TS_DDEO:
     def stage2(self):
         iteration = 0
 
-        while iteration < self.BBDOIter:
+        while iteration < self.BBDOIter/3:
             # DE screening stage
             GPModel = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="max")
 
@@ -1116,6 +1117,8 @@ class TS_DDEO:
             print(
                 f"BDDO Iteration {iteration}: Best Fitness = {self.scalarisedTargets[bestIdx]}"
             )
+            print(f'Evaluated points = {len(self.feFeatures)}')
+
 
 
 def lipschitz_global_underestimate(f_values, samplesXY, L, test_points):
@@ -1206,7 +1209,7 @@ class LSADE:
         mutation_factor=0.8,
         crossover_prob=0.7,
         method="lhs",
-        max_generations=33,
+        max_generations=27,
     ):
         """
         Initialize the Differential Evolution (DE) optimizer.
@@ -1560,6 +1563,7 @@ class LSADE:
             # Debug information
             # print(f"Generation {generation + 1}: Best Fitness = {self.best_fitness}")
             print(f"LSADE Iteration {iteration}, Best found solution = ", min(self.scalarisedTargets))
+            print(f'Evaluated points = {len(self.feFeatures)}')
 
             # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
@@ -1840,6 +1844,7 @@ class ESA:
             # plt.close()
 
             print(f"ESA Best result at iteration {iteration}", self.x_bestSolution)
+            print(f'Evaluated points = {len(self.feFeatures)}')
 
             # fig, ax = plt.subplots()
             # cax = ax.matshow(np.ndarray.transpose(self.qTable), cmap="binary", vmin = 0, vmax = 1, aspect=1)
@@ -2324,7 +2329,7 @@ class bayesianOptimiser:
         iteration = 0
 
         # while self.bestEI > 1e-7:
-        while iteration < 50:
+        while iteration < 80:
             best_idx = np.argmin(self.scalarisedTargets)
             bestFeature = self.feFeatures[best_idx]
             bestTarget = self.scalarisedTargets[best_idx]
@@ -2425,6 +2430,7 @@ class bayesianOptimiser:
             #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
 
             print(f"BO Iteration {iteration}, Best found solution = ", bestTarget)
+            print(f'Evaluated points = {len(self.feFeatures)}')
 
             # surrogate = Image.open('eiGS.png')
             # population = Image.open('eiDE.png')
