@@ -136,9 +136,9 @@ def simulate(features):
 
     subprocess.run(['postProcess', '-func', 'sampleDict'], cwd=tmpdir, shell=False, check=True, capture_output=False)
 
-    concDataA = np.loadtxt(tmpdir + '/postProcessing/sampleDict/2000/point_a_Conc01_Conc02_Conc03_Conc045.xy')
-    concDataB = np.loadtxt(tmpdir + '/postProcessing/sampleDict/2000/point_b_Conc01_Conc02_Conc03_Conc045.xy')
-    concDataC = np.loadtxt(tmpdir + '/postProcessing/sampleDict/2000/point_c_Conc01_Conc02_Conc03_Conc045.xy')
+    concDataA = np.loadtxt(tmpdir + '/postProcessing/sampleDict/500/point_a_Conc01_Conc02_Conc03_Conc045.xy')
+    concDataB = np.loadtxt(tmpdir + '/postProcessing/sampleDict/500/point_b_Conc01_Conc02_Conc03_Conc045.xy')
+    concDataC = np.loadtxt(tmpdir + '/postProcessing/sampleDict/500/point_c_Conc01_Conc02_Conc03_Conc045.xy')
 
     mergedConcsA = np.zeros((154,2))
     mergedConcsB = np.zeros((154,2))

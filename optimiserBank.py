@@ -26,7 +26,7 @@ def MOobjective_function(vec, currentFunction, nObjectives):
     """
     objectiveArray = np.empty((1, nObjectives))
 
-    if currentFunction == func.fonsecaFleming:
+    if currentFunction == (func.fonsecaFleming or func.sandtrap):
         objectiveArray[0] = currentFunction(vec)
         # objectiveArray = np.empty((1,nObjectives))
 
@@ -354,7 +354,7 @@ class DifferentialEvolution:
                 # print(i)
                 mutant = self.mutate(i)
                 # print(mutant)
-                mutant = np.reshape(mutant, (2,))
+                mutant = np.reshape(mutant, (self.dimensions,))
                 # print(mutant)
                 trial = self.crossover(target, mutant)
                 trial = np.reshape(trial, (1, -1))
@@ -402,10 +402,6 @@ class DifferentialEvolution:
         return self.best_solution, self.best_fitness
 
 
-def ackley_function(x, y, a=20, b=0.2, c=2 * np.pi):
-    term1 = -a * np.exp(-b * np.sqrt(0.5 * (x**2 + y**2)))
-    term2 = -np.exp(0.5 * (np.cos(c * x) + np.cos(c * y)))
-    return term1 + term2 + a + np.exp(1)
 
 
 def objective_function(vec):
@@ -553,7 +549,7 @@ class BayesianDifferentialEvolution:
             for i in range(self.pop_size):
                 target = self.population[i]
                 mutant = self.mutate(i)
-                mutant = np.reshape(mutant, (2,))
+                mutant = np.reshape(mutant, (self.dimensions,))
 
                 trial = self.crossover(target, mutant)
 
@@ -1016,7 +1012,7 @@ class TS_DDEO:
                 # print(i)
                 target = self.population[i]
                 mutant = self.mutate(i, GPModel)
-                mutant = np.reshape(mutant, (2,))
+                mutant = np.reshape(mutant, (self.dimensions,))
 
                 trial = self.crossover(target, mutant)
                 trial = np.reshape(trial, (1, -1))
@@ -1079,7 +1075,7 @@ class TS_DDEO:
 
             bestLocalSolution = self.localRBF(15)
 
-            bestLocalSolution = np.reshape(bestLocalSolution, (2,))
+            bestLocalSolution = np.reshape(bestLocalSolution, (self.nObjectives,))
 
             # print("best local Solution", bestLocalSolution)
 
@@ -1397,7 +1393,7 @@ class LSADE:
                 # print(i)
                 target = self.population[i]
                 mutant = self.mutate(i, GPModel)
-                mutant = np.reshape(mutant, (2,))
+                mutant = np.reshape(mutant, (self.dimensions,))
 
                 trial = self.crossover(target, mutant)
                 trial = np.reshape(trial, (1, -1))
@@ -1512,7 +1508,7 @@ class LSADE:
 
             bestLocalSolution = self.localRBF(15)
 
-            bestLocalSolution = np.reshape(bestLocalSolution, (2,))
+            bestLocalSolution = np.reshape(bestLocalSolution, (self.nObjectives,))
 
             # print("best local Solution", bestLocalSolution)
 
@@ -1901,7 +1897,7 @@ class ESA:
             # print(i)
             target = self.population[i]
             mutant = self.mutate(i, GPModel)
-            mutant = np.reshape(mutant, (2,))
+            mutant = np.reshape(mutant, (self.dimensions,))
 
             trial = self.crossover(target, mutant)
             trial = np.reshape(trial, (1, -1))
@@ -1978,7 +1974,7 @@ class ESA:
         # functionEval = localRBF.predict()
         localDE = DifferentialEvolution(bounds, localGP)
         bestLocalSolution, bestLocalFitness = localDE.optimize()
-        bestLocalSolution = np.reshape(bestLocalSolution, (2,))
+        bestLocalSolution = np.reshape(bestLocalSolution, (self.nObjectives,))
 
         newObjectiveTargets = MOobjective_function(
             bestLocalSolution, self.objFunction, self.nObjectives
@@ -2079,9 +2075,9 @@ class ESA:
         iteration = 0
 
         while iteration < 3:
-            print("Trust Region iteration = ", iteration+1)
+            print("Trust Region iteration = ", iteration + 1)
 
-            # this handles x_best updating
+            # This handles x_best updating
             bestIndex = np.argmin(self.scalarisedTargets)
             x_best = self.feFeatures[bestIndex]
 
@@ -2094,48 +2090,29 @@ class ESA:
                     self.feFeatures, bestIndex, nPoints
                 )
 
-                x_min, x_max = np.min(closestPoints[:, 0]), np.max(closestPoints[:, 0])
-                y_min, y_max = np.min(closestPoints[:, 1]), np.max(closestPoints[:, 1])
+                bounds_min = np.min(closestPoints, axis=0)
+                bounds_max = np.max(closestPoints, axis=0)
 
-                # print('x min max', x_min, x_max)
-                # print('y min max', y_min, y_max)
+                # Calculate sigma for each dimension
+                sigma = (bounds_max - bounds_min) / 2
 
-                sigma = np.empty((1, self.dimensions))
-
-                # print(sigma.shape)
-
-                # hard coded to two dimensions for now
-                sigma[0, 0] = (x_max - x_min) / 2
-                sigma[0, 1] = (y_max) - (y_min) / 2
-
-                # print('sigma', sigma)
-
-                # print('xbest', x_best)
-
+            # Compute trust region bounds for all dimensions
             lower_bound_trust = x_best - sigma
             upper_bound_trust = x_best + sigma
 
-            # print('lower bound trust shape:  ', lower_bound_trust.shape)
-
-            # print(lower_bound_trust)
-
+            # Create trust region bounds as a list of tuples
             trustRegionBounds = [
-                (lower_bound_trust[0, 0], upper_bound_trust[0, 0]),
-                (lower_bound_trust[0, 1], upper_bound_trust[0, 1]),
+                (lower_bound_trust[i], upper_bound_trust[i])
+                for i in range(self.dimensions)
             ]
 
-            in_area = (
-                (self.feFeatures[:, 0] >= lower_bound_trust[0, 0])
-                & (self.feFeatures[:, 0] <= upper_bound_trust[0, 0])
-                & (self.feFeatures[:, 1] >= lower_bound_trust[0, 1])
-                & (self.feFeatures[:, 1] <= upper_bound_trust[0, 1])
+            # Check if points fall within the trust region for all dimensions
+            in_area = np.all(
+                (self.feFeatures >= lower_bound_trust) & (self.feFeatures <= upper_bound_trust),
+                axis=1,
             )
 
-            # print(in_area)
-
-            # in_area is a 'boolean mask', which evaluates to True if all above conditions are achieved.
-            # when setting the points below it automatically chooses only ones which are true.
-
+            # Filter features and targets within the trust region
             trustRegionFeatures = self.feFeatures[in_area]
             trustRegionTargets = self.scalarisedTargets[in_area]
 
@@ -2148,7 +2125,7 @@ class ESA:
                 trustRegionDE = DifferentialEvolution(trustRegionBounds, trustRegionGP)
                 trustBestSolution, trustBestFitness = trustRegionDE.optimize()
 
-                trustBestSolution = np.reshape(trustBestSolution, (2,))
+                trustBestSolution = np.reshape(trustBestSolution, (self.nObjectives,))
                 
                 trustBestSolution = np.clip(trustBestSolution, self.globalBounds[:, 0], self.globalBounds[:, 1])
 
