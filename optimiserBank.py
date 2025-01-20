@@ -8,12 +8,11 @@ import gpytorch
 import random
 from PIL import Image
 from datetime import datetime
-#import scienceplots
+
+# import scienceplots
 from scipy.stats import norm
 import functionBank as func
 from sklearn.preprocessing import MinMaxScaler
-
-
 
 
 def MOobjective_function(vec, currentFunction, nObjectives):
@@ -52,7 +51,7 @@ def scalariseValues(
 
     objsNormalised = scaler.fit_transform(objectiveArray)
 
-    #print(objsNormalised)
+    # print(objsNormalised)
 
     z0 = np.zeros_like(zBests)
 
@@ -138,6 +137,7 @@ def removeNans(features, targets, objTargets):
 #     # Return the cleaned arrays
 #     return features[mask], targets[mask], objTargets[mask]
 
+
 # plt.style.available
 # plt.style.use(['science', 'notebook'])
 class ExactGPModel(gpytorch.models.ExactGP):
@@ -149,7 +149,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
             self.mean_module = gpytorch.means.ConstantMean()
             # self.mean_module.constant = torch.nn.Parameter(torch.tensor(torch.max(train_y)))
             self.mean_module.constant.data = torch.max(train_y).clone().detach()
-
 
         else:
             # self.mean_module = gpytorch.means.ConstantMean(constant_prior=torch.max(train_y))
@@ -402,19 +401,6 @@ class DifferentialEvolution:
         return self.best_solution, self.best_fitness
 
 
-
-
-def objective_function(vec):
-    """Objective function wrapper for optimization.
-    Args:
-        vec (np.ndarray): A vector representing candidate solution (x, y).
-    Returns:
-        float: Fitness value of the solution.
-    """
-    x, y = vec
-    return ackley_function(x, y)
-
-
 class BayesianDifferentialEvolution:
     def __init__(
         self,
@@ -614,6 +600,7 @@ class TS_DDEO:
         weights,
         useInitialPopulation,
         initialPopulation,
+        initialObjvValues,
         c1=2.05,
         c2=2.05,
         PSOFE=40,
@@ -645,9 +632,11 @@ class TS_DDEO:
         # Initialize population and velocities
         if useInitialPopulation == True:
             self.population = initialPopulation
+            self.objectiveTargets = initialObjvValues
         else:
             self.population = self.initialisePopulation()
-        self.evaluateInitialPopulation()
+            self.evaluateInitialPopulation()
+        self.scalariseInitialPopulation()
 
         self.velocities = self.initialiseVelocities()
 
@@ -667,7 +656,7 @@ class TS_DDEO:
         population = qmc.scale(sample, self.globalBounds[:, 0], self.globalBounds[:, 1])
 
         return population
-    
+
     def evaluateInitialPopulation(self):
 
         for i in range(0, len(self.population)):
@@ -677,6 +666,16 @@ class TS_DDEO:
             self.objectiveTargets = np.vstack(
                 (self.objectiveTargets, newObjectiveTargets)
             )
+
+    def scalariseInitialPopulation(self):
+
+        for i in range(0, len(self.population)):
+            # newObjectiveTargets = MOobjective_function(
+            #     self.population[i], self.objFunction, self.nObjectives
+            # )
+            # self.objectiveTargets = np.vstack(
+            #     (self.objectiveTargets, newObjectiveTargets)
+            # )
             self.feFeatures = np.vstack((self.feFeatures, self.population[i]))
 
         # find minimum in boths columns - new zbest values
@@ -692,14 +691,16 @@ class TS_DDEO:
             100,
         )
 
-        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+        )
 
-        #this is a wastefull hack to prevent nans in the initial population
-        #halting TSDDEO - as here the initial population is tracked throughout
-        #TSDDEO stage 1, and has to have the same shape as the initial number of 
-        #features (after nans have been removed)
+        # this is a wastefull hack to prevent nans in the initial population
+        # halting TSDDEO - as here the initial population is tracked throughout
+        # TSDDEO stage 1, and has to have the same shape as the initial number of
+        # features (after nans have been removed)
 
-        #have also updated self.pop_size to the post-nan removal value
+        # have also updated self.pop_size to the post-nan removal value
 
         self.population = self.feFeatures.copy()
 
@@ -720,7 +721,6 @@ class TS_DDEO:
         # plt.title('Initial Population')
         # plt.colorbar()
         # plt.show()
-
 
     def initialiseVelocities(self):
         """Initializes particle velocities as a small fraction of the bounds range."""
@@ -755,10 +755,10 @@ class TS_DDEO:
 
     def stage1(self):
         """Runs the PSO optimization loop."""
-        x_range = np.linspace(self.globalBounds[0, 0], self.globalBounds[0, 1], 100)
-        y_range = np.linspace(self.globalBounds[1, 0], self.globalBounds[1, 1], 100)
-        X, Y = np.meshgrid(x_range, y_range)
-        Z = ackley_function(X, Y)
+        # x_range = np.linspace(self.globalBounds[0, 0], self.globalBounds[0, 1], 100)
+        # y_range = np.linspace(self.globalBounds[1, 0], self.globalBounds[1, 1], 100)
+        # X, Y = np.meshgrid(x_range, y_range)
+        # Z = ackley_function(X, Y)
 
         iteration = 1
 
@@ -792,7 +792,9 @@ class TS_DDEO:
                 self.max_generations,
             )
 
-            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+                self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+            )
 
             # Update global best if necessary
             bestIdx = np.argmin(self.scalarisedTargets)
@@ -837,7 +839,9 @@ class TS_DDEO:
                 if self.scalarisedTargets[-1] < self.popBestTargets[idx]:
                     self.popBestTargets[idx] = self.scalarisedTargets[-1]
                     self.popBestFeature[idx] = particle
-            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+                self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+            )
 
             # refind best values
             bestIdx = np.argmin(self.scalarisedTargets)
@@ -862,8 +866,10 @@ class TS_DDEO:
             np.savetxt("TSDDEOObjectiveTargets.txt", self.objectiveTargets)
 
             # Debug information
-            print(f"PSO Iteration {iteration}: Best Fitness = {self.scalarisedTargets[bestIdx]}")
-            print(f'Evaluated points = {len(self.feFeatures)}')
+            print(
+                f"PSO Iteration {iteration}: Best Fitness = {self.scalarisedTargets[bestIdx]}"
+            )
+            print(f"Evaluated points = {len(self.feFeatures)}")
 
     def mutate(self, target_idx, currentGP):
         """Mutation using DE/best/1 strategy."""
@@ -902,7 +908,7 @@ class TS_DDEO:
         return trial
 
     def localRBF(self, numSolutions):
-        bestFeatures = np.empty((numSolutions, 2))
+        bestFeatures = np.empty((numSolutions, self.dimensions))
         bestTargets = np.empty(numSolutions)
 
         # find c best solutions
@@ -996,13 +1002,14 @@ class TS_DDEO:
             iteration,
             self.BBDOIter,
         )
-        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
-
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+        )
 
     def stage2(self):
         iteration = 0
 
-        while iteration < self.BBDOIter/3:
+        while iteration < self.BBDOIter / 3:
             # DE screening stage
             GPModel = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="max")
 
@@ -1059,7 +1066,9 @@ class TS_DDEO:
                 iteration,
                 self.BBDOIter,
             )
-            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+                self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+            )
 
             # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = y_pred)
 
@@ -1099,7 +1108,9 @@ class TS_DDEO:
                 iteration,
                 self.BBDOIter,
             )
-            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+                self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+            )
 
             self.fullCrossover(iteration)
 
@@ -1113,8 +1124,7 @@ class TS_DDEO:
             print(
                 f"BDDO Iteration {iteration}: Best Fitness = {self.scalarisedTargets[bestIdx]}"
             )
-            print(f'Evaluated points = {len(self.feFeatures)}')
-
+            print(f"Evaluated points = {len(self.feFeatures)}")
 
 
 def lipschitz_global_underestimate(f_values, samplesXY, L, test_points):
@@ -1201,6 +1211,7 @@ class LSADE:
         weights,
         useInitialPopulation,
         initialPopulation,
+        initialObjvValues,
         DEPop=50,
         mutation_factor=0.8,
         crossover_prob=0.7,
@@ -1224,13 +1235,13 @@ class LSADE:
         self.nObjectives = nObjectives
         self.objectiveTargets = np.empty((0, self.nObjectives))
         self.scalarisedTargets = np.empty(0)
-        self.feFeatures = np.empty((0, 2))
+        self.feFeatures = np.empty((0, self.dimensions))
         self.mutation_factor = mutation_factor
         self.crossover_prob = crossover_prob
         self.DEPop = np.empty((DEPop, self.dimensions))
         self.max_generations = max_generations
         self.method = method
-        self.feFeatures = np.empty((0, 2))
+        self.feFeatures = np.empty((0, self.dimensions))
         # self.feTargets = np.empty(0)
         # Initialize population
         self.objFunction = objFunction
@@ -1240,9 +1251,11 @@ class LSADE:
         self.weights = weights
         if useInitialPopulation == True:
             self.population = initialPopulation
+            self.objectiveTargets = initialObjvValues
+
         else:
             self.population = self.initialisePopulation()
-        self.evaluateInitialPopulation()
+            self.evaluateInitialPopulation()
 
         self.best_solution = None
         self.best_fitness = np.inf
@@ -1264,8 +1277,8 @@ class LSADE:
                     self.bounds[i, 1] - self.bounds[i, 0]
                 )
 
-        return population 
-    
+        return population
+
     def evaluateInitialPopulation(self):
 
         for i in range(0, len(self.population)):
@@ -1275,6 +1288,16 @@ class LSADE:
             self.objectiveTargets = np.vstack(
                 (self.objectiveTargets, newObjectiveTargets)
             )
+
+    def scalariseInitialPopulation(self):
+
+        for i in range(0, len(self.population)):
+            # newObjectiveTargets = MOobjective_function(
+            #     self.population[i], self.objFunction, self.nObjectives
+            # )
+            # self.objectiveTargets = np.vstack(
+            #     (self.objectiveTargets, newObjectiveTargets)
+            # )
             self.feFeatures = np.vstack((self.feFeatures, self.population[i]))
 
         # find minimum in boths columns - new zbest values
@@ -1289,7 +1312,9 @@ class LSADE:
             0,
             100,
         )
-        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+        )
 
         # for i in range(len(self.objectiveTargets)):
         #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
@@ -1298,7 +1323,6 @@ class LSADE:
         # plt.title('Initial Population')
         # plt.colorbar()
         # plt.show()
-
 
     def mutate(self, target_idx, currentGP):
         """Mutation using DE/best/1 strategy."""
@@ -1348,7 +1372,7 @@ class LSADE:
     #     return target
 
     def localRBF(self, numSolutions):
-        bestFeatures = np.empty((numSolutions, 2))
+        bestFeatures = np.empty((numSolutions, self.dimensions))
         bestTargets = np.empty(numSolutions)
 
         # find c best solutions
@@ -1405,8 +1429,8 @@ class LSADE:
             popOnGP = GPEval(GPModel, self.population)
 
             # evaluating whole landscape on RBF for plotting reasons:
-            x_range = np.linspace(self.bounds[0,0], self.bounds[0,1], 100)
-            y_range = np.linspace(self.bounds[1,0], self.bounds[1,1], 100)
+            x_range = np.linspace(self.bounds[0, 0], self.bounds[0, 1], 100)
+            y_range = np.linspace(self.bounds[1, 0], self.bounds[1, 1], 100)
             fullRange = list(product(x_range, y_range))
             fullRangeArray = np.array(fullRange)
             y_pred = GPEval(GPModel, fullRangeArray)
@@ -1441,7 +1465,9 @@ class LSADE:
                 iteration,
                 self.max_generations,
             )
-            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+                self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+            )
 
             # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = y_pred)
 
@@ -1486,7 +1512,9 @@ class LSADE:
                 iteration,
                 self.max_generations,
             )
-            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+                self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+            )
 
             # evaluating all points in function on Lipschitz for plotting purposes
             Z_under = lipschitz_global_underestimate(
@@ -1532,7 +1560,9 @@ class LSADE:
                 iteration,
                 self.max_generations,
             )
-            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+                self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+            )
 
             # plt.scatter(self.objectiveTargets[:,0], self.objectiveTargets[:,1], c = self.scalarisedTargets)
             # plt.title('Evaluated Population')
@@ -1558,8 +1588,11 @@ class LSADE:
             # plt.show()
             # Debug information
             # print(f"Generation {generation + 1}: Best Fitness = {self.best_fitness}")
-            print(f"LSADE Iteration {iteration}, Best found solution = ", min(self.scalarisedTargets))
-            print(f'Evaluated points = {len(self.feFeatures)}')
+            print(
+                f"LSADE Iteration {iteration}, Best found solution = ",
+                min(self.scalarisedTargets),
+            )
+            print(f"Evaluated points = {len(self.feFeatures)}")
 
             # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
@@ -1600,6 +1633,7 @@ class ESA:
         maxFE,
         useInitialPopulation,
         initialPopulation,
+        initialObjvValues,
         mutation_factor=0.8,
         crossover_prob=0.7,
     ):
@@ -1609,7 +1643,7 @@ class ESA:
         self.nObjectives = nObjectives
         self.objectiveTargets = np.empty((0, self.nObjectives))
         self.scalarisedTargets = np.empty(0)
-        self.feFeatures = np.empty((0, 2))
+        self.feFeatures = np.empty((0, self.dimensions))
         # self.feTargets = np.empty(0)
         # self.k = k
         self.objFunction = objFunction
@@ -1619,9 +1653,11 @@ class ESA:
         self.weights = weights
         if useInitialPopulation == True:
             self.population = initialPopulation
+            self.objectiveTargets = initialObjvValues
         else:
-            self.population = self.initialiseDatabase()
-        self.evaluateInitialPopulation()
+            self.population = self.initialisePopulation()
+            self.evaluateInitialPopulation()
+        self.scalariseInitialPopulation()
         self.localPopSize = localPopSize
 
         # initialise 4actions x 8states array, all entries initialised to 0.25
@@ -1640,7 +1676,7 @@ class ESA:
         population = qmc.scale(sample, self.globalBounds[:, 0], self.globalBounds[:, 1])
 
         return population
-    
+
     def evaluateInitialPopulation(self):
 
         for i in range(0, len(self.population)):
@@ -1650,6 +1686,16 @@ class ESA:
             self.objectiveTargets = np.vstack(
                 (self.objectiveTargets, newObjectiveTargets)
             )
+
+    def scalariseInitialPopulation(self):
+
+        for i in range(0, len(self.population)):
+            # newObjectiveTargets = MOobjective_function(
+            #     self.population[i], self.objFunction, self.nObjectives
+            # )
+            # self.objectiveTargets = np.vstack(
+            #     (self.objectiveTargets, newObjectiveTargets)
+            # )
             self.feFeatures = np.vstack((self.feFeatures, self.population[i]))
 
         # find minimum in boths columns - new zbest values
@@ -1664,7 +1710,9 @@ class ESA:
             0,
             100,
         )
-        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+        )
 
         # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
         # plt.title('Initial Population')
@@ -1840,7 +1888,7 @@ class ESA:
             # plt.close()
 
             print(f"ESA Best result at iteration {iteration}", self.x_bestSolution)
-            print(f'Evaluated points = {len(self.feFeatures)}')
+            print(f"Evaluated points = {len(self.feFeatures)}")
 
             # fig, ax = plt.subplots()
             # cax = ax.matshow(np.ndarray.transpose(self.qTable), cmap="binary", vmin = 0, vmax = 1, aspect=1)
@@ -1943,12 +1991,14 @@ class ESA:
             globalIteration,
             self.maxFE,
         )
-        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+        )
 
         return self.feFeatures[-1], self.scalarisedTargets[-1]
 
     def a2(self, globalIteration):
-        bestFeatures = np.empty((self.localPopSize, 2))
+        bestFeatures = np.empty((self.localPopSize, self.dimensions))
         bestTargets = np.empty(self.localPopSize)
 
         # find c best solutions
@@ -1994,7 +2044,9 @@ class ESA:
             globalIteration,
             self.maxFE,
         )
-        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+        )
 
         return self.feFeatures[-1], self.scalarisedTargets[-1]
 
@@ -2046,7 +2098,9 @@ class ESA:
             globalIteration,
             self.maxFE,
         )
-        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+        )
 
         return self.feFeatures[-1], self.scalarisedTargets[-1]
 
@@ -2108,7 +2162,8 @@ class ESA:
 
             # Check if points fall within the trust region for all dimensions
             in_area = np.all(
-                (self.feFeatures >= lower_bound_trust) & (self.feFeatures <= upper_bound_trust),
+                (self.feFeatures >= lower_bound_trust)
+                & (self.feFeatures <= upper_bound_trust),
                 axis=1,
             )
 
@@ -2126,8 +2181,10 @@ class ESA:
                 trustBestSolution, trustBestFitness = trustRegionDE.optimize()
 
                 trustBestSolution = np.reshape(trustBestSolution, (self.nObjectives,))
-                
-                trustBestSolution = np.clip(trustBestSolution, self.globalBounds[:, 0], self.globalBounds[:, 1])
+
+                trustBestSolution = np.clip(
+                    trustBestSolution, self.globalBounds[:, 0], self.globalBounds[:, 1]
+                )
 
                 # print('trust region best Solution', trustBestSolution)
 
@@ -2151,7 +2208,11 @@ class ESA:
                     globalIteration,
                     self.maxFE,
                 )
-                self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+                self.feFeatures, self.scalarisedTargets, self.objectiveTargets = (
+                    removeNans(
+                        self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+                    )
+                )
 
                 # calculate trust ratio
 
@@ -2238,12 +2299,20 @@ def probabilityOfImprovement(currentGP, feature, bestY, epsilon):
 
 class bayesianOptimiser:
     def __init__(
-        self, bounds, pop_size, objFunction, scalarisingFunction, nObjectives, weights, useInitialPopulation,
+        self,
+        bounds,
+        pop_size,
+        objFunction,
+        scalarisingFunction,
+        nObjectives,
+        weights,
+        useInitialPopulation,
         initialPopulation,
+        initialObjvValues,
     ):
         self.globalBounds = np.array(bounds)
         self.dimensions = len(bounds)
-        self.feFeatures = np.empty((0, 2))
+        self.feFeatures = np.empty((0, self.dimensions))
         self.pop_size = pop_size
         self.nObjectives = nObjectives
         self.objectiveTargets = np.empty((0, self.nObjectives))
@@ -2257,9 +2326,11 @@ class bayesianOptimiser:
         self.weights = weights
         if useInitialPopulation == True:
             self.population = initialPopulation
+            self.objectiveTargets = initialObjvValues
         else:
-            self.population = self.initialiseDatabase()
-        self.evaluateInitialPopulation()
+            self.population = self.initialisePopulation()
+            self.evaluateInitialPopulation()
+        self.scalariseInitialPopulation()
 
     def initialiseDatabase(self):
         sampler = qmc.LatinHypercube(d=self.dimensions)
@@ -2277,6 +2348,16 @@ class bayesianOptimiser:
             self.objectiveTargets = np.vstack(
                 (self.objectiveTargets, newObjectiveTargets)
             )
+
+    def scalariseInitialPopulation(self):
+
+        for i in range(0, len(self.population)):
+            # newObjectiveTargets = MOobjective_function(
+            #     self.population[i], self.objFunction, self.nObjectives
+            # )
+            # self.objectiveTargets = np.vstack(
+            #     (self.objectiveTargets, newObjectiveTargets)
+            # )
             self.feFeatures = np.vstack((self.feFeatures, self.population[i]))
 
         # find minimum in boths columns - new zbest values
@@ -2291,7 +2372,9 @@ class bayesianOptimiser:
             0,
             100,
         )
-        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+        )
 
         # for i in range(len(self.objectiveTargets)):
         #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
@@ -2300,7 +2383,6 @@ class bayesianOptimiser:
         # plt.title('Initial Population')
         # plt.colorbar()
         # plt.show()
-
 
     def runOptimiser(self):
         iteration = 0
@@ -2311,10 +2393,10 @@ class bayesianOptimiser:
             bestFeature = self.feFeatures[best_idx]
             bestTarget = self.scalarisedTargets[best_idx]
             # print(bestTarget)
-            
+
             numSolutions = self.pop_size
 
-            bestFeatures = np.empty((numSolutions, 2))
+            bestFeatures = np.empty((numSolutions, self.nObjectives))
             bestTargets = np.empty(numSolutions)
 
             # find c best solutions
@@ -2340,15 +2422,14 @@ class bayesianOptimiser:
             # functionEval = localRBF.predict()
             # localDE = DifferentialEvolution(bounds, localGP)
 
-
-            #this is the original training call
+            # this is the original training call
             # globalGP = GPTrain(
             #     self.feFeatures, self.scalarisedTargets, meanPrior="zero"
             # )
 
             # evaluating whole landscape on RBF for plotting reasons:
-            x_range = np.linspace(self.globalBounds[0,0], self.globalBounds[0,1], 100)
-            y_range = np.linspace(self.globalBounds[1,0], self.globalBounds[1,1], 100)
+            x_range = np.linspace(self.globalBounds[0, 0], self.globalBounds[0, 1], 100)
+            y_range = np.linspace(self.globalBounds[1, 0], self.globalBounds[1, 1], 100)
             fullRange = list(product(x_range, y_range))
             fullRangeArray = np.array(fullRange)
             y_pred, ystd = BOGPEval(localGP, fullRangeArray)
@@ -2364,9 +2445,7 @@ class bayesianOptimiser:
             # plt.savefig('eiGS.png')
             # plt.close()
 
-            eiDE = BayesianDifferentialEvolution(
-                localGP, localBounds, bestTarget
-            )
+            eiDE = BayesianDifferentialEvolution(localGP, localBounds, bestTarget)
             newSolution, newFitness = eiDE.optimize()
 
             # print("newsol", newSolution.shape)
@@ -2401,13 +2480,15 @@ class bayesianOptimiser:
                 iteration,
                 50,
             )
-            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(self.feFeatures, self.scalarisedTargets, self.objectiveTargets)
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+                self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+            )
 
             # for i in range(len(self.objectiveTargets)):
             #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
 
             print(f"BO Iteration {iteration}, Best found solution = ", bestTarget)
-            print(f'Evaluated points = {len(self.feFeatures)}')
+            print(f"Evaluated points = {len(self.feFeatures)}")
 
             # surrogate = Image.open('eiGS.png')
             # population = Image.open('eiDE.png')
@@ -2440,5 +2521,3 @@ class bayesianOptimiser:
             np.savetxt("BOObjectiveTargets.txt", self.objectiveTargets)
 
             iteration += 1
-
-        

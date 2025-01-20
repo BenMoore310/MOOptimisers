@@ -8,7 +8,8 @@ import gpytorch
 import random
 from PIL import Image
 from datetime import datetime
-#import scienceplots
+
+# import scienceplots
 from scipy.stats import norm
 from pymoo.indicators.hv import HV
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
@@ -18,8 +19,8 @@ import shutil
 from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 
 
-
 # SANDTRAP OPTIMISATION FUNCTIONS
+
 
 def updateTurbulence(file, newValue):
 
@@ -29,16 +30,12 @@ def updateTurbulence(file, newValue):
     print(f"Turbulence Constant updated to {newValue}")
 
 
-
-
 def updateConc(file, newValue):
 
     file["boundaryField"]["inletWater"]["value"] = f"uniform {newValue}"
 
     file.writeFile()
     print(f"Inlet concentration updated to {newValue}")
-
-
 
 
 def updateRoughness(file, newValue):
@@ -69,23 +66,23 @@ def updateTurbVisc(file, newValue):
 
 
 def calculateAverageDisplacement(labDataConc, simDataConc, probeHeights):
-    
+
     simDataIndices = []
 
     data_gaps = []
 
     for i in probeHeights:
         # print(np.searchsorted(concData[:,0], i))
-        simDataIndices.append(np.searchsorted(simDataConc[:,0], i))
+        simDataIndices.append(np.searchsorted(simDataConc[:, 0], i))
 
-    for i in range(0,4,1):
-        gap = abs(labDataConc[i]-(simDataConc[simDataIndices[i],1])*1e6)
+    for i in range(0, 4, 1):
+        gap = abs(labDataConc[i] - (simDataConc[simDataIndices[i], 1]) * 1e6)
         # print(probeAConcs[i], (concData[probeAIndices[i],1])*1e6)
         data_gaps.append(gap)
     averageDisplacement = np.average(data_gaps)
     print(averageDisplacement)
-    
-    return averageDisplacement 
+
+    return averageDisplacement
 
 
 def sandTrap(features):
@@ -99,33 +96,34 @@ def sandTrap(features):
     probeCHeights = [0.1051, 0.2078, 0.5158, 1.1821]
     probeCConcs = [106.3158, 109.1729, 81.9549, 50.5263]
 
-    sandTrapDir = "/home/bm424/OpenFOAM/bm424-v2312/run/sandTrap/monoSurrogateSetup/sandTrap4ConcsOrig"
+    sandTrapDir = "/home/bm424/Projects/MOOptimisers/sandTrapCaseDir/"
 
-    tmpdir = tempfile.mkdtemp(dir = "/home/bm424/OpenFOAM/bm424-v2312/run/sandTrap/monoSurrogateSetup/")
+    tmpdir = tempfile.mkdtemp(dir="/home/bm424/Projects/MOOptimisers/tempDirs/")
 
     shutil.copytree(sandTrapDir, tmpdir, dirs_exist_ok=True)
 
-    turbulenceProperties = ParsedParameterFile(tmpdir + "/constant/turbulenceProperties")
+    turbulenceProperties = ParsedParameterFile(
+        tmpdir + "/constant/turbulenceProperties"
+    )
     conc01 = ParsedParameterFile(tmpdir + "/0/Conc01")
     conc02 = ParsedParameterFile(tmpdir + "/0/Conc02")
     conc03 = ParsedParameterFile(tmpdir + "/0/Conc03")
     conc045 = ParsedParameterFile(tmpdir + "/0/Conc045")
-    #need 4 concs
+    # need 4 concs
     eddyvisc = ParsedParameterFile(tmpdir + "/0/eddyvisc")
     kineticenergy = ParsedParameterFile(tmpdir + "/0/kineticenergy")
     nut = ParsedParameterFile(tmpdir + "/0/nut")
     meshDict = ParsedParameterFile(tmpdir + "/system/meshDict")
 
-    # order is: Wall Roughness, inletConc, maxCellSize, sigmaTurbConstant, turbVisc
-
-    updateRoughness(eddyvisc, features[1])
-    updateRoughness(kineticenergy, features[1])
-    updateRoughness(nut, features[1])
-
+    # order is: inletConc, Wall Roughness, maxCellSize, sigmaTurbConstant, turbVisc
     updateConc(conc01, features[0])
     updateConc(conc02, features[0])
     updateConc(conc03, features[0])
     updateConc(conc045, features[0])
+
+    updateRoughness(eddyvisc, features[1])
+    updateRoughness(kineticenergy, features[1])
+    updateRoughness(nut, features[1])
 
     updateMaxCellSize(meshDict, features[2])
 
@@ -133,43 +131,62 @@ def sandTrap(features):
 
     updateTurbVisc(eddyvisc, features[4])
 
-
     subprocess.run(["cartesianMesh"], shell=False, cwd=tmpdir, check=False)
+    subprocess.run(["renumberMesh"], shell=False, cwd=tmpdir, check=False)
+    subprocess.run(["decomposePar"], shell=False, cwd=tmpdir, check=False)
 
     subprocess.run(["sediDriftFoam"], cwd=tmpdir, check=True)
 
-    subprocess.run(['postProcess', '-func', 'sampleDict'], cwd=tmpdir, shell=False, check=True, capture_output=False)
+    subprocess.run(
+        ["postProcess", "-func", "sampleDict"],
+        cwd=tmpdir,
+        shell=False,
+        check=True,
+        capture_output=False,
+    )
 
-    concDataA = np.loadtxt(tmpdir + '/postProcessing/sampleDict/500/point_a_Conc01_Conc02_Conc03_Conc045.xy')
-    concDataB = np.loadtxt(tmpdir + '/postProcessing/sampleDict/500/point_b_Conc01_Conc02_Conc03_Conc045.xy')
-    concDataC = np.loadtxt(tmpdir + '/postProcessing/sampleDict/500/point_c_Conc01_Conc02_Conc03_Conc045.xy')
+    concDataA = np.loadtxt(
+        tmpdir
+        + "/postProcessing/sampleDict/500/point_a_Conc01_Conc02_Conc03_Conc045.xy"
+    )
+    concDataB = np.loadtxt(
+        tmpdir
+        + "/postProcessing/sampleDict/500/point_b_Conc01_Conc02_Conc03_Conc045.xy"
+    )
+    concDataC = np.loadtxt(
+        tmpdir
+        + "/postProcessing/sampleDict/500/point_c_Conc01_Conc02_Conc03_Conc045.xy"
+    )
 
-    mergedConcsA = np.zeros((154,2))
-    mergedConcsB = np.zeros((154,2))
-    mergedConcsC = np.zeros((154,2))
+    mergedConcsA = np.zeros((154, 2))
+    mergedConcsB = np.zeros((154, 2))
+    mergedConcsC = np.zeros((154, 2))
 
-    for i in range(0,154):
-        mergedConcsA[i,0] = concDataA[i,0]
-        mergedConcsA[i,1] = (concDataA[i,1] + concDataA[i,2] + concDataA[i,3] + concDataA[i,4])/4
+    for i in range(0, 154):
+        mergedConcsA[i, 0] = concDataA[i, 0]
+        mergedConcsA[i, 1] = (
+            concDataA[i, 1] + concDataA[i, 2] + concDataA[i, 3] + concDataA[i, 4]
+        ) / 4
 
-    for i in range(0,154):
-        mergedConcsB[i,0] = concDataB[i,0]
-        mergedConcsB[i,1] = (concDataB[i,1] + concDataB[i,2] + concDataB[i,3] + concDataB[i,4])/4
+    for i in range(0, 154):
+        mergedConcsB[i, 0] = concDataB[i, 0]
+        mergedConcsB[i, 1] = (
+            concDataB[i, 1] + concDataB[i, 2] + concDataB[i, 3] + concDataB[i, 4]
+        ) / 4
 
-    for i in range(0,154):
-        mergedConcsC[i,0] = concDataC[i,0]
-        mergedConcsC[i,1] = (concDataC[i,1] + concDataC[i,2] + concDataC[i,3] + concDataC[i,4])/4
-
+    for i in range(0, 154):
+        mergedConcsC[i, 0] = concDataC[i, 0]
+        mergedConcsC[i, 1] = (
+            concDataC[i, 1] + concDataC[i, 2] + concDataC[i, 3] + concDataC[i, 4]
+        ) / 4
 
     avgDispA = calculateAverageDisplacement(probeAConcs, mergedConcsA, probeAHeights)
     avgDispB = calculateAverageDisplacement(probeBConcs, mergedConcsB, probeBHeights)
     avgDispC = calculateAverageDisplacement(probeCConcs, mergedConcsC, probeCHeights)
 
-    shutil.rmtree(tmpdir) 
+    shutil.rmtree(tmpdir)
 
-    
     return [avgDispA, avgDispB, avgDispC]
-
 
 
 # BENCHMARKING OBJECTIVE FUNCTIONS
@@ -185,7 +202,7 @@ def binhAndKorn(x, y):
     f1 = (4 * (x**2)) + (4 * (y**2))
     f2 = (x - 5) ** 2 + (y - 5) ** 2
 
-    if (x-5)**2 + y**2 <= 25 and (x-8)**2 + (y+3)**2 >= 7.7:
+    if (x - 5) ** 2 + y**2 <= 25 and (x - 8) ** 2 + (y + 3) ** 2 >= 7.7:
 
         return [f1, f2]
     else:
@@ -199,7 +216,7 @@ def chankongHaimes(x, y):
 
     # return [f1, f2]
 
-    if x**2 + y**2 <= 225 and x - 3*y + 10 <= 0:
+    if x**2 + y**2 <= 225 and x - 3 * y + 10 <= 0:
 
         return [f1, f2]
     else:
@@ -219,6 +236,7 @@ def chankongHaimes(x, y):
 
 #     return [f1, f2]
 
+
 def fonsecaFleming(x):
     """
     Evaluate the Fonseca-Fleming function for a given input vector x.
@@ -232,10 +250,10 @@ def fonsecaFleming(x):
     x = np.asarray(x)  # Ensure x is a numpy array
 
     # First objective function
-    f1 = 1 - np.exp(-np.sum((x - 1/np.sqrt(len(x)))**2))
+    f1 = 1 - np.exp(-np.sum((x - 1 / np.sqrt(len(x))) ** 2))
 
     # Second objective function
-    f2 = 1 - np.exp(-np.sum((x + 1/np.sqrt(len(x)))**2))
+    f2 = 1 - np.exp(-np.sum((x + 1 / np.sqrt(len(x))) ** 2))
 
     return [f1, f2]
 
@@ -244,7 +262,10 @@ def ctp1(x, y):
     f1 = x
     f2 = (1 + y) * np.exp(-1 * (x / (1 + y)))
 
-    if f2/(0.858*np.exp(-0.541*f1))>=1 and f2/(0.728*np.exp(-0.295*f1))>=1:
+    if (
+        f2 / (0.858 * np.exp(-0.541 * f1)) >= 1
+        and f2 / (0.728 * np.exp(-0.295 * f1)) >= 1
+    ):
 
         return [f1, f2]
     else:
@@ -256,8 +277,7 @@ def constrEx(x, y):
     f1 = x
     f2 = (1 + y) / x
 
-
-    if y + 9*x >= 6 and -1*y + 9*x >=1:
+    if y + 9 * x >= 6 and -1 * y + 9 * x >= 1:
 
         return [f1, f2]
     else:
@@ -269,7 +289,7 @@ def testFunction4(x, y):
     f1 = x**2 - y
     f2 = -0.5 * x - y - 1
 
-    if 6.5-(x/6)-y >= 0 and 7.5-0.5*x-y >=0 and 30 -5*x - y >=0:
+    if 6.5 - (x / 6) - y >= 0 and 7.5 - 0.5 * x - y >= 0 and 30 - 5 * x - y >= 0:
 
         return [f1, f2]
     else:
@@ -395,7 +415,7 @@ def PBI(objs, z, w, theta=5.0):
 
     d1term1 = np.linalg.norm(np.dot((np.transpose((objs - z))), w))
 
-    #d1 term calculation changed from norm to abs:
+    # d1 term calculation changed from norm to abs:
     # d1term1 = np.abs(np.dot((np.transpose((objs - z))), w))
 
     d1term2 = np.linalg.norm(w)
@@ -452,7 +472,8 @@ def PAPBI(objs, z, w, currentGen, maxGen, thetaStore={"previousTheta": 1.0}):
     return scalarisedArray
 
 
-#method and functions for HypI hypervolume improvement scalarising function
+# method and functions for HypI hypervolume improvement scalarising function
+
 
 def computeParetoShells(X):
     remaining = X.copy()
@@ -469,14 +490,15 @@ def computeParetoShells(X):
 
     return shells
 
-#calculate worst set of objective values in current dataset (nadir)
 
+# calculate worst set of objective values in current dataset (nadir)
 
 
 # Step 2: Compute hypervolume indicator
 def computeHypervolume(X, ref_point):
     hv = HV(ref_point)
     return hv.do(X)
+
 
 # Step 3: Compute hypervolume improvement
 def hypervolumeImprovement(x, ref_point, paretoShells):
@@ -488,9 +510,9 @@ def hypervolumeImprovement(x, ref_point, paretoShells):
     #     if not np.any(np.all(shell <= x, axis=1)):
     #         pareto_k = shell
     #         break
-    for i in range(0, len(paretoShells)-1):
+    for i in range(0, len(paretoShells) - 1):
         if not np.any(np.all(paretoShells[i] <= x, axis=1)):
-            pareto_k = paretoShells[i+1]
+            pareto_k = paretoShells[i + 1]
 
     # Check if pareto_k was assigned; if not, default to the last shell
     if pareto_k is None:
@@ -502,17 +524,17 @@ def hypervolumeImprovement(x, ref_point, paretoShells):
 
     return hv_after - hv_before
 
+
 def HypI(objs):
 
     # print('before function - ', objs)
 
-
-    #compute nadir vector (to be the reference vector)
-    #problem occurs if nan value encountered - refVector set as nan??
-    #does setting refVector to 1,1 (as values are normalised) fix this?
+    # compute nadir vector (to be the reference vector)
+    # problem occurs if nan value encountered - refVector set as nan??
+    # does setting refVector to 1,1 (as values are normalised) fix this?
     # refVector = np.max(objs, axis=0)
 
-    refVector = np.array((1,1))
+    refVector = np.array((1, 1))
 
     # print('refVector =', refVector)
 
@@ -526,5 +548,4 @@ def HypI(objs):
         scalarisedValues[i] = hypervolumeImprovement(objs[i], refVector, paretoShells)
     # print('after function - ', (1-scalarisedValues))
     # return (1-scalarisedValues), paretoShells
-    return (1-scalarisedValues)
-
+    return 1 - scalarisedValues

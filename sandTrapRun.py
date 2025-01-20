@@ -1,167 +1,204 @@
-import numpy as np 
+import optimiserBank as opt
+import functionBank as func
 import matplotlib.pyplot as plt
-import math
-import torch
-import gpytorch
-import PyFoam
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-from pyDOE import lhs
-from multiprocessing import Pool
-import subprocess
-import tempfile
-import shutil
-from scipy.stats import norm
-from sklearn.preprocessing import StandardScaler
+import importlib
+
+importlib.reload(opt)
+importlib.reload(func)
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import qmc
+
+# run with:
+
+# nohup python3.11 -u allrun.py > allRunLogNormalised 2>&1 &
 
 
+sandTrapDict = {
+    func.sandTrap: [(0.0001, 0.0005), (0, 0.075), (0.05, 0.2), (0.1, 2.0), (0.001, 0.1)]
+}
+# order is: inletConc, wallRoughness, maxCellSize, sigmaTurbConstant, turbVisc
+
+sandTrapWeights = np.array((1 / 3, 1 / 3, 1 / 3))
+
+scalarisingList = [
+    func.HypI,
+    func.chebyshev,
+    func.weightedSum,
+    func.EWC,
+    func.weightedPower,
+    func.weightedNorm,
+    func.augmentedChebychev,
+    func.modifiedChebychev,
+    func.PBI,
+    func.PAPBI,
+]
 
 
+# temporary list to run only the new HypI scalarising function
+# scalarisingList = [func.HypI]
 
-def updateTurbulence(file, newValue):
+for key, value in sandTrapDict.items():
+    print(key.__name__, value)
 
-    file["RAS"]["sigmaEps"] = f"{newValue}"
+    initSampleSize = 5
+    bounds = np.array(value)
+    lowBounds = bounds[:, 0]
+    highBounds = bounds[:, 1]
 
-    file.writeFile()
-    print(f"Turbulence Constant updated to {newValue}")
+    # Generate one Latin Hypercube Sample (LHS) for each test function,
+    # to be used for all optimisers/scalarisers using a population size of 20
+    sampler = qmc.LatinHypercube(
+        d=bounds.shape[0]
+    )  # Dimension is determined from bounds
+    sample = sampler.random(n=initSampleSize)
+    initPopulation = qmc.scale(sample, lowBounds, highBounds)
 
+    # Check for and systematically replace NaN values in initial population
+    # Requires evaluating initial population
+    initialObjvTargets = np.empty((0, 3))
 
+    for i in range(initSampleSize):
+        candidate = initPopulation[i]
+        newObjvTgt = opt.MOobjective_function(candidate, key, bounds.shape[0])
 
+        # Replace NaN values in the objective function result with valid samples
+        while np.any(np.isnan(newObjvTgt)):
+            candidate = np.random.uniform(
+                lowBounds, highBounds
+            )  # Match dimension automatically
+            newObjvTgt = opt.MOobjective_function(candidate, key, bounds.shape[0])
+            initPopulation[i] = candidate
+        initialObjvTargets = np.vstack(initialObjvTargets, newObjvTgt)
 
-def updateConc(file, newValue):
+    print("Initial Population:")
+    print(initPopulation)
 
-    file["boundaryField"]["inletWater"]["value"] = f"uniform {newValue}"
+    for scalarisingFunction in scalarisingList:
 
-    file.writeFile()
-    print(f"Inlet concentration updated to {newValue}")
+        print(scalarisingFunction.__name__)
 
+        LSADE = opt.LSADE(
+            value,
+            20,
+            key,
+            scalarisingFunction,
+            3,
+            sandTrapWeights,
+            useInitialPopulation=True,
+            initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets
+        )
+        LSADE.optimizerStep()
 
+        features = np.loadtxt("LSADEFeatures.txt")
+        np.savetxt(
+            f"LSADEFeatures{key.__name__}{scalarisingFunction.__name__}.txt", features
+        )
 
+        scalarisedTargets = np.loadtxt("LSADEScalarisedTargets.txt")
+        np.savetxt(
+            f"LSADEScalarisedTargets{key.__name__}{scalarisingFunction.__name__}.txt",
+            scalarisedTargets,
+        )
 
-def updateRoughness(file, newValue):
-    for surface in file["boundaryField"]:
-        # print(surface)
-        for entry in file["boundaryField"][surface]:
-            # print(entry)
-            if "Ks" in entry:
-                file["boundaryField"][surface]["Ks"] = f"uniform {newValue}"
-                file["boundaryField"][surface]["roughnessHeight"] = f"{newValue}"
+        objtTargets = np.loadtxt("LSADEObjectiveTargets.txt")
+        np.savetxt(
+            f"LSADEObjtvTargets{key.__name__}{scalarisingFunction.__name__}.txt",
+            objtTargets,
+        )
 
-    file.writeFile()
-    print(f"Wall roughness updated to {newValue}")
+        PSO = opt.TS_DDEO(
+            value,
+            20,
+            key,
+            scalarisingFunction,
+            3,
+            sandTrapWeights,
+            useInitialPopulation=True,
+            initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets
+        )
+        PSO.stage1()
+        PSO.stage2()
 
+        features = np.loadtxt("TSDDEOFeatures.txt")
+        np.savetxt(
+            f"TSDDEOFeatures{key.__name__}{scalarisingFunction.__name__}.txt", features
+        )
 
-def updateMaxCellSize(file, newValue):
-    file["maxCellSize"] = f"{newValue}"
+        scalarisedTargets = np.loadtxt("TSDDEOTargets.txt")
+        np.savetxt(
+            f"TSDDEOScalarisedTargets{key.__name__}{scalarisingFunction.__name__}.txt",
+            scalarisedTargets,
+        )
 
-    file.writeFile()
-    print(f"Max Cell Size updated to {newValue}")
+        objtTargets = np.loadtxt("TSDDEOObjectiveTargets.txt")
+        np.savetxt(
+            f"TSDDEOObjtvTargets{key.__name__}{scalarisingFunction.__name__}.txt",
+            objtTargets,
+        )
 
+        bayesianRun = opt.bayesianOptimiser(
+            value,
+            15,
+            key,
+            scalarisingFunction,
+            3,
+            sandTrapWeights,
+            useInitialPopulation=True,
+            initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets
+        )
+        bayesianRun.runOptimiser()
 
-def updateTurbVisc(file, newValue):
-    file["boundaryField"]["inletWater"]["value"] = f"uniform {newValue}"
+        features = np.loadtxt("BOFeatures.txt")
+        np.savetxt(
+            f"BOFeatures{key.__name__}{scalarisingFunction.__name__}.txt", features
+        )
 
-    file.writeFile()
-    print(f"Inlet Turbulent Viscosity updated to {newValue}")
+        scalarisedTargets = np.loadtxt("BOScalarisedTargets.txt")
+        np.savetxt(
+            f"BOScalarisedTargets{key.__name__}{scalarisingFunction.__name__}.txt",
+            scalarisedTargets,
+        )
 
+        objtTargets = np.loadtxt("BOObjectiveTargets.txt")
+        np.savetxt(
+            f"BOObjtvTargets{key.__name__}{scalarisingFunction.__name__}.txt",
+            objtTargets,
+        )
 
-def calculateAverageDisplacement(labDataConc, simDataConc, probeHeights):
-    
-    simDataIndices = []
+        ESA = opt.ESA(
+            value,
+            20,
+            10,
+            0.25,
+            key,
+            scalarisingFunction,
+            3,
+            sandTrapWeights,
+            0.9,
+            80,
+            useInitialPopulation=True,
+            initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets
+        )
+        ESA.mainMenu(initialAction=2)
 
-    data_gaps = []
+        features = np.loadtxt("ESAFeatures.txt")
+        np.savetxt(
+            f"ESAFeatures{key.__name__}{scalarisingFunction.__name__}.txt", features
+        )
 
-    for i in probeHeights:
-        # print(np.searchsorted(concData[:,0], i))
-        simDataIndices.append(np.searchsorted(simDataConc[:,0], i))
+        scalarisedTargets = np.loadtxt("ESAScalarisedTargets.txt")
+        np.savetxt(
+            f"ESAScalarisedTargets{key.__name__}{scalarisingFunction.__name__}.txt",
+            scalarisedTargets,
+        )
 
-    for i in range(0,4,1):
-        gap = abs(labDataConc[i]-(simDataConc[simDataIndices[i],1])*1e6)
-        # print(probeAConcs[i], (concData[probeAIndices[i],1])*1e6)
-        data_gaps.append(gap)
-    averageDisplacement = np.average(data_gaps)
-    print(averageDisplacement)
-    
-    return averageDisplacement 
-
-
-def simulate(features):
-
-    probeAHeights = [0.099681, 0.40639, 0.8179, 1.2831]
-    probeAConcs = [220.6415, 216.2483, 217.2245, 163.5286]
-
-    probeBHeights = [0.05063, 0.3063, 0.6152, 1.2329]
-    probeBConcs = [141.037, 129.8962, 146.2518, 97.4222]
-
-    probeCHeights = [0.1051, 0.2078, 0.5158, 1.1821]
-    probeCConcs = [106.3158, 109.1729, 81.9549, 50.5263]
-
-    sandTrapDir = "/home/bm424/OpenFOAM/bm424-v2312/run/sandTrap/monoSurrogateSetup/sandTrap4ConcsOrig"
-
-    tmpdir = tempfile.mkdtemp(dir = "/home/bm424/OpenFOAM/bm424-v2312/run/sandTrap/monoSurrogateSetup/")
-
-    shutil.copytree(sandTrapDir, tmpdir, dirs_exist_ok=True)
-
-    turbulenceProperties = ParsedParameterFile(tmpdir + "/constant/turbulenceProperties")
-    conc01 = ParsedParameterFile(tmpdir + "/0/Conc01")
-    conc02 = ParsedParameterFile(tmpdir + "/0/Conc02")
-    conc03 = ParsedParameterFile(tmpdir + "/0/Conc03")
-    conc045 = ParsedParameterFile(tmpdir + "/0/Conc045")
-    #need 4 concs
-    eddyvisc = ParsedParameterFile(tmpdir + "/0/eddyvisc")
-    kineticenergy = ParsedParameterFile(tmpdir + "/0/kineticenergy")
-    nut = ParsedParameterFile(tmpdir + "/0/nut")
-    meshDict = ParsedParameterFile(tmpdir + "/system/meshDict")
-
-    # order is: Wall Roughness, inletConc, maxCellSize, sigmaTurbConstant, turbVisc
-
-    updateRoughness(eddyvisc, features[1])
-    updateRoughness(kineticenergy, features[1])
-    updateRoughness(nut, features[1])
-
-    updateConc(conc01, features[0])
-    updateConc(conc02, features[0])
-    updateConc(conc03, features[0])
-    updateConc(conc045, features[0])
-
-    updateMaxCellSize(meshDict, features[2])
-
-    updateTurbulence(turbulenceProperties, features[3])
-
-    updateTurbVisc(eddyvisc, features[4])
-
-
-    subprocess.run(["cartesianMesh"], shell=False, cwd=tmpdir, check=False)
-
-    subprocess.run(["sediDriftFoam"], cwd=tmpdir, check=True)
-
-    subprocess.run(['postProcess', '-func', 'sampleDict'], cwd=tmpdir, shell=False, check=True, capture_output=False)
-
-    concDataA = np.loadtxt(tmpdir + '/postProcessing/sampleDict/500/point_a_Conc01_Conc02_Conc03_Conc045.xy')
-    concDataB = np.loadtxt(tmpdir + '/postProcessing/sampleDict/500/point_b_Conc01_Conc02_Conc03_Conc045.xy')
-    concDataC = np.loadtxt(tmpdir + '/postProcessing/sampleDict/500/point_c_Conc01_Conc02_Conc03_Conc045.xy')
-
-    mergedConcsA = np.zeros((154,2))
-    mergedConcsB = np.zeros((154,2))
-    mergedConcsC = np.zeros((154,2))
-
-    for i in range(0,154):
-        mergedConcsA[i,0] = concDataA[i,0]
-        mergedConcsA[i,1] = (concDataA[i,1] + concDataA[i,2] + concDataA[i,3] + concDataA[i,4])/4
-
-    for i in range(0,154):
-        mergedConcsB[i,0] = concDataB[i,0]
-        mergedConcsB[i,1] = (concDataB[i,1] + concDataB[i,2] + concDataB[i,3] + concDataB[i,4])/4
-
-    for i in range(0,154):
-        mergedConcsC[i,0] = concDataC[i,0]
-        mergedConcsC[i,1] = (concDataC[i,1] + concDataC[i,2] + concDataC[i,3] + concDataC[i,4])/4
-
-
-    avgDispA = calculateAverageDisplacement(probeAConcs, mergedConcsA, probeAHeights)
-    avgDispB = calculateAverageDisplacement(probeBConcs, mergedConcsB, probeBHeights)
-    avgDispC = calculateAverageDisplacement(probeCConcs, mergedConcsC, probeCHeights)
-
-    shutil.rmtree(tmpdir) 
-
-    
-    return avgDispA, avgDispB, avgDispC
+        objtTargets = np.loadtxt("ESAObjectiveTargets.txt")
+        np.savetxt(
+            f"ESAObjtvTargets{key.__name__}{scalarisingFunction.__name__}.txt",
+            objtTargets,
+        )

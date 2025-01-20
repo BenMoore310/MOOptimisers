@@ -1,0 +1,104 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  dev
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version      2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0";
+    object      epsilon;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 2 -3 0 0 0 0]; // turbulent kinetic energy dissipation rate in m^2/s^3
+
+internalField   uniform 0.01;
+
+boundaryField
+{
+    #includeEtc "caseDicts/setConstraintTypes"
+
+    freeSurface
+    {
+//		type            symmetryPlane; 
+		type 		codedFixedValue; // 
+//		patchType	symmetryPlane;
+		value           uniform 0.3;
+		name		myEpsilonFS;// Name of generated boundary condition, previously directType
+//		name 		symmetryPlane;
+		
+		code // modified from Subhojit
+		#{
+			const fvPatch& boundaryPatch = this->patch();
+			const volScalarField& eps = this->db().lookupObject<volScalarField>("epsilon");
+			const fvMesh& mesh = eps.mesh();
+			const vectorField& Cf = boundaryPatch.Cf();// face center coordinates for the patch
+			const dimensionedScalar h = max(mesh.Cf().component(2));//flow depth in m
+			fvPatchScalarField& epsilon = *this;
+
+Info<<"depth: "<<h.value() << endl;
+
+			const fvPatchScalarField& kinenp = boundaryPatch.lookupPatchField<volScalarField, scalar>("k");
+			
+			forAll(Cf, facei)
+			{
+				scalar kinenf = kinenp[facei];// turbulent kinetic energy at the facei
+				epsilon[facei] = 2.3*pow(kinenf, 1.5) / h.value();
+			}
+		#};
+
+		codeOptions
+			#{
+				-I$(LIB_SRC)/finiteVolume/lnInclude\
+				-I$(LIB_SRC)/meshTools/lnInclude\
+			#};
+			
+		codeInclude
+			#{
+				#include "fvCFD.H"
+				#include <cmath>
+				#include <iostream>
+			#};
+			
+		codeLibs 
+			#{ -lfiniteVolume -lmeshTools 
+			#};
+	}
+
+   bedWall
+    {
+        type            epsilonWallFunction;
+        value           uniform 0.01;
+    }
+    leftSide
+    {
+        type            epsilonWallFunction;
+        value           uniform 0.01;
+    }
+    rightSide
+    {
+        type            epsilonWallFunction;
+        value           uniform 0.01;
+    }
+    inletWater
+    {
+        type            fixedValue;
+        value           uniform 0.01;
+    }
+    outletWater
+    {
+        type            zeroGradient;
+    }
+    defaultFaces
+    {
+        type            empty;
+    }
+}
+
+
+// ************************************************************************* //

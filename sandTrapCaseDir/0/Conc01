@@ -1,0 +1,51 @@
+FoamFile 
+{
+    version      2.0;
+    format       ascii;
+    class        volScalarField;
+    location     "0";
+    object       Conc;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    bedWall
+    {
+        type            zeroGradient;
+     }
+    leftSide
+    {
+        type            zeroGradient;
+     }
+    rightSide
+    {
+        type            zeroGradient;
+     }
+    freeSurface
+    {
+        type            zeroGradient;
+    }
+    inletWater
+    {
+        type            fixedValue;
+        value           uniform 0.000420;
+    }
+    outletWater
+    {
+        type            zeroGradient;
+    }
+    defaultFaces
+    {
+        type            empty;
+    }
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
