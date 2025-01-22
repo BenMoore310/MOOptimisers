@@ -135,7 +135,19 @@ def sandTrap(features):
     subprocess.run(["renumberMesh"], shell=False, cwd=tmpdir, check=False)
     subprocess.run(["decomposePar"], shell=False, cwd=tmpdir, check=False)
 
-    subprocess.run(["sediDriftFoam"], cwd=tmpdir, check=True)
+    # subprocess.run(["mpirun", "-np", "10", "sediDriftFoam", "-parallel", ">", "tempSandTrapLog"], cwd=tmpdir, check=True)
+
+    with open("tempSandTrapLog", "w") as log_file:
+        subprocess.run(
+            ["mpirun", "-np", "10", "sediDriftFoam", "-parallel"],
+            cwd=tmpdir,
+            check=True,
+            stdout=log_file
+        )
+
+    subprocess.run(["reconstructPar"], shell=False, cwd=tmpdir, check=False)
+
+    
 
     subprocess.run(
         ["postProcess", "-func", "sampleDict"],
@@ -147,15 +159,15 @@ def sandTrap(features):
 
     concDataA = np.loadtxt(
         tmpdir
-        + "/postProcessing/sampleDict/500/point_a_Conc01_Conc02_Conc03_Conc045.xy"
+        + "/postProcessing/sampleDict/300/point_a_Conc01_Conc02_Conc03_Conc045.xy"
     )
     concDataB = np.loadtxt(
         tmpdir
-        + "/postProcessing/sampleDict/500/point_b_Conc01_Conc02_Conc03_Conc045.xy"
+        + "/postProcessing/sampleDict/300/point_b_Conc01_Conc02_Conc03_Conc045.xy"
     )
     concDataC = np.loadtxt(
         tmpdir
-        + "/postProcessing/sampleDict/500/point_c_Conc01_Conc02_Conc03_Conc045.xy"
+        + "/postProcessing/sampleDict/300/point_c_Conc01_Conc02_Conc03_Conc045.xy"
     )
 
     mergedConcsA = np.zeros((154, 2))
@@ -519,9 +531,11 @@ def hypervolumeImprovement(x, ref_point, paretoShells):
         pareto_k = paretoShells[-1]
 
     # Compute hypervolume with x added to the shell
+    # print(pareto_k, ref_point)
     hv_before = computeHypervolume(pareto_k, ref_point)
     hv_after = computeHypervolume(np.vstack([pareto_k, x]), ref_point)
-
+    # print('Hypervolumes:')
+    print(hv_after - hv_before)
     return hv_after - hv_before
 
 
@@ -534,11 +548,13 @@ def HypI(objs):
     # does setting refVector to 1,1 (as values are normalised) fix this?
     # refVector = np.max(objs, axis=0)
 
-    refVector = np.array((1, 1))
+    refVector = np.ones((len(objs[-1],)))
 
     # print('refVector =', refVector)
 
     paretoShells = computeParetoShells(objs)
+
+    print(paretoShells)
 
     # np.savetxt('paretoShells.txt', np.array(paretoShells))
 

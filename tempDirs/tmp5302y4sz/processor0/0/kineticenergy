@@ -1,0 +1,81 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    arch        "LSB;label=32;scalar=64";
+    class       volScalarField;
+    location    "0";
+    object      kineticenergy;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform 0.375;
+
+boundaryField
+{
+    inletWater
+    {
+        type            fixedValue;
+        value           nonuniform List<scalar> 0();
+    }
+    outletWater
+    {
+        type            zeroGradient;
+    }
+    freeSurface
+    {
+        type            zeroGradient;
+    }
+    leftSide
+    {
+        type            kqRWallFunction;
+        Ks              uniform 0.00716277;
+        Cs              uniform 0.5;
+        roughnessHeight 0.00716277;
+        roughnessConstant 0.5;
+        roughnessFactor 1;
+        value           uniform 0.375;
+    }
+    rightSide
+    {
+        type            kqRWallFunction;
+        Ks              uniform 0.00716277;
+        Cs              uniform 0.5;
+        roughnessHeight 0.00716277;
+        roughnessConstant 0.5;
+        roughnessFactor 1;
+        value           uniform 0.375;
+    }
+    bedWall
+    {
+        type            kqRWallFunction;
+        Ks              uniform 0.00716277;
+        Cs              uniform 0.5;
+        roughnessHeight 0.00716277;
+        roughnessConstant 0.5;
+        roughnessFactor 1;
+        value           uniform 0.375;
+    }
+    procBoundary0to1
+    {
+        type            processor;
+        value           uniform 0.375;
+    }
+    procBoundary0to7
+    {
+        type            processor;
+        value           uniform 0.375;
+    }
+}
+
+
+// ************************************************************************* //

@@ -35,44 +35,68 @@ scalarisingList = [
 ]
 
 
+
 # temporary list to run only the new HypI scalarising function
 # scalarisingList = [func.HypI]
+
+# initPopulation = np.array([[2.71774478e-04, 1.06624662e-02, 1.61572910e-01, 7.88754700e-01,
+#   8.49862317e-02],
+#  [2.26544913e-04 ,4.20017446e-02, 1.20045421e-01 ,9.31354269e-01,
+#   7.55967468e-03],
+#  [1.11567477e-04 ,4.56233761e-02, 1.81794950e-01 ,1.98978413e+00,
+#   4.93982515e-02],
+#  [4.39090704e-04 ,1.54648860e-02 ,9.60211045e-02, 3.91748950e-01,
+#   3.76541760e-02],
+#  [3.65540217e-04 ,7.01556452e-02 ,6.53417300e-02, 1.24438485e+00,
+#   7.40832369e-02]])
+
+# initialObjvTargets = np.array([
+#     [100.74126249999998, 36.15734375, 121.6074875],
+#     [47.50642500000001, 21.31479375, 58.419337500000005],
+#     [133.50328125000001, 60.9302875, 48.79143625],
+#     [141.05033749999996, 55.3736625, 72.153948125],
+#     [86.5700875, 41.091212500000005, 71.36274374999999]])
+
+initPopulation = np.loadtxt('sandTrapInitPop.txt')
+initialObjvTargets = np.loadtxt('sandTrapInitObjvTargets.txt')
 
 for key, value in sandTrapDict.items():
     print(key.__name__, value)
 
-    initSampleSize = 5
-    bounds = np.array(value)
-    lowBounds = bounds[:, 0]
-    highBounds = bounds[:, 1]
+    # initSampleSize = 20
+    # bounds = np.array(value)
+    # lowBounds = bounds[:, 0]
+    # highBounds = bounds[:, 1]
 
-    # Generate one Latin Hypercube Sample (LHS) for each test function,
-    # to be used for all optimisers/scalarisers using a population size of 20
-    sampler = qmc.LatinHypercube(
-        d=bounds.shape[0]
-    )  # Dimension is determined from bounds
-    sample = sampler.random(n=initSampleSize)
-    initPopulation = qmc.scale(sample, lowBounds, highBounds)
+    # # Generate one Latin Hypercube Sample (LHS) for each test function,
+    # # to be used for all optimisers/scalarisers using a population size of 20
+    # sampler = qmc.LatinHypercube(
+    #     d=bounds.shape[0]
+    # )  # Dimension is determined from bounds
+    # sample = sampler.random(n=initSampleSize)
+    # initPopulation = qmc.scale(sample, lowBounds, highBounds)
 
-    # Check for and systematically replace NaN values in initial population
-    # Requires evaluating initial population
-    initialObjvTargets = np.empty((0, 3))
+    # # Check for and systematically replace NaN values in initial population
+    # # Requires evaluating initial population
+    # initialObjvTargets = np.empty((0, 3))
 
-    for i in range(initSampleSize):
-        candidate = initPopulation[i]
-        newObjvTgt = opt.MOobjective_function(candidate, key, bounds.shape[0])
+    # for i in range(initSampleSize):
+    #     candidate = initPopulation[i]
+    #     newObjvTgt = opt.MOobjective_function(candidate, key, 3)
 
-        # Replace NaN values in the objective function result with valid samples
-        while np.any(np.isnan(newObjvTgt)):
-            candidate = np.random.uniform(
-                lowBounds, highBounds
-            )  # Match dimension automatically
-            newObjvTgt = opt.MOobjective_function(candidate, key, bounds.shape[0])
-            initPopulation[i] = candidate
-        initialObjvTargets = np.vstack(initialObjvTargets, newObjvTgt)
+    #     # Replace NaN values in the objective function result with valid samples
+    #     while np.any(np.isnan(newObjvTgt)):
+    #         candidate = np.random.uniform(
+    #             lowBounds, highBounds
+    #         )  # Match dimension automatically
+    #         newObjvTgt = opt.MOobjective_function(candidate, key, 3)
+    #         initPopulation[i] = candidate
+    #     initialObjvTargets = np.vstack((initialObjvTargets, newObjvTgt))
 
-    print("Initial Population:")
-    print(initPopulation)
+    # print("Initial Population:")
+    # print(initPopulation)
+    # np.savetxt('sandTrapInitPop.txt', initPopulation)
+    # np.savetxt('sandTrapInitObjvTargets.txt', initialObjvTargets)
 
     for scalarisingFunction in scalarisingList:
 
