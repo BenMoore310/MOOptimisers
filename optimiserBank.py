@@ -24,8 +24,9 @@ def MOobjective_function(vec, currentFunction, nObjectives):
         float: Fitness value of the solution.
     """
     objectiveArray = np.empty((1, nObjectives))
+    # print(currentFunction)
 
-    if currentFunction == (func.fonsecaFleming or func.sandtrap):
+    if currentFunction == func.fonsecaFleming or currentFunction == func.sandTrap:
         objectiveArray[0] = currentFunction(vec)
         # objectiveArray = np.empty((1,nObjectives))
 
@@ -335,12 +336,12 @@ class DifferentialEvolution:
         # y_range = np.linspace(-5, 5, 100)
         # X, Y = np.meshgrid(x_range, y_range)
         # Z = ackley_function(X, Y)
-        x_range = np.linspace(self.bounds[0, 0], self.bounds[0, 1], 50)
-        y_range = np.linspace(self.bounds[1, 0], self.bounds[1, 1], 50)
-        fullRange = list(product(x_range, y_range))
-        fullRangeArray = np.array(fullRange)
-        # y_pred = self.objective_function.predict(fullRangeArray)
-        y_pred = GPEval(self.objective_function, fullRangeArray)
+        # x_range = np.linspace(self.bounds[0, 0], self.bounds[0, 1], 50)
+        # y_range = np.linspace(self.bounds[1, 0], self.bounds[1, 1], 50)
+        # fullRange = list(product(x_range, y_range))
+        # fullRangeArray = np.array(fullRange)
+        # # y_pred = self.objective_function.predict(fullRangeArray)
+        # y_pred = GPEval(self.objective_function, fullRangeArray)
 
         for generation in range(self.max_generations):
             new_population = np.zeros_like(self.population)
@@ -518,13 +519,13 @@ class BayesianDifferentialEvolution:
 
     def optimize(self):
         """Run the Differential Evolution optimization."""
-        x_range = np.linspace(self.bounds[0, 0], self.bounds[0, 1], 50)
-        y_range = np.linspace(self.bounds[1, 0], self.bounds[1, 1], 50)
-        fullRange = list(product(x_range, y_range))
-        fullRangeArray = np.array(fullRange)
-        Z = expectedImprovement(
-            self.surrogateModel, fullRangeArray, self.bestTarget, 0.01
-        )
+        # x_range = np.linspace(self.bounds[0, 0], self.bounds[0, 1], 50)
+        # y_range = np.linspace(self.bounds[1, 0], self.bounds[1, 1], 50)
+        # fullRange = list(product(x_range, y_range))
+        # fullRangeArray = np.array(fullRange)
+        # Z = expectedImprovement(
+        #     self.surrogateModel, fullRangeArray, self.bestTarget, 0.01
+        # )
 
         for generation in range(self.max_generations):
             new_population = np.zeros_like(self.population)
@@ -918,10 +919,12 @@ class TS_DDEO:
             bestFeatures[i] = self.feFeatures[bestIndices[i]]
             bestTargets[i] = self.scalarisedTargets[bestIndices[i]]
 
-        x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
-        y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
+        # x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
+        # y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
 
-        bounds = [(x_min, x_max), (y_min, y_max)]
+        # bounds = [(x_min, x_max), (y_min, y_max)]
+
+        bounds = [(np.min(bestFeatures[:, d]), np.max(bestFeatures[:, d])) for d in range(bestFeatures.shape[1])]
 
         # pairwiseDistancesLocal = np.linalg.norm(bestFeatures[:, np.newaxis] - bestFeatures, axis=2)
         # avgDistanceLocal = np.mean(pairwiseDistancesLocal)
@@ -950,12 +953,12 @@ class TS_DDEO:
         # print(self.feFeatures.shape)
         # print(bestFeature)
 
-        x_range = np.linspace(self.globalBounds[0, 0], self.globalBounds[0, 1], 100)
-        y_range = np.linspace(self.globalBounds[1, 0], self.globalBounds[1, 1], 100)
-        fullRange = list(product(x_range, y_range))
-        fullRangeArray = np.array(fullRange)
-        # y_pred = self.objective_function.predict(fullRangeArray)
-        y_pred = GPEval(crossoverGP, fullRangeArray)
+        # x_range = np.linspace(self.globalBounds[0, 0], self.globalBounds[0, 1], 100)
+        # y_range = np.linspace(self.globalBounds[1, 0], self.globalBounds[1, 1], 100)
+        # fullRange = list(product(x_range, y_range))
+        # fullRangeArray = np.array(fullRange)
+        # # y_pred = self.objective_function.predict(fullRangeArray)
+        # y_pred = GPEval(crossoverGP, fullRangeArray)
 
         tempPop = np.full_like((self.feFeatures), bestFeature)
 
@@ -1032,11 +1035,11 @@ class TS_DDEO:
             popOnGP = GPEval(GPModel, self.population)
 
             # evaluating whole landscape on RBF for plotting reasons:
-            x_range = np.linspace(-5, 5, 50)
-            y_range = np.linspace(-5, 5, 50)
-            fullRange = list(product(x_range, y_range))
-            fullRangeArray = np.array(fullRange)
-            y_pred = GPEval(GPModel, fullRangeArray)
+            # x_range = np.linspace(-5, 5, 50)
+            # y_range = np.linspace(-5, 5, 50)
+            # fullRange = list(product(x_range, y_range))
+            # fullRangeArray = np.array(fullRange)
+            # y_pred = GPEval(GPModel, fullRangeArray)
 
             # function evaluation of best predicted child
             best_idx = np.argmin(popOnGP)
@@ -1084,7 +1087,7 @@ class TS_DDEO:
 
             bestLocalSolution = self.localRBF(15)
 
-            bestLocalSolution = np.reshape(bestLocalSolution, (self.nObjectives,))
+            bestLocalSolution = np.reshape(bestLocalSolution, (self.dimensions,))
 
             # print("best local Solution", bestLocalSolution)
 
@@ -1127,38 +1130,74 @@ class TS_DDEO:
             print(f"Evaluated points = {len(self.feFeatures)}")
 
 
-def lipschitz_global_underestimate(f_values, samplesXY, L, test_points):
+# def lipschitz_global_underestimate(f_values, samplesXY, L, test_points):
+#     """
+#     Compute the Lipschitz-based global underestimate at specific points.
+
+#     Parameters:
+#     f_values: np.ndarray of shape (n_samples,)
+#         The function values at the sampled points.
+#     samplesXY: np.ndarray of shape (n_samples, 2)
+#         Array of the sampled (x, y) points.
+#     L: float
+#         The Lipschitz constant.
+#     test_points: np.ndarray of shape (n, 2)
+#         Array of (x, y) points at which to compute the underestimate.
+
+#     Returns:
+#     Z_under: np.ndarray of shape (n,)
+#         The global Lipschitz-based underestimate values at the test points.
+#     """
+#     n_test_points = test_points.shape[0]
+#     Z_under = np.full(n_test_points, -np.inf)  # Initialize with very low values
+
+#     # Loop over all sample points to compute their individual underestimates
+#     for i, (x_i, y_i) in enumerate(samplesXY):
+#         f_x_i_y_i = f_values[i]
+
+#         # Compute the distance from each test point to the sample point (x_i, y_i)
+#         distances = np.sqrt(
+#             (test_points[:, 0] - x_i) ** 2 + (test_points[:, 1] - y_i) ** 2
+#         )
+
+#         # Compute the local Lipschitz underestimate for this sample
+#         Z_local_under = f_x_i_y_i - L * distances
+
+#         # Update the global underestimate by taking the maximum across samples
+#         Z_under = np.maximum(Z_under, Z_local_under)
+
+#     return Z_under
+
+def lipschitz_global_underestimate(f_values, samples, L, test_points):
     """
-    Compute the Lipschitz-based global underestimate at specific points.
+    Compute the Lipschitz-based global underestimate at specific points in any-dimensional space.
 
     Parameters:
     f_values: np.ndarray of shape (n_samples,)
         The function values at the sampled points.
-    samplesXY: np.ndarray of shape (n_samples, 2)
-        Array of the sampled (x, y) points.
+    samples: np.ndarray of shape (n_samples, d)
+        Array of the sampled points in d-dimensional space.
     L: float
         The Lipschitz constant.
-    test_points: np.ndarray of shape (n, 2)
-        Array of (x, y) points at which to compute the underestimate.
+    test_points: np.ndarray of shape (n, d)
+        Array of points in d-dimensional space at which to compute the underestimate.
 
     Returns:
     Z_under: np.ndarray of shape (n,)
         The global Lipschitz-based underestimate values at the test points.
     """
     n_test_points = test_points.shape[0]
-    Z_under = np.full(n_test_points, -np.inf)  # Initialize with very low values
+    Z_under = np.full(n_test_points, -np.inf)  # Initialise with very low values
 
     # Loop over all sample points to compute their individual underestimates
-    for i, (x_i, y_i) in enumerate(samplesXY):
-        f_x_i_y_i = f_values[i]
+    for i, sample_point in enumerate(samples):
+        f_sample = f_values[i]
 
-        # Compute the distance from each test point to the sample point (x_i, y_i)
-        distances = np.sqrt(
-            (test_points[:, 0] - x_i) ** 2 + (test_points[:, 1] - y_i) ** 2
-        )
+        # Compute the distance from each test point to the current sample point
+        distances = np.linalg.norm(test_points - sample_point, axis=1)
 
         # Compute the local Lipschitz underestimate for this sample
-        Z_local_under = f_x_i_y_i - L * distances
+        Z_local_under = f_sample - L * distances
 
         # Update the global underestimate by taking the maximum across samples
         Z_under = np.maximum(Z_under, Z_local_under)
@@ -1256,6 +1295,8 @@ class LSADE:
         else:
             self.population = self.initialisePopulation()
             self.evaluateInitialPopulation()
+        self.scalariseInitialPopulation()
+
 
         self.best_solution = None
         self.best_fitness = np.inf
@@ -1382,10 +1423,12 @@ class LSADE:
             bestFeatures[i] = self.feFeatures[bestIndices[i]]
             bestTargets[i] = self.scalarisedTargets[bestIndices[i]]
 
-        x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
-        y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
+        # x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
+        # y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
 
-        bounds = [(x_min, x_max), (y_min, y_max)]
+        # bounds = [(x_min, x_max), (y_min, y_max)]
+
+        bounds = [(np.min(bestFeatures[:, d]), np.max(bestFeatures[:, d])) for d in range(bestFeatures.shape[1])]
 
         # pairwiseDistancesLocal = np.linalg.norm(bestFeatures[:, np.newaxis] - bestFeatures, axis=2)
         # avgDistanceLocal = np.mean(pairwiseDistancesLocal)
@@ -1429,11 +1472,11 @@ class LSADE:
             popOnGP = GPEval(GPModel, self.population)
 
             # evaluating whole landscape on RBF for plotting reasons:
-            x_range = np.linspace(self.bounds[0, 0], self.bounds[0, 1], 100)
-            y_range = np.linspace(self.bounds[1, 0], self.bounds[1, 1], 100)
-            fullRange = list(product(x_range, y_range))
-            fullRangeArray = np.array(fullRange)
-            y_pred = GPEval(GPModel, fullRangeArray)
+            # x_range = np.linspace(self.bounds[0, 0], self.bounds[0, 1], 100)
+            # y_range = np.linspace(self.bounds[1, 0], self.bounds[1, 1], 100)
+            # fullRange = list(product(x_range, y_range))
+            # fullRangeArray = np.array(fullRange)
+            # y_pred = GPEval(GPModel, fullRangeArray)
 
             # evaluate current population (children) on RBF
             # popOnRBF = globalRBF.predict(self.population)
@@ -1516,10 +1559,10 @@ class LSADE:
                 self.feFeatures, self.scalarisedTargets, self.objectiveTargets
             )
 
-            # evaluating all points in function on Lipschitz for plotting purposes
-            Z_under = lipschitz_global_underestimate(
-                self.scalarisedTargets, self.feFeatures, L_est, fullRangeArray
-            )
+            # # evaluating all points in function on Lipschitz for plotting purposes
+            # Z_under = lipschitz_global_underestimate(
+            #     self.scalarisedTargets, self.feFeatures, L_est, fullRangeArray
+            # )
 
             # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = Z_under)
 
@@ -1536,7 +1579,7 @@ class LSADE:
 
             bestLocalSolution = self.localRBF(15)
 
-            bestLocalSolution = np.reshape(bestLocalSolution, (self.nObjectives,))
+            bestLocalSolution = np.reshape(bestLocalSolution, (self.dimensions,))
 
             # print("best local Solution", bestLocalSolution)
 
@@ -2008,10 +2051,12 @@ class ESA:
             bestFeatures[i] = self.feFeatures[bestIndices[i]]
             bestTargets[i] = self.scalarisedTargets[bestIndices[i]]
 
-        x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
-        y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
+        # x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
+        # y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
 
-        bounds = [(x_min, x_max), (y_min, y_max)]
+        # bounds = [(x_min, x_max), (y_min, y_max)]
+
+        bounds = [(np.min(bestFeatures[:, d]), np.max(bestFeatures[:, d])) for d in range(bestFeatures.shape[1])]
 
         # pairwiseDistancesLocal = np.linalg.norm(bestFeatures[:, np.newaxis] - bestFeatures, axis=2)
         # avgDistanceLocal = np.mean(pairwiseDistancesLocal)
@@ -2024,7 +2069,7 @@ class ESA:
         # functionEval = localRBF.predict()
         localDE = DifferentialEvolution(bounds, localGP)
         bestLocalSolution, bestLocalFitness = localDE.optimize()
-        bestLocalSolution = np.reshape(bestLocalSolution, (self.nObjectives,))
+        bestLocalSolution = np.reshape(bestLocalSolution, (self.dimensions,))
 
         newObjectiveTargets = MOobjective_function(
             bestLocalSolution, self.objFunction, self.nObjectives
@@ -2180,7 +2225,7 @@ class ESA:
                 trustRegionDE = DifferentialEvolution(trustRegionBounds, trustRegionGP)
                 trustBestSolution, trustBestFitness = trustRegionDE.optimize()
 
-                trustBestSolution = np.reshape(trustBestSolution, (self.nObjectives,))
+                trustBestSolution = np.reshape(trustBestSolution, (self.dimensions,))
 
                 trustBestSolution = np.clip(
                     trustBestSolution, self.globalBounds[:, 0], self.globalBounds[:, 1]
@@ -2406,10 +2451,12 @@ class bayesianOptimiser:
                 bestFeatures[i] = self.feFeatures[bestIndices[i]]
                 bestTargets[i] = self.scalarisedTargets[bestIndices[i]]
 
-            x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
-            y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
+            # x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
+            # y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
 
-            localBounds = [(x_min, x_max), (y_min, y_max)]
+            # localBounds = [(x_min, x_max), (y_min, y_max)]
+
+            bounds = [(np.min(bestFeatures[:, d]), np.max(bestFeatures[:, d])) for d in range(bestFeatures.shape[1])]
 
             # pairwiseDistancesLocal = np.linalg.norm(bestFeatures[:, np.newaxis] - bestFeatures, axis=2)
             # avgDistanceLocal = np.mean(pairwiseDistancesLocal)
@@ -2428,11 +2475,11 @@ class bayesianOptimiser:
             # )
 
             # evaluating whole landscape on RBF for plotting reasons:
-            x_range = np.linspace(self.globalBounds[0, 0], self.globalBounds[0, 1], 100)
-            y_range = np.linspace(self.globalBounds[1, 0], self.globalBounds[1, 1], 100)
-            fullRange = list(product(x_range, y_range))
-            fullRangeArray = np.array(fullRange)
-            y_pred, ystd = BOGPEval(localGP, fullRangeArray)
+            # x_range = np.linspace(self.globalBounds[0, 0], self.globalBounds[0, 1], 100)
+            # y_range = np.linspace(self.globalBounds[1, 0], self.globalBounds[1, 1], 100)
+            # fullRange = list(product(x_range, y_range))
+            # fullRangeArray = np.array(fullRange)
+            # y_pred, ystd = BOGPEval(localGP, fullRangeArray)
 
             # print(fullRangeArray.shape, y_pred.shape)
 

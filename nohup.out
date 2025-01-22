@@ -1,0 +1,9 @@
+sandTrap [(0.0001, 0.0005), (0, 0.075), (0.05, 0.2), (0.1, 2.0), (0.001, 0.1)]
+Traceback (most recent call last):
+  File "/home/bm424/Projects/MOOptimisers/sandTrapRun.py", line 63, in <module>
+    newObjvTgt = opt.MOobjective_function(candidate, key, bounds.shape[0])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bm424/Projects/MOOptimisers/optimiserBank.py", line 33, in MOobjective_function
+    x, y = vec
+    ^^^^
+ValueError: too many values to unpack (expected 2)

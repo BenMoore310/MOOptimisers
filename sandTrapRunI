@@ -1,0 +1,3357 @@
+nohup: ignoring input
+sandTrap [(0.0001, 0.0005), (0, 0.075), (0.05, 0.2), (0.1, 2.0), (0.001, 0.1)]
+Inlet concentration updated to 0.0002717744781797863
+Inlet concentration updated to 0.0002717744781797863
+Inlet concentration updated to 0.0002717744781797863
+Inlet concentration updated to 0.0002717744781797863
+Wall roughness updated to 0.010662466192269005
+Wall roughness updated to 0.010662466192269005
+Wall roughness updated to 0.010662466192269005
+Max Cell Size updated to 0.16157291008552754
+Turbulence Constant updated to 0.7887546996107195
+Inlet Turbulent Viscosity updated to 0.0849862317182878
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : cartesianMesh
+Date   : Jan 20 2025
+Time   : 14:51:20
+Host   : work
+PID    : 35963
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Setting root cube size and refinement parameters
+Root box (-8.93133 -20.1813 -19.9113) (32.4313 21.1813 21.4513)
+Requested cell size corresponds to octree level 8
+Requested boundary cell size corresponds to octree level 10
+Refining boundary
+Refining boundary boxes to the given size
+Finished refining boundary boxes
+Refining boxes intersecting surface meshes
+Finished refinement of boxes intersecting surface meshes
+Refining boxes intersecting edge meshes
+Finished refinement of boxes intersecting edge meshes
+Performing automatic refinement
+Performing automatic refinement
+Marking inside/outside.
+Number of internal boxes is 50158
+Number of outside boxes is 86776
+Number of data boxes is 62672
+Number of unknown boxes is 0
+Refining boxes near DATA boxes
+Marking inside/outside.
+Number of internal boxes is 106984
+Number of outside boxes is 86776
+Number of data boxes is 62672
+Number of unknown boxes is 0
+Finished refining boxes near DATA boxes
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 223301
+Resizing points!
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating polyMesh
+Mesh has :
+160674 vertices 
+372771 faces
+106150 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking cells connected to surface vertices
+Found 60930 boundary faces 
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non - manifold surface edges
+Found 0 non - manifold edges
+Finished checking for non - manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 60930 boundary faces 
+Found 0 non - mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 60930 boundary faces 
+Marked 0 faces for decomposition
+Found 60930 boundary faces 
+Smoothing mesh surface before mapping.
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Finished smoothing mesh surface before mapping.
+Mapping vertices onto surface
+Finished mapping vertices onto surface
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 60930 boundary faces 
+Extracting edges
+Starting topological adjustment of patches
+No topological adjustment was needed
+Starting geometrical adjustment of patches
+Found 8 corners at the surface of the volume mesh
+Found 2556 edge points at the surface of the volume mesh
+12 edge groups found!
+No geometrical adjustment was needed
+Found 60930 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2556 edge points at the surface of the volume mesh
+Performing patch correction
+Found 8 corners at the surface of the volume mesh
+Found 2556 edge points at the surface of the volume mesh
+Finished with patch correction
+Found 61016 boundary faces 
+Removing selected cells from the mesh
+New cells size 106064
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Adding new cells 
+Adding 602 cells to the mesh
+Finished adding cells to the mesh
+Reordering bnd faces
+Reordering boundary faces 
+Finished reordering boundary faces
+Finding bnd faces
+Found 61016 boundary faces 
+Mapping vertices with respect to surface patches
+Found 8 corners at the surface of the volume mesh
+Found 2556 edge points at the surface of the volume mesh
+12 edge groups found!
+Finished mapping vertices with respect to surface patches
+Found 61016 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2556 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 61016 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2556 edge points at the surface of the volume mesh
+Found 8 corners at the surface of the volume mesh
+Found 2556 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 63592 cells to the mesh
+Resizing cells!
+Resizing faces!
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 66176 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2580 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 66176 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2580 edge points at the surface of the volume mesh
+Starting smoothing the mesh
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Finished smoothing the mesh
+Iteration 0. Number of bad faces is 0
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Found 66176 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2580 edge points at the surface of the volume mesh
+Iteration 0. Number of bad faces is 0
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Renumbering the mesh
+Finished renumbering the mesh
+Renaming boundary patches
+Finished renaming boundary patches
+ExecutionTime = 74.93 s  ClockTime = 8 s
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : renumberMesh
+Date   : Jan 20 2025
+Time   : 14:51:28
+Host   : work
+PID    : 36841
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Mesh region0 size: 170258
+Before renumbering :
+    band           : 169412
+    profile        : 4.21416e+09
+
+Using default renumberMethod.
+
+Selecting renumberMethod CuthillMcKee
+
+Reading volScalarField: Conc01 Conc02 Conc03 Conc045 S_explicit01 S_explicit02 S_explicit03 S_explicit045 S_implicit eddyvisc epsilonUsing dynamicCode for patch freeSurface on field epsilon at line 32 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si/0/epsilon/boundaryField/freeSurface"
+ k kineticenergy nut p
+Reading volVectorField: U Umod01 Umod02 Umod03 Umod045
+
+After renumbering :
+    band           : 1600
+    profile        : 2.15004e+08
+
+Writing mesh to "0.05"
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : decomposePar
+Date   : Jan 20 2025
+Time   : 14:51:29
+Host   : work
+PID    : 36842
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+
+
+Decomposing mesh
+
+Create mesh
+
+Calculating distribution of cells
+Decomposition method scotch [10] (region region0)
+
+Finished decomposition in 0.33 s
+
+Calculating original mesh data
+
+Distributing cells to processors
+
+Distributing faces to processors
+
+Distributing points to processors
+
+Constructing processor meshes
+
+Processor 0
+    Number of cells = 17195
+    Number of points = 23561
+    Number of faces shared with processor 1 = 620
+    Number of faces shared with processor 2 = 500
+    Number of processor patches = 2
+    Number of processor faces = 1120
+    Number of boundary faces = 6379
+
+Processor 1
+    Number of cells = 17194
+    Number of points = 23203
+    Number of faces shared with processor 0 = 620
+    Number of processor patches = 1
+    Number of processor faces = 620
+    Number of boundary faces = 6619
+
+Processor 2
+    Number of cells = 17121
+    Number of points = 23427
+    Number of faces shared with processor 0 = 500
+    Number of faces shared with processor 4 = 516
+    Number of processor patches = 2
+    Number of processor faces = 1016
+    Number of boundary faces = 6380
+
+Processor 3
+    Number of cells = 16928
+    Number of points = 23141
+    Number of faces shared with processor 4 = 479
+    Number of faces shared with processor 9 = 508
+    Number of processor patches = 2
+    Number of processor faces = 987
+    Number of boundary faces = 6291
+
+Processor 4
+    Number of cells = 16855
+    Number of points = 23077
+    Number of faces shared with processor 2 = 516
+    Number of faces shared with processor 3 = 479
+    Number of processor patches = 2
+    Number of processor faces = 995
+    Number of boundary faces = 6301
+
+Processor 5
+    Number of cells = 16917
+    Number of points = 22968
+    Number of faces shared with processor 6 = 295
+    Number of faces shared with processor 7 = 408
+    Number of processor patches = 2
+    Number of processor faces = 703
+    Number of boundary faces = 6844
+
+Processor 6
+    Number of cells = 16989
+    Number of points = 23195
+    Number of faces shared with processor 5 = 295
+    Number of processor patches = 1
+    Number of processor faces = 295
+    Number of boundary faces = 8282
+
+Processor 7
+    Number of cells = 17016
+    Number of points = 23100
+    Number of faces shared with processor 5 = 408
+    Number of faces shared with processor 8 = 449
+    Number of processor patches = 2
+    Number of processor faces = 857
+    Number of boundary faces = 6374
+
+Processor 8
+    Number of cells = 17128
+    Number of points = 23407
+    Number of faces shared with processor 7 = 449
+    Number of faces shared with processor 9 = 521
+    Number of processor patches = 2
+    Number of processor faces = 970
+    Number of boundary faces = 6368
+
+Processor 9
+    Number of cells = 16915
+    Number of points = 23166
+    Number of faces shared with processor 3 = 508
+    Number of faces shared with processor 8 = 521
+    Number of processor patches = 2
+    Number of processor faces = 1029
+    Number of boundary faces = 6338
+
+Number of processor faces = 4296
+Max number of cells = 17195 (0.993786% above average 17025.8)
+Max number of processor patches = 2 (11.1111% above average 1.8)
+Max number of faces between processors = 1120 (30.3538% above average 859.2)
+
+Time = 0
+Using dynamicCode for patch freeSurface on field epsilon at line 32 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si/0/epsilon/boundaryField/freeSurface"
+
+Processor 0: field transfer
+Processor 1: field transfer
+Processor 2: field transfer
+Processor 3: field transfer
+Processor 4: field transfer
+Processor 5: field transfer
+Processor 6: field transfer
+Processor 7: field transfer
+Processor 8: field transfer
+Processor 9: field transfer
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : reconstructPar
+Date   : Jan 20 2025
+Time   : 15:28:05
+Host   : work
+PID    : 37303
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+
+
+Reconstructing fields
+region=region0
+
+Time = 100
+
+--> FOAM Warning : 
+    From int main(int, char**)
+    in file reconstructPar.C at line 369
+    readUpdate for the reconstructed mesh:2
+readUpdate for the processor meshes  :0
+These should be equal or your addressing might be incorrect. Please check your time directories for any mesh directories.
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+Using dynamicCode for patch freeSurface on field epsilon at line 18611 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si/processor0/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 18178 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si/processor1/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 18479 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si/processor2/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 18222 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si/processor3/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 18117 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si/processor4/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 18285 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si/processor5/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 18593 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si/processor6/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 18250 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si/processor7/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 18354 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si/processor8/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 18271 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si/processor9/100/epsilon/boundaryField/freeSurface"
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+Time = 200
+
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+Time = 300
+
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : postProcess -func sampleDict
+Date   : Jan 20 2025
+Time   : 15:28:11
+Host   : work
+PID    : 37304
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmprn4ch5si
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Sampled set:
+    point_a -> raw
+    point_b -> raw
+    point_c -> raw
+
+Time = 0
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 0.05
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 100
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 200
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 300
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+End
+
+100.74126249999998
+36.15734375
+121.6074875
+Inlet concentration updated to 0.00022654491336674526
+Inlet concentration updated to 0.00022654491336674526
+Inlet concentration updated to 0.00022654491336674526
+Inlet concentration updated to 0.00022654491336674526
+Wall roughness updated to 0.04200174459771595
+Wall roughness updated to 0.04200174459771595
+Wall roughness updated to 0.04200174459771595
+Max Cell Size updated to 0.12004542146485651
+Turbulence Constant updated to 0.9313542690296024
+Inlet Turbulent Viscosity updated to 0.007559674683523595
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : cartesianMesh
+Date   : Jan 20 2025
+Time   : 15:28:13
+Host   : work
+PID    : 37308
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Setting root cube size and refinement parameters
+Root box (-18.9816 -30.2316 -29.9616) (42.4816 31.2316 31.5016)
+Requested cell size corresponds to octree level 9
+Requested boundary cell size corresponds to octree level 10
+Refining boundary
+Refining boundary boxes to the given size
+Finished refining boundary boxes
+Refining boxes intersecting surface meshes
+Finished refinement of boxes intersecting surface meshes
+Refining boxes intersecting edge meshes
+Finished refinement of boxes intersecting edge meshes
+Performing automatic refinement
+Performing automatic refinement
+Marking inside/outside.
+Number of internal boxes is 12728
+Number of outside boxes is 49712
+Number of data boxes is 27728
+Number of unknown boxes is 0
+Refining boxes near DATA boxes
+Marking inside/outside.
+Number of internal boxes is 52978
+Number of outside boxes is 49712
+Number of data boxes is 27728
+Number of unknown boxes is 0
+Finished refining boxes near DATA boxes
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 101061
+Resizing points!
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating polyMesh
+Mesh has :
+73363 vertices 
+178370 faces
+52628 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking cells connected to surface vertices
+Found 26350 boundary faces 
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non - manifold surface edges
+Found 0 non - manifold edges
+Finished checking for non - manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 26350 boundary faces 
+Found 0 non - mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 26350 boundary faces 
+Marked 0 faces for decomposition
+Found 26350 boundary faces 
+Smoothing mesh surface before mapping.
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Finished smoothing mesh surface before mapping.
+Mapping vertices onto surface
+Finished mapping vertices onto surface
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 26350 boundary faces 
+Extracting edges
+Starting topological adjustment of patches
+No topological adjustment was needed
+Starting geometrical adjustment of patches
+Found 8 corners at the surface of the volume mesh
+Found 1708 edge points at the surface of the volume mesh
+12 edge groups found!
+No geometrical adjustment was needed
+Found 26350 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 1708 edge points at the surface of the volume mesh
+Performing patch correction
+Found 8 corners at the surface of the volume mesh
+Found 1708 edge points at the surface of the volume mesh
+Finished with patch correction
+Found 26406 boundary faces 
+Removing selected cells from the mesh
+New cells size 52574
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Adding new cells 
+Adding 380 cells to the mesh
+Finished adding cells to the mesh
+Reordering bnd faces
+Reordering boundary faces 
+Finished reordering boundary faces
+Finding bnd faces
+Found 26406 boundary faces 
+Mapping vertices with respect to surface patches
+Found 8 corners at the surface of the volume mesh
+Found 1708 edge points at the surface of the volume mesh
+12 edge groups found!
+Finished mapping vertices with respect to surface patches
+Found 26406 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 1708 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 26406 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 1708 edge points at the surface of the volume mesh
+Found 8 corners at the surface of the volume mesh
+Found 1708 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 28134 cells to the mesh
+Resizing cells!
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 29870 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 1732 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 29870 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 1732 edge points at the surface of the volume mesh
+Starting smoothing the mesh
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Finished smoothing the mesh
+Iteration 0. Number of bad faces is 0
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Found 29870 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 1732 edge points at the surface of the volume mesh
+Iteration 0. Number of bad faces is 0
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Renumbering the mesh
+Finished renumbering the mesh
+Renaming boundary patches
+Finished renaming boundary patches
+ExecutionTime = 61.64 s  ClockTime = 6 s
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : renumberMesh
+Date   : Jan 20 2025
+Time   : 15:28:19
+Host   : work
+PID    : 38186
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Mesh region0 size: 81088
+Before renumbering :
+    band           : 80913
+    profile        : 9.74429e+08
+
+Using default renumberMethod.
+
+Selecting renumberMethod CuthillMcKee
+
+Reading volScalarField: Conc01 Conc02 Conc03 Conc045 S_explicit01 S_explicit02 S_explicit03 S_explicit045 S_implicit eddyvisc epsilonUsing dynamicCode for patch freeSurface on field epsilon at line 32 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9/0/epsilon/boundaryField/freeSurface"
+ k kineticenergy nut p
+Reading volVectorField: U Umod01 Umod02 Umod03 Umod045
+
+After renumbering :
+    band           : 544
+    profile        : 3.70295e+07
+
+Writing mesh to "0.05"
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : decomposePar
+Date   : Jan 20 2025
+Time   : 15:28:20
+Host   : work
+PID    : 38187
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+
+
+Decomposing mesh
+
+Create mesh
+
+Calculating distribution of cells
+Decomposition method scotch [10] (region region0)
+
+Finished decomposition in 0.18 s
+
+Calculating original mesh data
+
+Distributing cells to processors
+
+Distributing faces to processors
+
+Distributing points to processors
+
+Constructing processor meshes
+
+Processor 0
+    Number of cells = 8033
+    Number of points = 10523
+    Number of faces shared with processor 1 = 149
+    Number of processor patches = 1
+    Number of processor faces = 149
+    Number of boundary faces = 4079
+
+Processor 1
+    Number of cells = 8027
+    Number of points = 10611
+    Number of faces shared with processor 0 = 149
+    Number of faces shared with processor 4 = 290
+    Number of processor patches = 2
+    Number of processor faces = 439
+    Number of boundary faces = 3269
+
+Processor 2
+    Number of cells = 8180
+    Number of points = 10759
+    Number of faces shared with processor 3 = 343
+    Number of faces shared with processor 6 = 333
+    Number of processor patches = 2
+    Number of processor faces = 676
+    Number of boundary faces = 2786
+
+Processor 3
+    Number of cells = 8189
+    Number of points = 10755
+    Number of faces shared with processor 2 = 343
+    Number of faces shared with processor 4 = 308
+    Number of processor patches = 2
+    Number of processor faces = 651
+    Number of boundary faces = 2798
+
+Processor 4
+    Number of cells = 8080
+    Number of points = 10583
+    Number of faces shared with processor 1 = 290
+    Number of faces shared with processor 3 = 308
+    Number of processor patches = 2
+    Number of processor faces = 598
+    Number of boundary faces = 2774
+
+Processor 5
+    Number of cells = 8037
+    Number of points = 10548
+    Number of faces shared with processor 6 = 307
+    Number of faces shared with processor 7 = 324
+    Number of processor patches = 2
+    Number of processor faces = 631
+    Number of boundary faces = 2746
+
+Processor 6
+    Number of cells = 8053
+    Number of points = 10573
+    Number of faces shared with processor 2 = 333
+    Number of faces shared with processor 5 = 307
+    Number of processor patches = 2
+    Number of processor faces = 640
+    Number of boundary faces = 2744
+
+Processor 7
+    Number of cells = 8176
+    Number of points = 10742
+    Number of faces shared with processor 5 = 324
+    Number of faces shared with processor 9 = 330
+    Number of processor patches = 2
+    Number of processor faces = 654
+    Number of boundary faces = 2786
+
+Processor 8
+    Number of cells = 8189
+    Number of points = 10763
+    Number of faces shared with processor 9 = 361
+    Number of processor patches = 1
+    Number of processor faces = 361
+    Number of boundary faces = 3122
+
+Processor 9
+    Number of cells = 8124
+    Number of points = 10692
+    Number of faces shared with processor 7 = 330
+    Number of faces shared with processor 8 = 361
+    Number of processor patches = 2
+    Number of processor faces = 691
+    Number of boundary faces = 2766
+
+Number of processor faces = 2745
+Max number of cells = 8189 (0.989049% above average 8108.8)
+Max number of processor patches = 2 (11.1111% above average 1.8)
+Max number of faces between processors = 691 (25.8652% above average 549)
+
+Time = 0
+Using dynamicCode for patch freeSurface on field epsilon at line 32 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9/0/epsilon/boundaryField/freeSurface"
+
+Processor 0: field transfer
+Processor 1: field transfer
+Processor 2: field transfer
+Processor 3: field transfer
+Processor 4: field transfer
+Processor 5: field transfer
+Processor 6: field transfer
+Processor 7: field transfer
+Processor 8: field transfer
+Processor 9: field transfer
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : reconstructPar
+Date   : Jan 20 2025
+Time   : 15:42:50
+Host   : work
+PID    : 38387
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+
+
+Reconstructing fields
+region=region0
+
+Time = 100
+
+--> FOAM Warning : 
+    From int main(int, char**)
+    in file reconstructPar.C at line 369
+    readUpdate for the reconstructed mesh:2
+readUpdate for the processor meshes  :0
+These should be equal or your addressing might be incorrect. Please check your time directories for any mesh directories.
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+Using dynamicCode for patch freeSurface on field epsilon at line 8877 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9/processor0/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 8683 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9/processor1/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 8764 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9/processor2/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 8782 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9/processor3/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 8716 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9/processor4/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 8641 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9/processor5/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 8688 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9/processor6/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 8834 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9/processor7/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 8739 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9/processor8/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 8746 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9/processor9/100/epsilon/boundaryField/freeSurface"
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+Time = 200
+
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+Time = 300
+
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : postProcess -func sampleDict
+Date   : Jan 20 2025
+Time   : 15:42:53
+Host   : work
+PID    : 38388
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp1515t2f9
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Sampled set:
+    point_a -> raw
+    point_b -> raw
+    point_c -> raw
+
+Time = 0
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 0.05
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 100
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 200
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 300
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+End
+
+47.50642500000001
+21.31479375
+58.419337500000005
+Inlet concentration updated to 0.0001115674769589193
+Inlet concentration updated to 0.0001115674769589193
+Inlet concentration updated to 0.0001115674769589193
+Inlet concentration updated to 0.0001115674769589193
+Wall roughness updated to 0.045623376135230743
+Wall roughness updated to 0.045623376135230743
+Wall roughness updated to 0.045623376135230743
+Max Cell Size updated to 0.18179494963004456
+Turbulence Constant updated to 1.9897841324270005
+Inlet Turbulent Viscosity updated to 0.04939825153563215
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : cartesianMesh
+Date   : Jan 20 2025
+Time   : 15:42:54
+Host   : work
+PID    : 38389
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Setting root cube size and refinement parameters
+Root box (-11.5198 -22.7698 -22.4998) (35.0198 23.7698 24.0398)
+Requested cell size corresponds to octree level 8
+Requested boundary cell size corresponds to octree level 10
+Refining boundary
+Refining boundary boxes to the given size
+Finished refining boundary boxes
+Refining boxes intersecting surface meshes
+Finished refinement of boxes intersecting surface meshes
+Refining boxes intersecting edge meshes
+Finished refinement of boxes intersecting edge meshes
+Performing automatic refinement
+Performing automatic refinement
+Marking inside/outside.
+Number of internal boxes is 41784
+Number of outside boxes is 62708
+Number of data boxes is 48662
+Number of unknown boxes is 0
+Refining boxes near DATA boxes
+Marking inside/outside.
+Number of internal boxes is 75552
+Number of outside boxes is 62708
+Number of data boxes is 48662
+Number of unknown boxes is 0
+Finished refining boxes near DATA boxes
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 165004
+Resizing points!
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating polyMesh
+Mesh has :
+116382 vertices 
+266021 faces
+74912 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking cells connected to surface vertices
+Found 47014 boundary faces 
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non - manifold surface edges
+Found 0 non - manifold edges
+Finished checking for non - manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 47014 boundary faces 
+Found 0 non - mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 47014 boundary faces 
+Marked 0 faces for decomposition
+Found 47014 boundary faces 
+Smoothing mesh surface before mapping.
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Finished smoothing mesh surface before mapping.
+Mapping vertices onto surface
+Finished mapping vertices onto surface
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 47014 boundary faces 
+Extracting edges
+Starting topological adjustment of patches
+No topological adjustment was needed
+Starting geometrical adjustment of patches
+Found 8 corners at the surface of the volume mesh
+Found 2268 edge points at the surface of the volume mesh
+12 edge groups found!
+No geometrical adjustment was needed
+Found 47014 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2268 edge points at the surface of the volume mesh
+Performing patch correction
+Found 8 corners at the surface of the volume mesh
+Found 2268 edge points at the surface of the volume mesh
+Finished with patch correction
+Found 47090 boundary faces 
+Removing selected cells from the mesh
+New cells size 74840
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Adding new cells 
+Adding 508 cells to the mesh
+Finished adding cells to the mesh
+Reordering bnd faces
+Reordering boundary faces 
+Finished reordering boundary faces
+Finding bnd faces
+Found 47090 boundary faces 
+Mapping vertices with respect to surface patches
+Found 8 corners at the surface of the volume mesh
+Found 2268 edge points at the surface of the volume mesh
+12 edge groups found!
+Finished mapping vertices with respect to surface patches
+Found 47090 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2268 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 47090 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2268 edge points at the surface of the volume mesh
+Found 8 corners at the surface of the volume mesh
+Found 2268 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 49378 cells to the mesh
+Resizing cells!
+Resizing faces!
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 51674 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2292 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 51674 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2292 edge points at the surface of the volume mesh
+Starting smoothing the mesh
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Finished smoothing the mesh
+Iteration 0. Number of bad faces is 0
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Found 51674 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2292 edge points at the surface of the volume mesh
+Iteration 0. Number of bad faces is 0
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Renumbering the mesh
+Finished renumbering the mesh
+Renaming boundary patches
+Finished renaming boundary patches
+ExecutionTime = 69.08 s  ClockTime = 7 s
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : renumberMesh
+Date   : Jan 20 2025
+Time   : 15:43:01
+Host   : work
+PID    : 39266
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Mesh region0 size: 124726
+Before renumbering :
+    band           : 124469
+    profile        : 2.34015e+09
+
+Using default renumberMethod.
+
+Selecting renumberMethod CuthillMcKee
+
+Reading volScalarField: Conc01 Conc02 Conc03 Conc045 S_explicit01 S_explicit02 S_explicit03 S_explicit045 S_implicit eddyvisc epsilonUsing dynamicCode for patch freeSurface on field epsilon at line 32 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod/0/epsilon/boundaryField/freeSurface"
+ k kineticenergy nut p
+Reading volVectorField: U Umod01 Umod02 Umod03 Umod045
+
+After renumbering :
+    band           : 1467
+    profile        : 1.2789e+08
+
+Writing mesh to "0.05"
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : decomposePar
+Date   : Jan 20 2025
+Time   : 15:43:02
+Host   : work
+PID    : 39267
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+
+
+Decomposing mesh
+
+Create mesh
+
+Calculating distribution of cells
+Decomposition method scotch [10] (region region0)
+
+Finished decomposition in 0.27 s
+
+Calculating original mesh data
+
+Distributing cells to processors
+
+Distributing faces to processors
+
+Distributing points to processors
+
+Constructing processor meshes
+
+Processor 0
+    Number of cells = 12396
+    Number of points = 17314
+    Number of faces shared with processor 1 = 380
+    Number of faces shared with processor 5 = 377
+    Number of processor patches = 2
+    Number of processor faces = 757
+    Number of boundary faces = 5068
+
+Processor 1
+    Number of cells = 12596
+    Number of points = 17592
+    Number of faces shared with processor 0 = 380
+    Number of faces shared with processor 4 = 382
+    Number of processor patches = 2
+    Number of processor faces = 762
+    Number of boundary faces = 5139
+
+Processor 2
+    Number of cells = 12468
+    Number of points = 16652
+    Number of faces shared with processor 3 = 196
+    Number of processor patches = 1
+    Number of processor faces = 196
+    Number of boundary faces = 6000
+
+Processor 3
+    Number of cells = 12551
+    Number of points = 16919
+    Number of faces shared with processor 2 = 196
+    Number of faces shared with processor 4 = 411
+    Number of processor patches = 2
+    Number of processor faces = 607
+    Number of boundary faces = 5098
+
+Processor 4
+    Number of cells = 12459
+    Number of points = 17103
+    Number of faces shared with processor 1 = 382
+    Number of faces shared with processor 3 = 411
+    Number of processor patches = 2
+    Number of processor faces = 793
+    Number of boundary faces = 4849
+
+Processor 5
+    Number of cells = 12506
+    Number of points = 17485
+    Number of faces shared with processor 0 = 377
+    Number of faces shared with processor 6 = 407
+    Number of processor patches = 2
+    Number of processor faces = 784
+    Number of boundary faces = 5099
+
+Processor 6
+    Number of cells = 12436
+    Number of points = 17397
+    Number of faces shared with processor 5 = 407
+    Number of faces shared with processor 8 = 393
+    Number of processor patches = 2
+    Number of processor faces = 800
+    Number of boundary faces = 5086
+
+Processor 7
+    Number of cells = 12511
+    Number of points = 17101
+    Number of faces shared with processor 9 = 370
+    Number of processor patches = 1
+    Number of processor faces = 370
+    Number of boundary faces = 5200
+
+Processor 8
+    Number of cells = 12405
+    Number of points = 17338
+    Number of faces shared with processor 6 = 393
+    Number of faces shared with processor 9 = 382
+    Number of processor patches = 2
+    Number of processor faces = 775
+    Number of boundary faces = 5057
+
+Processor 9
+    Number of cells = 12398
+    Number of points = 17336
+    Number of faces shared with processor 7 = 370
+    Number of faces shared with processor 8 = 382
+    Number of processor patches = 2
+    Number of processor faces = 752
+    Number of boundary faces = 5078
+
+Number of processor faces = 3298
+Max number of cells = 12596 (0.989369% above average 12472.6)
+Max number of processor patches = 2 (11.1111% above average 1.8)
+Max number of faces between processors = 800 (21.2856% above average 659.6)
+
+Time = 0
+Using dynamicCode for patch freeSurface on field epsilon at line 32 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod/0/epsilon/boundaryField/freeSurface"
+
+Processor 0: field transfer
+Processor 1: field transfer
+Processor 2: field transfer
+Processor 3: field transfer
+Processor 4: field transfer
+Processor 5: field transfer
+Processor 6: field transfer
+Processor 7: field transfer
+Processor 8: field transfer
+Processor 9: field transfer
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : reconstructPar
+Date   : Jan 20 2025
+Time   : 16:07:53
+Host   : work
+PID    : 39548
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+
+
+Reconstructing fields
+region=region0
+
+Time = 100
+
+--> FOAM Warning : 
+    From int main(int, char**)
+    in file reconstructPar.C at line 369
+    readUpdate for the reconstructed mesh:2
+readUpdate for the processor meshes  :0
+These should be equal or your addressing might be incorrect. Please check your time directories for any mesh directories.
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+Using dynamicCode for patch freeSurface on field epsilon at line 13504 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod/processor0/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 13707 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod/processor1/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 13702 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod/processor2/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 13560 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod/processor3/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 13523 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod/processor4/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 13534 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod/processor5/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 13516 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod/processor6/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 13453 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod/processor7/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 13517 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod/processor8/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 13532 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod/processor9/100/epsilon/boundaryField/freeSurface"
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+Time = 200
+
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+Time = 300
+
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : postProcess -func sampleDict
+Date   : Jan 20 2025
+Time   : 16:07:57
+Host   : work
+PID    : 39549
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp2n62dpod
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Sampled set:
+    point_a -> raw
+    point_b -> raw
+    point_c -> raw
+
+Time = 0
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 0.05
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 100
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 200
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 300
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+End
+
+133.50328125000001
+60.9302875
+48.79143625
+Inlet concentration updated to 0.00043909070394349366
+Inlet concentration updated to 0.00043909070394349366
+Inlet concentration updated to 0.00043909070394349366
+Inlet concentration updated to 0.00043909070394349366
+Wall roughness updated to 0.015464885974231506
+Wall roughness updated to 0.015464885974231506
+Wall roughness updated to 0.015464885974231506
+Max Cell Size updated to 0.09602110448628438
+Turbulence Constant updated to 0.3917489496472162
+Inlet Turbulent Viscosity updated to 0.03765417599674741
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : cartesianMesh
+Date   : Jan 20 2025
+Time   : 16:07:59
+Host   : work
+PID    : 39550
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Setting root cube size and refinement parameters
+Root box (-12.8314 -24.0814 -23.8114) (36.3314 25.0814 25.3514)
+Requested cell size corresponds to octree level 9
+Requested boundary cell size corresponds to octree level 10
+Refining boundary
+Refining boundary boxes to the given size
+Finished refining boundary boxes
+Refining boxes intersecting surface meshes
+Finished refinement of boxes intersecting surface meshes
+Refining boxes intersecting edge meshes
+Finished refinement of boxes intersecting edge meshes
+Performing automatic refinement
+Performing automatic refinement
+Marking inside/outside.
+Number of internal boxes is 20260
+Number of outside boxes is 78814
+Number of data boxes is 44686
+Number of unknown boxes is 0
+Refining boxes near DATA boxes
+Marking inside/outside.
+Number of internal boxes is 94502
+Number of outside boxes is 78814
+Number of data boxes is 44686
+Number of unknown boxes is 0
+Finished refining boxes near DATA boxes
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 173646
+Resizing points!
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating polyMesh
+Mesh has :
+128997 vertices 
+316580 faces
+93930 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking cells connected to surface vertices
+Found 43090 boundary faces 
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non - manifold surface edges
+Found 0 non - manifold edges
+Finished checking for non - manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 43090 boundary faces 
+Found 0 non - mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 43090 boundary faces 
+Marked 0 faces for decomposition
+Found 43090 boundary faces 
+Smoothing mesh surface before mapping.
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Finished smoothing mesh surface before mapping.
+Mapping vertices onto surface
+Finished mapping vertices onto surface
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 43090 boundary faces 
+Extracting edges
+Starting topological adjustment of patches
+No topological adjustment was needed
+Starting geometrical adjustment of patches
+Found 8 corners at the surface of the volume mesh
+Found 2148 edge points at the surface of the volume mesh
+12 edge groups found!
+No geometrical adjustment was needed
+Found 43090 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2148 edge points at the surface of the volume mesh
+Performing patch correction
+Found 8 corners at the surface of the volume mesh
+Found 2148 edge points at the surface of the volume mesh
+Finished with patch correction
+Found 43160 boundary faces 
+Removing selected cells from the mesh
+New cells size 93862
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Adding new cells 
+Adding 478 cells to the mesh
+Finished adding cells to the mesh
+Reordering bnd faces
+Reordering boundary faces 
+Finished reordering boundary faces
+Finding bnd faces
+Found 43160 boundary faces 
+Mapping vertices with respect to surface patches
+Found 8 corners at the surface of the volume mesh
+Found 2148 edge points at the surface of the volume mesh
+12 edge groups found!
+Finished mapping vertices with respect to surface patches
+Found 43160 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2148 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 43160 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2148 edge points at the surface of the volume mesh
+Found 8 corners at the surface of the volume mesh
+Found 2148 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 45328 cells to the mesh
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 47504 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2172 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 47504 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2172 edge points at the surface of the volume mesh
+Starting smoothing the mesh
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Finished smoothing the mesh
+Iteration 0. Number of bad faces is 0
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Found 47504 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 2172 edge points at the surface of the volume mesh
+Iteration 0. Number of bad faces is 0
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Renumbering the mesh
+Finished renumbering the mesh
+Renaming boundary patches
+Finished renaming boundary patches
+ExecutionTime = 65.89 s  ClockTime = 7 s
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : renumberMesh
+Date   : Jan 20 2025
+Time   : 16:08:06
+Host   : work
+PID    : 40426
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Mesh region0 size: 139668
+Before renumbering :
+    band           : 138509
+    profile        : 2.65234e+09
+
+Using default renumberMethod.
+
+Selecting renumberMethod CuthillMcKee
+
+Reading volScalarField: Conc01 Conc02 Conc03 Conc045 S_explicit01 S_explicit02 S_explicit03 S_explicit045 S_implicit eddyvisc epsilonUsing dynamicCode for patch freeSurface on field epsilon at line 32 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu/0/epsilon/boundaryField/freeSurface"
+ k kineticenergy nut p
+Reading volVectorField: U Umod01 Umod02 Umod03 Umod045
+
+After renumbering :
+    band           : 765
+    profile        : 8.84724e+07
+
+Writing mesh to "0.05"
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : decomposePar
+Date   : Jan 20 2025
+Time   : 16:08:07
+Host   : work
+PID    : 40427
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+
+
+Decomposing mesh
+
+Create mesh
+
+Calculating distribution of cells
+Decomposition method scotch [10] (region region0)
+
+Finished decomposition in 0.28 s
+
+Calculating original mesh data
+
+Distributing cells to processors
+
+Distributing faces to processors
+
+Distributing points to processors
+
+Constructing processor meshes
+
+Processor 0
+    Number of cells = 14019
+    Number of points = 18010
+    Number of faces shared with processor 1 = 518
+    Number of processor patches = 1
+    Number of processor faces = 518
+    Number of boundary faces = 4776
+
+Processor 1
+    Number of cells = 13827
+    Number of points = 17900
+    Number of faces shared with processor 0 = 518
+    Number of faces shared with processor 4 = 482
+    Number of processor patches = 2
+    Number of processor faces = 1000
+    Number of boundary faces = 4364
+
+Processor 2
+    Number of cells = 13827
+    Number of points = 17875
+    Number of faces shared with processor 3 = 524
+    Number of faces shared with processor 5 = 446
+    Number of processor patches = 2
+    Number of processor faces = 970
+    Number of boundary faces = 4349
+
+Processor 3
+    Number of cells = 13966
+    Number of points = 18080
+    Number of faces shared with processor 2 = 524
+    Number of faces shared with processor 4 = 488
+    Number of processor patches = 2
+    Number of processor faces = 1012
+    Number of boundary faces = 4413
+
+Processor 4
+    Number of cells = 13882
+    Number of points = 17943
+    Number of faces shared with processor 1 = 482
+    Number of faces shared with processor 3 = 488
+    Number of processor patches = 2
+    Number of processor faces = 970
+    Number of boundary faces = 4356
+
+Processor 5
+    Number of cells = 14022
+    Number of points = 18116
+    Number of faces shared with processor 2 = 446
+    Number of faces shared with processor 6 = 521
+    Number of processor patches = 2
+    Number of processor faces = 967
+    Number of boundary faces = 4398
+
+Processor 6
+    Number of cells = 13966
+    Number of points = 18050
+    Number of faces shared with processor 5 = 521
+    Number of faces shared with processor 9 = 451
+    Number of processor patches = 2
+    Number of processor faces = 972
+    Number of boundary faces = 4400
+
+Processor 7
+    Number of cells = 14030
+    Number of points = 18882
+    Number of faces shared with processor 8 = 260
+    Number of processor patches = 1
+    Number of processor faces = 260
+    Number of boundary faces = 6748
+
+Processor 8
+    Number of cells = 14038
+    Number of points = 18427
+    Number of faces shared with processor 7 = 260
+    Number of faces shared with processor 9 = 527
+    Number of processor patches = 2
+    Number of processor faces = 787
+    Number of boundary faces = 5244
+
+Processor 9
+    Number of cells = 14091
+    Number of points = 18226
+    Number of faces shared with processor 6 = 451
+    Number of faces shared with processor 8 = 527
+    Number of processor patches = 2
+    Number of processor faces = 978
+    Number of boundary faces = 4456
+
+Number of processor faces = 4217
+Max number of cells = 14091 (0.889252% above average 13966.8)
+Max number of processor patches = 2 (11.1111% above average 1.8)
+Max number of faces between processors = 1012 (19.9905% above average 843.4)
+
+Time = 0
+Using dynamicCode for patch freeSurface on field epsilon at line 32 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu/0/epsilon/boundaryField/freeSurface"
+
+Processor 0: field transfer
+Processor 1: field transfer
+Processor 2: field transfer
+Processor 3: field transfer
+Processor 4: field transfer
+Processor 5: field transfer
+Processor 6: field transfer
+Processor 7: field transfer
+Processor 8: field transfer
+Processor 9: field transfer
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : reconstructPar
+Date   : Jan 20 2025
+Time   : 16:37:33
+Host   : work
+PID    : 40817
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+
+
+Reconstructing fields
+region=region0
+
+Time = 100
+
+--> FOAM Warning : 
+    From int main(int, char**)
+    in file reconstructPar.C at line 369
+    readUpdate for the reconstructed mesh:2
+readUpdate for the processor meshes  :0
+These should be equal or your addressing might be incorrect. Please check your time directories for any mesh directories.
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+Using dynamicCode for patch freeSurface on field epsilon at line 14953 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu/processor0/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 14645 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu/processor1/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 14633 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu/processor2/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 15007 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu/processor3/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 14715 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu/processor4/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 14890 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu/processor5/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 14950 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu/processor6/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 15306 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu/processor7/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 15042 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu/processor8/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 15079 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu/processor9/100/epsilon/boundaryField/freeSurface"
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+Time = 200
+
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+Time = 300
+
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : postProcess -func sampleDict
+Date   : Jan 20 2025
+Time   : 16:37:38
+Host   : work
+PID    : 40818
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmp9kuadupu
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Sampled set:
+    point_a -> raw
+    point_b -> raw
+    point_c -> raw
+
+Time = 0
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 0.05
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 100
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 200
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 300
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+End
+
+141.05033749999996
+55.3736625
+72.153948125
+Inlet concentration updated to 0.00036554021727054945
+Inlet concentration updated to 0.00036554021727054945
+Inlet concentration updated to 0.00036554021727054945
+Inlet concentration updated to 0.00036554021727054945
+Wall roughness updated to 0.07015564524373374
+Wall roughness updated to 0.07015564524373374
+Wall roughness updated to 0.07015564524373374
+Max Cell Size updated to 0.06534173001883359
+Turbulence Constant updated to 1.24438485138795
+Inlet Turbulent Viscosity updated to 0.07408323694235387
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : cartesianMesh
+Date   : Jan 20 2025
+Time   : 16:37:39
+Host   : work
+PID    : 40819
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Setting root cube size and refinement parameters
+Root box (-21.705 -32.955 -32.685) (45.205 33.955 34.225)
+Requested cell size corresponds to octree level 10
+Requested boundary cell size corresponds to octree level 10
+Refining boundary
+Refining boundary boxes to the given size
+Finished refining boundary boxes
+Refining boxes intersecting surface meshes
+Finished refinement of boxes intersecting surface meshes
+Refining boxes intersecting edge meshes
+Finished refinement of boxes intersecting edge meshes
+Performing automatic refinement
+Performing automatic refinement
+Marking inside/outside.
+Number of internal boxes is 23120
+Number of outside boxes is 28404
+Number of data boxes is 23118
+Number of unknown boxes is 0
+Refining boxes near DATA boxes
+Marking inside/outside.
+Number of internal boxes is 83166
+Number of outside boxes is 28404
+Number of data boxes is 23118
+Number of unknown boxes is 0
+Finished refining boxes near DATA boxes
+Extracting polyMesh
+Creating octree vertices
+Octree nodes 117279
+Resizing points!
+Finished creating octree vertices
+Creating polyMesh from octree
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating polyMesh
+Mesh has :
+94188 vertices 
+259565 faces
+82886 cells
+Finished extracting polyMesh
+Checking for irregular surface connections
+Checking cells connected to surface vertices
+Found 21814 boundary faces 
+Found 0 problematic vertices
+Finished checking cells connected to surface vertices
+Checking for non - manifold surface edges
+Found 0 non - manifold edges
+Finished checking for non - manifold surface edges
+Checking faces connections to surface vertices
+Found 0 invalid connections
+Finished checking faces connections to surface vertices
+Finished checking for irregular surface connections
+Found 21814 boundary faces 
+Found 0 non - mappable cells
+Checking cell connections
+Finished checking cell connections
+Found 21814 boundary faces 
+Marked 0 faces for decomposition
+Found 21814 boundary faces 
+Smoothing mesh surface before mapping.
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Finished smoothing mesh surface before mapping.
+Mapping vertices onto surface
+Finished mapping vertices onto surface
+Found 0 corners at the surface of the volume mesh
+Found 0 edge points at the surface of the volume mesh
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 21814 boundary faces 
+Extracting edges
+Starting topological adjustment of patches
+No topological adjustment was needed
+Starting geometrical adjustment of patches
+Found 8 corners at the surface of the volume mesh
+Found 1564 edge points at the surface of the volume mesh
+12 edge groups found!
+No geometrical adjustment was needed
+Found 21814 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 1564 edge points at the surface of the volume mesh
+Performing patch correction
+Found 8 corners at the surface of the volume mesh
+Found 1564 edge points at the surface of the volume mesh
+Finished with patch correction
+Found 21864 boundary faces 
+Removing selected cells from the mesh
+New cells size 82836
+Reordering boundary faces 
+Finished reordering boundary faces
+Removing faces
+Finished removing faces
+Finished removing selected cells from the mesh
+Adding new cells 
+Adding 350 cells to the mesh
+Finished adding cells to the mesh
+Reordering bnd faces
+Reordering boundary faces 
+Finished reordering boundary faces
+Finding bnd faces
+Found 21864 boundary faces 
+Mapping vertices with respect to surface patches
+Found 8 corners at the surface of the volume mesh
+Found 1564 edge points at the surface of the volume mesh
+12 edge groups found!
+Finished mapping vertices with respect to surface patches
+Found 21864 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 1564 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 21864 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 1564 edge points at the surface of the volume mesh
+Found 8 corners at the surface of the volume mesh
+Found 1564 edge points at the surface of the volume mesh
+Starting creating layer cells
+Adding 23448 cells to the mesh
+Finished adding cells to the mesh
+Reordering boundary faces 
+Finished reordering boundary faces
+Finished creating layer cells
+Found 25040 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 1588 edge points at the surface of the volume mesh
+Optimizing edges. Iteration:.....
+Optimizing surface vertices. Iteration:.....
+Starting untangling the surface of the volume mesh
+Number of inverted boundary faces is 0
+Finished untangling the surface of the volume mesh
+Found 25040 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 1588 edge points at the surface of the volume mesh
+Starting smoothing the mesh
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Finished smoothing the mesh
+Iteration 0. Number of bad faces is 0
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Found 25040 boundary faces 
+Found 8 corners at the surface of the volume mesh
+Found 1588 edge points at the surface of the volume mesh
+Iteration 0. Number of bad faces is 0
+Starting untangling the mesh
+Iteration 0. Number of bad faces is 0
+Finished untangling the mesh
+Renumbering the mesh
+Finished renumbering the mesh
+Renaming boundary patches
+Finished renaming boundary patches
+ExecutionTime = 52.86 s  ClockTime = 6 s
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : renumberMesh
+Date   : Jan 20 2025
+Time   : 16:37:45
+Host   : work
+PID    : 41695
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Mesh region0 size: 106634
+Before renumbering :
+    band           : 105726
+    profile        : 1.11077e+09
+
+Using default renumberMethod.
+
+Selecting renumberMethod CuthillMcKee
+
+Reading volScalarField: Conc01 Conc02 Conc03 Conc045 S_explicit01 S_explicit02 S_explicit03 S_explicit045 S_implicit eddyvisc epsilonUsing dynamicCode for patch freeSurface on field epsilon at line 32 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg/0/epsilon/boundaryField/freeSurface"
+ k kineticenergy nut p
+Reading volVectorField: U Umod01 Umod02 Umod03 Umod045
+
+After renumbering :
+    band           : 402
+    profile        : 3.79401e+07
+
+Writing mesh to "0.05"
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : decomposePar
+Date   : Jan 20 2025
+Time   : 16:37:45
+Host   : work
+PID    : 41696
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+
+
+Decomposing mesh
+
+Create mesh
+
+Calculating distribution of cells
+Decomposition method scotch [10] (region region0)
+
+Finished decomposition in 0.23 s
+
+Calculating original mesh data
+
+Distributing cells to processors
+
+Distributing faces to processors
+
+Distributing points to processors
+
+Constructing processor meshes
+
+Processor 0
+    Number of cells = 10566
+    Number of points = 12099
+    Number of faces shared with processor 1 = 252
+    Number of faces shared with processor 2 = 400
+    Number of processor patches = 2
+    Number of processor faces = 652
+    Number of boundary faces = 2476
+
+Processor 1
+    Number of cells = 10612
+    Number of points = 12845
+    Number of faces shared with processor 0 = 252
+    Number of processor patches = 1
+    Number of processor faces = 252
+    Number of boundary faces = 4378
+
+Processor 2
+    Number of cells = 10576
+    Number of points = 12138
+    Number of faces shared with processor 0 = 400
+    Number of faces shared with processor 3 = 384
+    Number of processor patches = 2
+    Number of processor faces = 784
+    Number of boundary faces = 2202
+
+Processor 3
+    Number of cells = 10752
+    Number of points = 12325
+    Number of faces shared with processor 2 = 384
+    Number of faces shared with processor 4 = 384
+    Number of processor patches = 2
+    Number of processor faces = 768
+    Number of boundary faces = 2240
+
+Processor 4
+    Number of cells = 10752
+    Number of points = 12325
+    Number of faces shared with processor 3 = 384
+    Number of faces shared with processor 6 = 384
+    Number of processor patches = 2
+    Number of processor faces = 768
+    Number of boundary faces = 2240
+
+Processor 5
+    Number of cells = 10640
+    Number of points = 12223
+    Number of faces shared with processor 6 = 416
+    Number of faces shared with processor 7 = 400
+    Number of processor patches = 2
+    Number of processor faces = 816
+    Number of boundary faces = 2210
+
+Processor 6
+    Number of cells = 10656
+    Number of points = 12240
+    Number of faces shared with processor 4 = 384
+    Number of faces shared with processor 5 = 416
+    Number of processor patches = 2
+    Number of processor faces = 800
+    Number of boundary faces = 2228
+
+Processor 7
+    Number of cells = 10624
+    Number of points = 12223
+    Number of faces shared with processor 5 = 400
+    Number of faces shared with processor 8 = 448
+    Number of processor patches = 2
+    Number of processor faces = 848
+    Number of boundary faces = 2208
+
+Processor 8
+    Number of cells = 10704
+    Number of points = 12308
+    Number of faces shared with processor 7 = 448
+    Number of faces shared with processor 9 = 384
+    Number of processor patches = 2
+    Number of processor faces = 832
+    Number of boundary faces = 2234
+
+Processor 9
+    Number of cells = 10752
+    Number of points = 12325
+    Number of faces shared with processor 8 = 384
+    Number of processor patches = 1
+    Number of processor faces = 384
+    Number of boundary faces = 2624
+
+Number of processor faces = 3452
+Max number of cells = 10752 (0.830879% above average 10663.4)
+Max number of processor patches = 2 (11.1111% above average 1.8)
+Max number of faces between processors = 848 (22.8273% above average 690.4)
+
+Time = 0
+Using dynamicCode for patch freeSurface on field epsilon at line 32 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg/0/epsilon/boundaryField/freeSurface"
+
+Processor 0: field transfer
+Processor 1: field transfer
+Processor 2: field transfer
+Processor 3: field transfer
+Processor 4: field transfer
+Processor 5: field transfer
+Processor 6: field transfer
+Processor 7: field transfer
+Processor 8: field transfer
+Processor 9: field transfer
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : reconstructPar
+Date   : Jan 20 2025
+Time   : 16:56:52
+Host   : work
+PID    : 41946
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+
+
+Reconstructing fields
+region=region0
+
+Time = 100
+
+--> FOAM Warning : 
+    From int main(int, char**)
+    in file reconstructPar.C at line 369
+    readUpdate for the reconstructed mesh:2
+readUpdate for the processor meshes  :0
+These should be equal or your addressing might be incorrect. Please check your time directories for any mesh directories.
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+Using dynamicCode for patch freeSurface on field epsilon at line 11100 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg/processor0/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 11518 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg/processor1/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 11054 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg/processor2/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 11246 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg/processor3/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 11246 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg/processor4/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 11150 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg/processor5/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 11134 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg/processor6/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 11134 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg/processor7/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 11166 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg/processor8/100/epsilon/boundaryField/freeSurface"
+Using dynamicCode for patch freeSurface on field epsilon at line 11246 in "/home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg/processor9/100/epsilon/boundaryField/freeSurface"
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+Time = 200
+
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+Time = 300
+
+Reconstructing FV fields
+
+    Reconstructing volScalarFields
+
+        Conc01
+        Conc02
+        Conc03
+        Conc045
+        eddyvisc
+        epsilon
+        k
+        kineticenergy
+        nut
+        p
+
+    Reconstructing volVectorFields
+
+        U
+
+    Reconstructing surfaceScalarFields
+
+        phi
+
+Reconstructing point fields
+
+No point fields
+
+No lagrangian fields
+
+No FA fields
+
+
+End
+
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _e651d635-20240208 OPENFOAM=2312 patch=240220 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : postProcess -func sampleDict
+Date   : Jan 20 2025
+Time   : 16:56:56
+Host   : work
+PID    : 41947
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /home/bm424/Projects/MOOptimisers/tempDirs/tmph4nd0rjg
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Sampled set:
+    point_a -> raw
+    point_b -> raw
+    point_c -> raw
+
+Time = 0
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 0.05
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 100
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 200
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+Time = 300
+
+Reading fields:
+    volScalarField: Conc01 Conc02 Conc03 Conc045
+
+Executing functionObjects
+
+End
+
+86.5700875
+41.091212500000005
+71.36274374999999
+Initial Population:
+[[2.71774478e-04 1.06624662e-02 1.61572910e-01 7.88754700e-01
+  8.49862317e-02]
+ [2.26544913e-04 4.20017446e-02 1.20045421e-01 9.31354269e-01
+  7.55967468e-03]
+ [1.11567477e-04 4.56233761e-02 1.81794950e-01 1.98978413e+00
+  4.93982515e-02]
+ [4.39090704e-04 1.54648860e-02 9.60211045e-02 3.91748950e-01
+  3.76541760e-02]
+ [3.65540217e-04 7.01556452e-02 6.53417300e-02 1.24438485e+00
+  7.40832369e-02]]
+HypI
+Traceback (most recent call last):
+  File "/home/bm424/Projects/MOOptimisers/sandTrapRun.py", line 92, in <module>
+    LSADE.optimizerStep()
+  File "/home/bm424/Projects/MOOptimisers/optimiserBank.py", line 1413, in optimizerStep
+    GPModel = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="max")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bm424/Projects/MOOptimisers/optimiserBank.py", line 171, in GPTrain
+    model = ExactGPModel(tensorSamplesXY, tensorSamplesZ, likelihood, meanPrior)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bm424/Projects/MOOptimisers/optimiserBank.py", line 152, in __init__
+    self.mean_module.constant.data = torch.max(train_y).clone().detach()
+                                     ^^^^^^^^^^^^^^^^^^
+RuntimeError: max(): Expected reduction dim to be specified for input.numel() == 0. Specify the reduction dim with the 'dim' argument.
