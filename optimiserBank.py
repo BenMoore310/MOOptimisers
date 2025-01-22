@@ -2456,7 +2456,7 @@ class bayesianOptimiser:
 
             # localBounds = [(x_min, x_max), (y_min, y_max)]
 
-            bounds = [(np.min(bestFeatures[:, d]), np.max(bestFeatures[:, d])) for d in range(bestFeatures.shape[1])]
+            localBounds = [(np.min(bestFeatures[:, d]), np.max(bestFeatures[:, d])) for d in range(bestFeatures.shape[1])]
 
             # pairwiseDistancesLocal = np.linalg.norm(bestFeatures[:, np.newaxis] - bestFeatures, axis=2)
             # avgDistanceLocal = np.mean(pairwiseDistancesLocal)
