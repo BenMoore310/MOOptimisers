@@ -2568,3 +2568,245 @@ class bayesianOptimiser:
             np.savetxt("BOObjectiveTargets.txt", self.objectiveTargets)
 
             iteration += 1
+
+
+
+
+class BOZeroMax:
+    def __init__(
+        self,
+        bounds,
+        pop_size,
+        objFunction,
+        scalarisingFunction,
+        nObjectives,
+        weights,
+        useInitialPopulation,
+        initialPopulation,
+        initialObjvValues,
+    ):
+        self.globalBounds = np.array(bounds)
+        self.dimensions = len(bounds)
+        self.feFeatures = np.empty((0, self.dimensions))
+        self.pop_size = pop_size
+        self.nObjectives = nObjectives
+        self.objectiveTargets = np.empty((0, self.nObjectives))
+        self.scalarisedTargets = np.empty(0)
+        self.x_bestSolution = 0
+        self.bestEI = 100
+        self.objFunction = objFunction
+
+        self.scalarisingFunction = scalarisingFunction
+        self.zbests = np.empty((0))
+        self.weights = weights
+        if useInitialPopulation == True:
+            self.population = initialPopulation
+            self.objectiveTargets = initialObjvValues
+        else:
+            self.population = self.initialisePopulation()
+            self.evaluateInitialPopulation()
+        self.scalariseInitialPopulation()
+
+    def initialiseDatabase(self):
+        sampler = qmc.LatinHypercube(d=self.dimensions)
+        sample = sampler.random(n=self.pop_size)
+        population = qmc.scale(sample, self.globalBounds[:, 0], self.globalBounds[:, 1])
+
+        return population
+
+    def evaluateInitialPopulation(self):
+
+        for i in range(0, len(self.population)):
+            newObjectiveTargets = MOobjective_function(
+                self.population[i], self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
+
+    def scalariseInitialPopulation(self):
+
+        for i in range(0, len(self.population)):
+            # newObjectiveTargets = MOobjective_function(
+            #     self.population[i], self.objFunction, self.nObjectives
+            # )
+            # self.objectiveTargets = np.vstack(
+            #     (self.objectiveTargets, newObjectiveTargets)
+            # )
+            self.feFeatures = np.vstack((self.feFeatures, self.population[i]))
+
+        # find minimum in boths columns - new zbest values
+
+        self.zbests = np.min(self.objectiveTargets, axis=0)
+
+        self.scalarisedTargets = scalariseValues(
+            self.scalarisingFunction,
+            self.objectiveTargets,
+            self.zbests,
+            self.weights,
+            0,
+            100,
+        )
+        self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+        )
+
+        # for i in range(len(self.objectiveTargets)):
+        #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
+
+        # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.feTargets)
+        # plt.title('Initial Population')
+        # plt.colorbar()
+        # plt.show()
+
+    def runOptimiser(self):
+        iteration = 0
+
+        # while self.bestEI > 1e-7:
+        while iteration < 40:
+            best_idx = np.argmin(self.scalarisedTargets)
+            bestFeature = self.feFeatures[best_idx]
+            bestTarget = self.scalarisedTargets[best_idx]
+            # print(bestTarget)
+
+            numSolutions = self.pop_size
+
+            bestFeatures = np.empty((numSolutions, self.nObjectives))
+            bestTargets = np.empty(numSolutions)
+
+            # find c best solutions
+            bestIndices = np.argsort(self.scalarisedTargets)[:numSolutions]
+
+            for i in range(numSolutions):
+                bestFeatures[i] = self.feFeatures[bestIndices[i]]
+                bestTargets[i] = self.scalarisedTargets[bestIndices[i]]
+
+            # x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
+            # y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
+
+            # localBounds = [(x_min, x_max), (y_min, y_max)]
+
+            localBounds = [(np.min(bestFeatures[:, d]), np.max(bestFeatures[:, d])) for d in range(bestFeatures.shape[1])]
+
+            # pairwiseDistancesLocal = np.linalg.norm(bestFeatures[:, np.newaxis] - bestFeatures, axis=2)
+            # avgDistanceLocal = np.mean(pairwiseDistancesLocal)
+
+            localGP = GPTrain(bestFeatures, bestTargets, meanPrior="max")
+
+            # localRBF = RBFSurrogateModel(epsilon=1.0)
+            # localRBF.fit(bestFeatures, bestTargets)
+
+            # functionEval = localRBF.predict()
+            # localDE = DifferentialEvolution(bounds, localGP)
+
+            #now perform a global zero mean search
+
+            # this is the original training call
+            globalGP = GPTrain(
+                self.feFeatures, self.scalarisedTargets, meanPrior="zero"
+            )
+
+            # evaluating whole landscape on RBF for plotting reasons:
+            # x_range = np.linspace(self.globalBounds[0, 0], self.globalBounds[0, 1], 100)
+            # y_range = np.linspace(self.globalBounds[1, 0], self.globalBounds[1, 1], 100)
+            # fullRange = list(product(x_range, y_range))
+            # fullRangeArray = np.array(fullRange)
+            # y_pred, ystd = BOGPEval(localGP, fullRangeArray)
+
+            # print(fullRangeArray.shape, y_pred.shape)
+
+            # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c=y_pred)
+            # plt.title("Global Surrogate")
+            # plt.colorbar()
+            # plt.clim(1e-5, 1e2)
+            # # plt.yscale('log')
+
+            # plt.savefig('eiGS.png')
+            # plt.close()
+
+            eiDELocal = BayesianDifferentialEvolution(localGP, localBounds, bestTarget)
+            newSolutionLocal, newFitnessLocal = eiDELocal.optimize()
+
+            eiDEGlobal = BayesianDifferentialEvolution(globalGP, self.globalBounds, bestTarget)
+            newSolutionGlobal, newFitnessGlobal = eiDEGlobal.optimize()
+            # print("newsol", newSolution.shape)
+
+            # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c = y_pred, alpha = 0.5)
+            # plt.scatter(newSolution[0], newSolution[1], color='blue', label='Best Solution', s=10)
+            # plt.legend()
+            # plt.title("DE Optimisation of Expected Improvement")
+            # plt.colorbar()
+            # # plt.yscale('log')
+            # plt.clim(np.min(y_pred), np.max(y_pred))
+            # # plt.savefig('eiDE.png')
+            # plt.show()
+
+            newObjectiveTargets = MOobjective_function(
+                newSolutionLocal, self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
+            self.feFeatures = np.vstack((self.feFeatures, newSolutionLocal))
+
+            newObjectiveTargets = MOobjective_function(
+                newSolutionGlobal, self.objFunction, self.nObjectives
+            )
+            self.objectiveTargets = np.vstack(
+                (self.objectiveTargets, newObjectiveTargets)
+            )
+            self.feFeatures = np.vstack((self.feFeatures, newSolutionGlobal))
+
+            # find minimum in boths columns - new zbest values
+
+            self.zbests = np.min(self.objectiveTargets, axis=0)
+
+            self.scalarisedTargets = scalariseValues(
+                self.scalarisingFunction,
+                self.objectiveTargets,
+                self.zbests,
+                self.weights,
+                iteration,
+                50,
+            )
+            self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
+                self.feFeatures, self.scalarisedTargets, self.objectiveTargets
+            )
+
+            # for i in range(len(self.objectiveTargets)):
+            #     print(self.objectiveTargets[i], self.scalarisedTargets[i])
+
+            print(f"BO Iteration {iteration}, Best found solution = ", bestTarget)
+            print(f"Evaluated points = {len(self.feFeatures)}")
+
+            # surrogate = Image.open('eiGS.png')
+            # population = Image.open('eiDE.png')
+
+            # width, height = population.size
+            # combinedImage = Image.new('RGB', (2 * width, height), "WHITE")
+            # combinedImage.paste(population, (0, 0))
+            # combinedImage.paste(surrogate, (width, 0))
+
+            # combinedImage.save(f'{iteration}.png')
+
+            # self.bestEI = newFitness
+
+            # positions = np.arange(len(self.scalarisedTargets))
+
+            # plt.scatter(
+            #     self.objectiveTargets[:, 0], self.objectiveTargets[:, 1], c=positions
+            # )
+            # plt.title(f"Pareto Front, iteration {iteration}")
+            # plt.colorbar()
+            # plt.clim(0, len(self.scalarisedTargets))
+            # plt.xlabel("f2(x)")
+            # plt.ylabel("f1(x)")
+            # # plt.savefig("BOPareto.png")
+            # # plt.close()
+            # plt.show()
+
+            np.savetxt("BOMinMaxFeatures.txt", self.feFeatures)
+            np.savetxt("BOMinMaxScalarisedTargets.txt", self.scalarisedTargets)
+            np.savetxt("BOMinMaxObjectiveTargets.txt", self.objectiveTargets)
+
+            iteration += 1

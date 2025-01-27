@@ -47,6 +47,8 @@ scalarisingList = [
 # temporary list to run only the new HypI scalarising function
 # scalarisingList = [func.HypI]
 
+#TODO:: change the 2d hardcoded bits in this initialisation
+
 for key, value in functionDict.items():
     print(key.__name__, value)
 
@@ -65,7 +67,7 @@ for key, value in functionDict.items():
 
     # Check for and systematically replace NaN values in initial population
     # Requires evaluating initial population
-    objvTargets = np.empty((0, 2))
+    initialObjvTargets = np.empty((0, 2))
 
     for i in range(initSampleSize):
         candidate = initPopulation[i]
@@ -78,9 +80,11 @@ for key, value in functionDict.items():
             )  # Match dimension automatically
             newObjvTgt = opt.MOobjective_function(candidate, key, bounds.shape[0])
             initPopulation[i] = candidate
+        initialObjvTargets = np.vstack((initialObjvTargets, newObjvTgt))
 
     print("Initial Population:")
     print(initPopulation)
+    print("initial targets:\n", initialObjvTargets )
 
     for scalarisingFunction in scalarisingList:
 
@@ -95,6 +99,7 @@ for key, value in functionDict.items():
             weights,
             useInitialPopulation=True,
             initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets
         )
         LSADE.optimizerStep()
 
@@ -124,6 +129,7 @@ for key, value in functionDict.items():
             weights,
             useInitialPopulation=True,
             initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets
         )
         PSO.stage1()
         PSO.stage2()
@@ -154,6 +160,7 @@ for key, value in functionDict.items():
             weights,
             useInitialPopulation=True,
             initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets
         )
         bayesianRun.runOptimiser()
 
@@ -187,6 +194,7 @@ for key, value in functionDict.items():
             80,
             useInitialPopulation=True,
             initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets
         )
         ESA.mainMenu(initialAction=2)
 
