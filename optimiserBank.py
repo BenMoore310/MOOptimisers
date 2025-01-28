@@ -8,11 +8,14 @@ import gpytorch
 import random
 from PIL import Image
 from datetime import datetime
-
+import functionBank as func
 # import scienceplots
 from scipy.stats import norm
 import functionBank as func
 from sklearn.preprocessing import MinMaxScaler
+import inspect
+from pymoo.core.problem import Problem  # PyMoo Problem base class
+
 
 
 def MOobjective_function(vec, currentFunction, nObjectives):
@@ -24,18 +27,29 @@ def MOobjective_function(vec, currentFunction, nObjectives):
         float: Fitness value of the solution.
     """
     objectiveArray = np.empty((1, nObjectives))
-    # print(currentFunction)
 
-    if currentFunction == func.fonsecaFleming or currentFunction == func.sandTrap:
+    if inspect.isfunction(func):  # Checks if it's a user-defined function
+
         objectiveArray[0] = currentFunction(vec)
-        # objectiveArray = np.empty((1,nObjectives))
 
     else:
-        x, y = vec
+        # isinstance(func, Problem):  # Checks if it's a PyMoo test function
+   
+        objectiveArray[0] = func.evalPyMooProblem(currentFunction, vec)
+
+    
+    # print(currentFunction)
+    # print(vec)
+    # if currentFunction == func.fonsecaFleming or currentFunction == func.sandTrap or currentFunction == func.viennetFunction:
+    #     objectiveArray[0] = currentFunction(vec)
+    #     # objectiveArray = np.empty((1,nObjectives))
+
+    # else:
+    #     x, y = vec
 
         # this gives the separate objective values to be returned for pareto plotting purposes
-        objectiveArray[0] = currentFunction(x, y)
-        #  print(objectiveArray.shape)
+    # objectiveArray[0] = currentFunction(vec)
+        # print(objectiveArray.shape)
 
     # noww scalarise the objectives
     # scalarisedObjective, newZBests = scalarisingFunction(objectiveArray, zbests, weights)
@@ -172,7 +186,7 @@ def GPTrain(features, targets, meanPrior):
     likelihood.noise = 1e-4
     likelihood.noise_covar.raw_noise.requires_grad_(False)
 
-    training_iter = 150
+    training_iter = 250
     # Find optimal model hyperparameters
     model.train()
     likelihood.train()
@@ -551,7 +565,7 @@ class BayesianDifferentialEvolution:
             # Track the best solution
 
             predictedEI = expectedImprovement(
-                self.surrogateModel, self.population, self.bestTarget, 0.01
+                self.surrogateModel, self.population, self.bestTarget, 0.0001
             )
 
             # print(predictedEI)
@@ -2354,6 +2368,7 @@ class bayesianOptimiser:
         useInitialPopulation,
         initialPopulation,
         initialObjvValues,
+        maxFE
     ):
         self.globalBounds = np.array(bounds)
         self.dimensions = len(bounds)
@@ -2365,6 +2380,7 @@ class bayesianOptimiser:
         self.x_bestSolution = 0
         self.bestEI = 100
         self.objFunction = objFunction
+        self.maxFE = maxFE
 
         self.scalarisingFunction = scalarisingFunction
         self.zbests = np.empty((0))
@@ -2433,7 +2449,8 @@ class bayesianOptimiser:
         iteration = 0
 
         # while self.bestEI > 1e-7:
-        while iteration < 80:
+        # while iteration < 80:
+        while len(self.feFeatures) < self.maxFE:
             best_idx = np.argmin(self.scalarisedTargets)
             bestFeature = self.feFeatures[best_idx]
             bestTarget = self.scalarisedTargets[best_idx]
@@ -2441,7 +2458,7 @@ class bayesianOptimiser:
 
             numSolutions = self.pop_size
 
-            bestFeatures = np.empty((numSolutions, self.nObjectives))
+            bestFeatures = np.empty((numSolutions, self.dimensions))
             bestTargets = np.empty(numSolutions)
 
             # find c best solutions
@@ -2584,6 +2601,7 @@ class BOZeroMax:
         useInitialPopulation,
         initialPopulation,
         initialObjvValues,
+        maxFE
     ):
         self.globalBounds = np.array(bounds)
         self.dimensions = len(bounds)
@@ -2595,6 +2613,7 @@ class BOZeroMax:
         self.x_bestSolution = 0
         self.bestEI = 100
         self.objFunction = objFunction
+        self.maxFE = maxFE
 
         self.scalarisingFunction = scalarisingFunction
         self.zbests = np.empty((0))
@@ -2608,6 +2627,7 @@ class BOZeroMax:
         self.scalariseInitialPopulation()
 
     def initialiseDatabase(self):
+        
         sampler = qmc.LatinHypercube(d=self.dimensions)
         sample = sampler.random(n=self.pop_size)
         population = qmc.scale(sample, self.globalBounds[:, 0], self.globalBounds[:, 1])
@@ -2663,7 +2683,9 @@ class BOZeroMax:
         iteration = 0
 
         # while self.bestEI > 1e-7:
-        while iteration < 40:
+        # while iteration < 40:
+        while len(self.feFeatures) < self.maxFE:
+
             best_idx = np.argmin(self.scalarisedTargets)
             bestFeature = self.feFeatures[best_idx]
             bestTarget = self.scalarisedTargets[best_idx]
@@ -2671,7 +2693,7 @@ class BOZeroMax:
 
             numSolutions = self.pop_size
 
-            bestFeatures = np.empty((numSolutions, self.nObjectives))
+            bestFeatures = np.empty((numSolutions, self.dimensions))
             bestTargets = np.empty(numSolutions)
 
             # find c best solutions
@@ -2711,13 +2733,24 @@ class BOZeroMax:
             # y_range = np.linspace(self.globalBounds[1, 0], self.globalBounds[1, 1], 100)
             # fullRange = list(product(x_range, y_range))
             # fullRangeArray = np.array(fullRange)
-            # y_pred, ystd = BOGPEval(localGP, fullRangeArray)
+            # y_predG, ystdG = BOGPEval(globalGP, fullRangeArray)
+            # y_predM, ystdM = BOGPEval(localGP, fullRangeArray)
 
-            # print(fullRangeArray.shape, y_pred.shape)
+            # # print(fullRangeArray.shape, y_pred.shape)
 
-            # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c=y_pred)
+            # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c=y_predG)
+            # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.objectiveTargets[:,2])
             # plt.title("Global Surrogate")
             # plt.colorbar()
+            # plt.show()
+
+            # plt.scatter(fullRangeArray[:,0], fullRangeArray[:,1], c=y_predM)
+            # plt.scatter(self.feFeatures[:,0], self.feFeatures[:,1], c = self.objectiveTargets[:,2])
+            # plt.title("Local Surrogate")
+            # plt.colorbar()
+            # plt.show()
+
+
             # plt.clim(1e-5, 1e2)
             # # plt.yscale('log')
 

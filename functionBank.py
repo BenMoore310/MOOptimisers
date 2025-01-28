@@ -17,6 +17,7 @@ import subprocess
 import tempfile
 import shutil
 from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
+from pymoo.problems import get_problem
 
 
 # SANDTRAP OPTIMISATION FUNCTIONS
@@ -203,6 +204,35 @@ def sandTrap(features):
 
 # BENCHMARKING OBJECTIVE FUNCTIONS
 
+# Benchmarking functions have been updated - they now return a third objective value based on whether the objective values are valid or not - 
+# returns a 0 if objectives are valid, returns 1 if they are invalid. 
+
+
+# PYMOO problems
+
+def getPyMooProblem(function, n_var, n_obj):
+
+    problem = get_problem(function, n_var=n_var, n_obj=n_obj)
+
+    bl = problem.xl
+    bu = problem.xu
+    bounds = []
+
+    for i in range(n_var):
+        bounds.append([bl[i], bu[i]])
+
+    return problem, np.array(bounds)
+
+def evalPyMooProblem(function, vec):
+
+    result = function.evaluate(vec)
+    # result = np.append(result, [0])
+
+    return result
+
+
+
+
 
 def ackley_function(x, y, a=20, b=0.2, c=2 * np.pi):
     term1 = -a * np.exp(-b * np.sqrt(0.5 * (x**2 + y**2)))
@@ -210,19 +240,23 @@ def ackley_function(x, y, a=20, b=0.2, c=2 * np.pi):
     return term1 + term2 + a + np.exp(1)
 
 
-def binhAndKorn(x, y):
+def binhAndKorn(vec):
+
+    x, y = vec
+
     f1 = (4 * (x**2)) + (4 * (y**2))
     f2 = (x - 5) ** 2 + (y - 5) ** 2
 
     if (x - 5) ** 2 + y**2 <= 25 and (x - 8) ** 2 + (y + 3) ** 2 >= 7.7:
 
-        return [f1, f2]
+        return [f1, f2, 0]
     else:
         # print('here', x, y)
-        return [np.nan, np.nan]
+        return [f1, f2, 1]
 
 
-def chankongHaimes(x, y):
+def chankongHaimes(vec):
+    x, y = vec
     f1 = 2 + (x - 2) ** 2 + (y - 1) ** 2
     f2 = (9 * x) - (y - 1) ** 2
 
@@ -230,10 +264,10 @@ def chankongHaimes(x, y):
 
     if x**2 + y**2 <= 225 and x - 3 * y + 10 <= 0:
 
-        return [f1, f2]
+        return [f1, f2, 0]
     else:
         # print('here', x, y)
-        return [np.nan, np.nan]
+        return [f1, f2, 2]
 
 
 # def fonsecaFleming(vec):
@@ -267,10 +301,11 @@ def fonsecaFleming(x):
     # Second objective function
     f2 = 1 - np.exp(-np.sum((x + 1 / np.sqrt(len(x))) ** 2))
 
-    return [f1, f2]
+    return [f1, f2, 0]
 
 
-def ctp1(x, y):
+def ctp1(vec):
+    x, y = vec
     f1 = x
     f2 = (1 + y) * np.exp(-1 * (x / (1 + y)))
 
@@ -279,35 +314,53 @@ def ctp1(x, y):
         and f2 / (0.728 * np.exp(-0.295 * f1)) >= 1
     ):
 
-        return [f1, f2]
+        return [f1, f2, 0]
     else:
         # print('here', x, y)
-        return [np.nan, np.nan]
+        return [f1, f2, 1]
 
 
-def constrEx(x, y):
+def constrEx(vec):
+    x, y = vec
     f1 = x
     f2 = (1 + y) / x
 
     if y + 9 * x >= 6 and -1 * y + 9 * x >= 1:
 
-        return [f1, f2]
+        return [f1, f2, 0]
     else:
         # print('here', x, y)
-        return [np.nan, np.nan]
+        return [f1, f2, 1]
 
 
-def testFunction4(x, y):
+def testFunction4(vec):
+    x, y = vec
     f1 = x**2 - y
     f2 = -0.5 * x - y - 1
 
     if 6.5 - (x / 6) - y >= 0 and 7.5 - 0.5 * x - y >= 0 and 30 - 5 * x - y >= 0:
 
-        return [f1, f2]
+        return [f1, f2, 0]
     else:
         # print('here', x, y)
-        return [np.nan, np.nan]
+        return [f1, f2, 1]
 
+
+
+def viennetFunction(vector):
+ 
+    x, y = vector
+
+    # Objective function f1
+    f1 = (0.5 * (x**2 + y**2)) + np.sin(x**2 + y**2)
+
+    # Objective function f2
+    f2 = ((((3 * x) - (2 * y) + 4)**2) / 8) + (((x - y + 1)**2) / 27) + 15
+
+    # Objective function f3
+    f3 = (1 / (x**2 + y**2 + 1)) - 1.1 * np.exp(-(x**2 + y**2))
+
+    return [f1, f2, f3, 0]
 
 # SCALARISING FUNCTIONS
 
@@ -320,7 +373,7 @@ def chebyshev(objs, z, w):
     #         z[0,i] = objs[0,i]
     # print(objs, objs.shape)
     # compute chebyshev
-    objSums = np.empty((2,))
+    objSums = np.empty((len(objs),))
     # print(objSums.shape)
     for i in range(0, len(objs)):
         # print(i)
@@ -383,7 +436,7 @@ def augmentedChebychev(objs, z, w):
     # from chugh =>  alpha = 0.0001
     alpha = 0.0001
 
-    objSums = np.empty((2,))
+    objSums = np.empty((len(objs),))
 
     # calculate augmented term
     augTerm = 0
@@ -403,7 +456,7 @@ def modifiedChebychev(objs, z, w):
     # from chugh =>  alpha = 0.0001
     alpha = 0.0001
 
-    objSums = np.empty((2,))
+    objSums = np.empty((len(objs),))
 
     # calculate augmented term
     augTerm = 0
@@ -535,7 +588,7 @@ def hypervolumeImprovement(x, ref_point, paretoShells):
     hv_before = computeHypervolume(pareto_k, ref_point)
     hv_after = computeHypervolume(np.vstack([pareto_k, x]), ref_point)
     # print('Hypervolumes:')
-    print(hv_after - hv_before)
+    # print(hv_after - hv_before)
     return hv_after - hv_before
 
 
@@ -548,13 +601,23 @@ def HypI(objs):
     # does setting refVector to 1,1 (as values are normalised) fix this?
     # refVector = np.max(objs, axis=0)
 
+    # Filter the rows where the last column is 0
+
+    #TODO need some handling where the below option is turned
+    #on when im using my functions and not when using pyMoo
+
+    # valid_rows = objs[objs[:, -1] == 0]
+
+    # max_values = np.max(valid_rows[:, :-1], axis=0)
+
+    # refVector = np.append(max_values, 0)
     refVector = np.ones((len(objs[-1],)))
 
     # print('refVector =', refVector)
 
     paretoShells = computeParetoShells(objs)
 
-    print(paretoShells)
+    # print(paretoShells)
 
     # np.savetxt('paretoShells.txt', np.array(paretoShells))
 
