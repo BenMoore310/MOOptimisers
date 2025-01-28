@@ -138,7 +138,8 @@ for function in dtlzProblems:
             weights,
             useInitialPopulation=True,
             initialPopulation=initPopulation,
-            initialObjvValues=initialObjvTargets
+            initialObjvValues=initialObjvTargets,
+            maxFE=100
         )
         bayesianRun.runOptimiser()
 
