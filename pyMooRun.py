@@ -37,7 +37,7 @@ for function in dtlzProblems:
 
     problem, bounds = func.getPyMooProblem(function, n_var, n_obj)
 
-    initSampleSize = 20
+    initSampleSize = 50
     # bounds = np.array(value)
     lowBounds = bounds[:, 0]
     highBounds = bounds[:, 1]
@@ -70,7 +70,7 @@ for function in dtlzProblems:
 
         LSADE = opt.LSADE(
             bounds,
-            20,
+            initSampleSize,
             problem,
             scalarisingFunction,
             n_obj,
@@ -100,7 +100,7 @@ for function in dtlzProblems:
 
         PSO = opt.TS_DDEO(
             bounds,
-            20,
+            initSampleSize,
             problem,
             scalarisingFunction,
             n_obj,
@@ -131,7 +131,7 @@ for function in dtlzProblems:
 
         bayesianRun = opt.BOZeroMax(
             bounds,
-            15,
+            initSampleSize,
             problem,
             scalarisingFunction,
             n_obj,
@@ -162,7 +162,7 @@ for function in dtlzProblems:
 
         ESA = opt.ESA(
             bounds,
-            20,
+            initSampleSize,
             10,
             0.25,
             problem,
@@ -170,7 +170,7 @@ for function in dtlzProblems:
             n_obj,
             weights,
             0.9,
-            80,
+            100,
             useInitialPopulation=True,
             initialPopulation=initPopulation,
             initialObjvValues=initialObjvTargets

@@ -618,8 +618,8 @@ class TS_DDEO:
         initialObjvValues,
         c1=2.05,
         c2=2.05,
-        PSOFE=40,
-        BDDOFE=40,
+        PSOFE=50,
+        BDDOFE=50,
         mutation_factor=0.8,
         crossover_prob=0.7,
     ):
@@ -1026,7 +1026,7 @@ class TS_DDEO:
     def stage2(self):
         iteration = 0
 
-        while iteration < self.BBDOIter / 3:
+        while len(self.feFeatures) < (self.BBDOIter + self.max_generations + self.pop_size):
             # DE screening stage
             GPModel = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="max")
 
@@ -1269,7 +1269,7 @@ class LSADE:
         mutation_factor=0.8,
         crossover_prob=0.7,
         method="lhs",
-        max_generations=27,
+        max_generations=100,
     ):
         """
         Initialize the Differential Evolution (DE) optimizer.
@@ -1465,7 +1465,7 @@ class LSADE:
         # X, Y = np.meshgrid(x_range, y_range)
         # Z = ackley_function(X, Y)
         iteration = 0
-        while iteration < self.max_generations:
+        while iteration < (self.max_generations/3):
             GPModel = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="max")
 
             new_population = np.zeros_like(self.population)
@@ -2684,7 +2684,7 @@ class BOZeroMax:
 
         # while self.bestEI > 1e-7:
         # while iteration < 40:
-        while len(self.feFeatures) < self.maxFE:
+        while len(self.feFeatures) < (self.pop_size + self.maxFE):
 
             best_idx = np.argmin(self.scalarisedTargets)
             bestFeature = self.feFeatures[best_idx]
