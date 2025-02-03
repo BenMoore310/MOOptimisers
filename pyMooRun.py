@@ -12,8 +12,8 @@ from pymoo.problems import get_problem
 
 dtlzProblems = ['dtlz1','dtlz2','dtlz3','dtlz4','dtlz5','dtlz6','dtlz7']
 
-n_var = 4
-n_obj = 2
+n_var = 7
+n_obj = 3
 
 scalarisingList = [
     func.HypI,
@@ -28,7 +28,7 @@ scalarisingList = [
     func.PAPBI,
 ]
 
-weights = np.array((0.5, 0.5))
+weights = np.array((1/3, 1/3, 1/3))
 
 
 for function in dtlzProblems:
@@ -139,22 +139,53 @@ for function in dtlzProblems:
             useInitialPopulation=True,
             initialPopulation=initPopulation,
             initialObjvValues=initialObjvTargets,
-            maxFE=100
+            maxFE=250
         )
         bayesianRun.runOptimiser()
 
         features = np.loadtxt("BOMinMaxFeatures.txt")
         np.savetxt(
-            f"BOFeatures{function}{scalarisingFunction.__name__}.txt", features
+            f"BOMinMaxFeatures{function}{scalarisingFunction.__name__}.txt", features
         )
 
         scalarisedTargets = np.loadtxt("BOMinMaxScalarisedTargets.txt")
+        np.savetxt(
+            f"BOMinMaxScalarisedTargets{function}{scalarisingFunction.__name__}.txt",
+            scalarisedTargets,
+        )
+
+        objtTargets = np.loadtxt("BOMinMaxObjectiveTargets.txt")
+        np.savetxt(
+            f"BOMinMaxObjtvTargets{function}{scalarisingFunction.__name__}.txt",
+            objtTargets,
+        )
+
+        bayesianRunII = opt.bayesianOptimiser(
+            bounds,
+            initSampleSize,
+            problem,
+            scalarisingFunction,
+            n_obj,
+            weights,
+            useInitialPopulation=True,
+            initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets,
+            maxFE=250
+        )
+        bayesianRunII.runOptimiser()
+
+        features = np.loadtxt("BOFeatures.txt")
+        np.savetxt(
+            f"BOFeatures{function}{scalarisingFunction.__name__}.txt", features
+        )
+
+        scalarisedTargets = np.loadtxt("BOScalarisedTargets.txt")
         np.savetxt(
             f"BOScalarisedTargets{function}{scalarisingFunction.__name__}.txt",
             scalarisedTargets,
         )
 
-        objtTargets = np.loadtxt("BOMinMaxObjectiveTargets.txt")
+        objtTargets = np.loadtxt("BOObjectiveTargets.txt")
         np.savetxt(
             f"BOObjtvTargets{function}{scalarisingFunction.__name__}.txt",
             objtTargets,
@@ -163,19 +194,19 @@ for function in dtlzProblems:
         ESA = opt.ESA(
             bounds,
             initSampleSize,
-            10,
+            initSampleSize,
             0.25,
             problem,
             scalarisingFunction,
             n_obj,
             weights,
             0.9,
-            100,
+            250,
             useInitialPopulation=True,
             initialPopulation=initPopulation,
             initialObjvValues=initialObjvTargets
         )
-        ESA.mainMenu(initialAction=2)
+        ESA.mainMenu(initialAction=1)
 
         features = np.loadtxt("ESAFeatures.txt")
         np.savetxt(

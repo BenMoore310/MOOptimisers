@@ -618,15 +618,15 @@ class TS_DDEO:
         initialObjvValues,
         c1=2.05,
         c2=2.05,
-        PSOFE=50,
-        BDDOFE=50,
+        PSOFE=125,
+        BDDOFE=125,
         mutation_factor=0.8,
         crossover_prob=0.7,
     ):
         self.globalBounds = np.array(bounds)
         self.dimensions = len(bounds)
         self.pop_size = pop_size
-        self.max_generations = PSOFE
+        self.PSOIter = PSOFE
         self.feFeatures = np.empty((0, self.dimensions))  # Consistent with dimensions
         self.globalBestFeature = None
         self.nObjectives = nObjectives
@@ -777,7 +777,7 @@ class TS_DDEO:
 
         iteration = 1
 
-        while len(self.feFeatures) < (self.pop_size + self.max_generations):
+        while len(self.feFeatures) < (self.pop_size + self.PSOIter):
             # Train surrogate model and find a solution
             GPModel = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="zero")
             globalDE = DifferentialEvolution(self.globalBounds, GPModel)
@@ -804,7 +804,7 @@ class TS_DDEO:
                 self.zbests,
                 self.weights,
                 iteration,
-                self.max_generations,
+                self.PSOIter,
             )
 
             self.feFeatures, self.scalarisedTargets, self.objectiveTargets = removeNans(
@@ -847,7 +847,7 @@ class TS_DDEO:
                     self.zbests,
                     self.weights,
                     iteration,
-                    self.max_generations,
+                    self.PSOIter,
                 )
 
                 # Update personal best if necessary
@@ -1026,7 +1026,7 @@ class TS_DDEO:
     def stage2(self):
         iteration = 0
 
-        while len(self.feFeatures) < (self.BBDOIter + self.max_generations + self.pop_size):
+        while len(self.feFeatures) < (self.BBDOIter + self.PSOIter + self.pop_size):
             # DE screening stage
             GPModel = GPTrain(self.feFeatures, self.scalarisedTargets, meanPrior="max")
 
@@ -1269,7 +1269,7 @@ class LSADE:
         mutation_factor=0.8,
         crossover_prob=0.7,
         method="lhs",
-        max_generations=100,
+        max_generations=250,
     ):
         """
         Initialize the Differential Evolution (DE) optimizer.
