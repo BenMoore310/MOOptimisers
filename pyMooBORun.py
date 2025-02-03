@@ -83,18 +83,18 @@ for function in dtlzProblems:
         )
         bayesianRun.runOptimiser()
 
-        features = np.loadtxt("BOMinMaxFeatures.txt")
+        features = np.loadtxt("BOFeatures.txt")
         np.savetxt(
             f"BOFeatures{function}{scalarisingFunction.__name__}.txt", features
         )
 
-        scalarisedTargets = np.loadtxt("BOMinMaxScalarisedTargets.txt")
+        scalarisedTargets = np.loadtxt("BOScalarisedTargets.txt")
         np.savetxt(
             f"BOScalarisedTargets{function}{scalarisingFunction.__name__}.txt",
             scalarisedTargets,
         )
 
-        objtTargets = np.loadtxt("BOMinMaxObjectiveTargets.txt")
+        objtTargets = np.loadtxt("BOObjectiveTargets.txt")
         np.savetxt(
             f"BOObjtvTargets{function}{scalarisingFunction.__name__}.txt",
             objtTargets,
