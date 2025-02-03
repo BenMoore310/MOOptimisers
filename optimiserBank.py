@@ -2456,29 +2456,29 @@ class bayesianOptimiser:
             bestTarget = self.scalarisedTargets[best_idx]
             # print(bestTarget)
 
-            numSolutions = self.pop_size
+            # numSolutions = self.pop_size
 
-            bestFeatures = np.empty((numSolutions, self.dimensions))
-            bestTargets = np.empty(numSolutions)
+            # bestFeatures = np.empty((numSolutions, self.dimensions))
+            # bestTargets = np.empty(numSolutions)
 
             # find c best solutions
-            bestIndices = np.argsort(self.scalarisedTargets)[:numSolutions]
+            # bestIndices = np.argsort(self.scalarisedTargets)[:numSolutions]
 
-            for i in range(numSolutions):
-                bestFeatures[i] = self.feFeatures[bestIndices[i]]
-                bestTargets[i] = self.scalarisedTargets[bestIndices[i]]
+            # for i in range(numSolutions):
+            #     bestFeatures[i] = self.feFeatures[bestIndices[i]]
+            #     bestTargets[i] = self.scalarisedTargets[bestIndices[i]]
 
             # x_min, x_max = np.min(bestFeatures[:, 0]), np.max(bestFeatures[:, 0])
             # y_min, y_max = np.min(bestFeatures[:, 1]), np.max(bestFeatures[:, 1])
 
             # localBounds = [(x_min, x_max), (y_min, y_max)]
 
-            localBounds = [(np.min(bestFeatures[:, d]), np.max(bestFeatures[:, d])) for d in range(bestFeatures.shape[1])]
+            # localBounds = [(np.min(bestFeatures[:, d]), np.max(bestFeatures[:, d])) for d in range(bestFeatures.shape[1])]
 
             # pairwiseDistancesLocal = np.linalg.norm(bestFeatures[:, np.newaxis] - bestFeatures, axis=2)
             # avgDistanceLocal = np.mean(pairwiseDistancesLocal)
 
-            localGP = GPTrain(bestFeatures, bestTargets, meanPrior="max")
+            # localGP = GPTrain(bestFeatures, bestTargets, meanPrior="max")
 
             # localRBF = RBFSurrogateModel(epsilon=1.0)
             # localRBF.fit(bestFeatures, bestTargets)
@@ -2487,9 +2487,9 @@ class bayesianOptimiser:
             # localDE = DifferentialEvolution(bounds, localGP)
 
             # this is the original training call
-            # globalGP = GPTrain(
-            #     self.feFeatures, self.scalarisedTargets, meanPrior="zero"
-            # )
+            globalGP = GPTrain(
+                self.feFeatures, self.scalarisedTargets, meanPrior="zero"
+            )
 
             # evaluating whole landscape on RBF for plotting reasons:
             # x_range = np.linspace(self.globalBounds[0, 0], self.globalBounds[0, 1], 100)
@@ -2509,8 +2509,8 @@ class bayesianOptimiser:
             # plt.savefig('eiGS.png')
             # plt.close()
 
-            eiDE = BayesianDifferentialEvolution(localGP, localBounds, bestTarget)
-            newSolution, newFitness = eiDE.optimize()
+            eiDEGlobal = BayesianDifferentialEvolution(globalGP, self.globalBounds, bestTarget)
+            newSolution, newFitness = eiDEGlobal.optimize()
 
             # print("newsol", newSolution.shape)
 
