@@ -2450,7 +2450,7 @@ class bayesianOptimiser:
 
         # while self.bestEI > 1e-7:
         # while iteration < 80:
-        while len(self.feFeatures) < self.maxFE:
+        while len(self.feFeatures) < (self.pop_size + self.maxFE):
             best_idx = np.argmin(self.scalarisedTargets)
             bestFeature = self.feFeatures[best_idx]
             bestTarget = self.scalarisedTargets[best_idx]
