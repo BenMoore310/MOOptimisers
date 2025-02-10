@@ -10,10 +10,12 @@ from scipy.stats import qmc
 from itertools import product
 from pymoo.problems import get_problem
 
-dtlzProblems = ['dtlz1','dtlz2','dtlz3','dtlz4','dtlz5','dtlz6','dtlz7']
+dtlzProblems = ['dtlz1','dtlz2','dtlz5','dtlz7']
 
 n_var = 7
 n_obj = 3
+# 'granularity' of weight vector spacing
+s = 8
 
 scalarisingList = [
     func.HypI,
@@ -28,7 +30,8 @@ scalarisingList = [
     func.PAPBI,
 ]
 
-weights = np.array((1/3, 1/3, 1/3))
+weightVectors = func.generateWeightVectors(n_obj, s)
+print(f'Generated {len(weightVectors)} weight vectors.')
 
 
 for function in dtlzProblems:
@@ -74,7 +77,7 @@ for function in dtlzProblems:
             problem,
             scalarisingFunction,
             n_obj,
-            weights,
+            weightVectors,
             useInitialPopulation=True,
             initialPopulation=initPopulation,
             initialObjvValues=initialObjvTargets
@@ -104,7 +107,7 @@ for function in dtlzProblems:
             problem,
             scalarisingFunction,
             n_obj,
-            weights,
+            weightVectors,
             useInitialPopulation=True,
             initialPopulation=initPopulation,
             initialObjvValues=initialObjvTargets
@@ -129,50 +132,50 @@ for function in dtlzProblems:
             objtTargets,
         )
 
-        bayesianRun = opt.BOZeroMax(
+        # bayesianRun = opt.BOZeroMax(
+        #     bounds,
+        #     initSampleSize,
+        #     problem,
+        #     scalarisingFunction,
+        #     n_obj,
+        #     weights,
+        #     useInitialPopulation=True,
+        #     initialPopulation=initPopulation,
+        #     initialObjvValues=initialObjvTargets,
+        #     maxFE=250
+        # )
+        # bayesianRun.runOptimiser()
+
+        # features = np.loadtxt("BOMinMaxFeatures.txt")
+        # np.savetxt(
+        #     f"BOMinMaxFeatures{function}{scalarisingFunction.__name__}.txt", features
+        # )
+
+        # scalarisedTargets = np.loadtxt("BOMinMaxScalarisedTargets.txt")
+        # np.savetxt(
+        #     f"BOMinMaxScalarisedTargets{function}{scalarisingFunction.__name__}.txt",
+        #     scalarisedTargets,
+        # )
+
+        # objtTargets = np.loadtxt("BOMinMaxObjectiveTargets.txt")
+        # np.savetxt(
+        #     f"BOMinMaxObjtvTargets{function}{scalarisingFunction.__name__}.txt",
+        #     objtTargets,
+        # )
+
+        bayesianRun = opt.bayesianOptimiser(
             bounds,
             initSampleSize,
             problem,
             scalarisingFunction,
             n_obj,
-            weights,
+            weightVectors,
             useInitialPopulation=True,
             initialPopulation=initPopulation,
             initialObjvValues=initialObjvTargets,
             maxFE=250
         )
         bayesianRun.runOptimiser()
-
-        features = np.loadtxt("BOMinMaxFeatures.txt")
-        np.savetxt(
-            f"BOMinMaxFeatures{function}{scalarisingFunction.__name__}.txt", features
-        )
-
-        scalarisedTargets = np.loadtxt("BOMinMaxScalarisedTargets.txt")
-        np.savetxt(
-            f"BOMinMaxScalarisedTargets{function}{scalarisingFunction.__name__}.txt",
-            scalarisedTargets,
-        )
-
-        objtTargets = np.loadtxt("BOMinMaxObjectiveTargets.txt")
-        np.savetxt(
-            f"BOMinMaxObjtvTargets{function}{scalarisingFunction.__name__}.txt",
-            objtTargets,
-        )
-
-        bayesianRunII = opt.bayesianOptimiser(
-            bounds,
-            initSampleSize,
-            problem,
-            scalarisingFunction,
-            n_obj,
-            weights,
-            useInitialPopulation=True,
-            initialPopulation=initPopulation,
-            initialObjvValues=initialObjvTargets,
-            maxFE=250
-        )
-        bayesianRunII.runOptimiser()
 
         features = np.loadtxt("BOFeatures.txt")
         np.savetxt(
@@ -199,7 +202,7 @@ for function in dtlzProblems:
             problem,
             scalarisingFunction,
             n_obj,
-            weights,
+            weightVectors,
             0.9,
             250,
             useInitialPopulation=True,

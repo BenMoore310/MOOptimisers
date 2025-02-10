@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
+import itertools
 from itertools import product
 from scipy.stats import qmc  # For Latin Hypercube Sampling
 import torch
@@ -18,6 +19,58 @@ import tempfile
 import shutil
 from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 from pymoo.problems import get_problem
+
+
+# FUNCTIONS FOR RANDOMISING WEIGHT VECTORS A LA PAREGO
+
+def generateWeightVectors(k, s):
+    """
+    Generate the set of weight vectors Λ for k objectives and granularity s.
+    
+    Parameters:
+        k (int): Number of objectives (dimensions of the weight vector).
+        s (int): Granularity (number of divisions for each weight component).
+    
+    Returns:
+        list of tuples: A list containing all possible weight vectors in Λ.
+    """
+    # Generate all combinations of s+1 integers that sum to s
+    levels = range(s + 1)  # Possible values for each λ_j: {0, 1/s, 2/s, ..., 1}
+    # print(levels)
+    combinations = [comb for comb in itertools.product(levels, repeat=k-1)]
+
+    
+    # Convert combinations into weight vectors (ensure they sum to 1)
+    weight_vectors = []
+    for comb in combinations:
+        lam = np.zeros(k)
+        # print(lam, comb)
+        lam[:k-1] = np.array(comb) / s
+        lam[-1] = 1 - sum(lam[:-1])  # Ensure sum of λ equals 1
+        if all(0 <= val <= 1 for val in lam):
+            weight_vectors.append(tuple(lam))
+    
+    return weight_vectors
+
+
+def sampleWeightVector(weight_vectors):
+    """
+    Randomly sample a weight vector from the generated set Λ.
+    
+    Parameters:
+        weight_vectors (list of tuples): The set of all possible weight vectors.
+    
+    Returns:
+        tuple: A randomly selected weight vector.
+    """
+
+    # print(len(weight_vectors))
+    # print(np.linspace(0, len(weight_vectors), len(weight_vectors)+1))
+
+    idx = int(np.random.choice(np.linspace(0, len(weight_vectors)-1, len(weight_vectors))))
+    # print(idx)
+    return weight_vectors[idx]
+
 
 
 # SANDTRAP OPTIMISATION FUNCTIONS
@@ -628,3 +681,52 @@ def HypI(objs):
     # print('after function - ', (1-scalarisedValues))
     # return (1-scalarisedValues), paretoShells
     return 1 - scalarisedValues
+
+
+def APD(F, ref_dirs, FE, FE_max, k, alpha):
+    """
+    Compute the Angle Penalized Distance (APD) for a set of solutions.
+    
+    Parameters:
+        F (numpy.ndarray): Objective values of solutions (m x k matrix).
+        ref_dirs (numpy.ndarray): Reference directions (n x k matrix).
+        FE (int): Current number of function evaluations.
+        FE_max (int): Maximum number of function evaluations.
+        alpha (float): Penalty exponent.
+        k (float): Penalty scaling factor.
+    
+    Returns:
+        numpy.ndarray: APD values for each solution.
+    """
+    # Normalize the objective values
+    F_norm = F / np.linalg.norm(F, axis=1, keepdims=True)
+
+    # Compute cosine similarity and find the nearest reference direction
+    cosine = np.dot(F_norm, ref_dirs.T)
+    nearest_idx = np.argmax(cosine, axis=1)  # Index of the nearest reference direction
+    nearest_ref = ref_dirs[nearest_idx]      # Nearest reference directions for each solution
+
+    # Compute distances (Euclidean norm) between F and their nearest reference vector
+    distances = np.linalg.norm(F - nearest_ref, axis=1)
+
+    # Compute the angle (1 - cosine) between each solution and its nearest reference vector
+    angles = 1 - cosine[np.arange(len(F)), nearest_idx]
+
+    # Calculate gamma (minimum angle between the selected reference vector and other reference vectors)
+    gamma_values = []
+    for idx in nearest_idx:
+        # Compute angles (cosine values) between the chosen reference vector and all other reference vectors
+        selected_ref = ref_dirs[idx]  # The reference vector assigned to the current solution
+        other_refs = np.delete(ref_dirs, idx, axis=0)  # Remove the selected reference vector
+        cosine_to_others = np.dot(selected_ref, other_refs.T)
+        gamma = 1 - np.max(cosine_to_others)  # Smallest angle (highest cosine similarity)
+        gamma_values.append(gamma)
+    gamma_values = np.array(gamma_values)
+
+    # Calculate the progress term FE / FE_max
+    progress = FE / FE_max
+    penalty_factor = k * (progress ** alpha)
+
+    # Compute the APD value for each solution
+    apd = distances * (1 + penalty_factor * (angles / gamma_values))
+    return apd

@@ -15,6 +15,8 @@ import functionBank as func
 from sklearn.preprocessing import MinMaxScaler
 import inspect
 from pymoo.core.problem import Problem  # PyMoo Problem base class
+from pymoo.util.ref_dirs import get_reference_directions
+
 
 
 
@@ -68,21 +70,31 @@ def scalariseValues(
 
     # print(objsNormalised)
 
+    weightVector = func.sampleWeightVector(weights)
+    print(f'New weight vector = {weightVector}')
+
     z0 = np.zeros_like(zBests)
 
     if scalarisingFunction == func.PAPBI:
         print("using PAPBI!")
         scalarisedArray = scalarisingFunction(
-            objsNormalised, z0, weights, currentGen, maxGen
+            objsNormalised, z0, weightVector, currentGen, maxGen
         )
     elif scalarisingFunction == func.HypI:
         # print('using HypI')
         scalarisedArray = scalarisingFunction(objsNormalised)
+    elif scalarisingFunction == func.APD:
+        # print('1')
+        ref_dirs = get_reference_directions("das-dennis", len(objectiveArray[-1]), n_partitions=len(objectiveArray[-1])*3)
 
+        # not using normalised values here, as it does not mix well with reference directions
+
+        scalarisedArray =scalarisingFunction(objectiveArray, ref_dirs, currentGen, maxGen, len(objectiveArray[-1]), alpha = 2)
+        # print('2')
     else:
         scalarisedArray = np.empty(len(objectiveArray))
         for i in range(0, len(objectiveArray)):
-            scalarisedArray[i] = scalarisingFunction(objsNormalised[i], z0, weights)
+            scalarisedArray[i] = scalarisingFunction(objsNormalised[i], z0, weightVector)
 
     # print(scalarisedArray)
     # unNormalisedScalarArray = scaler.inverse_transform(scalarisedArray)
@@ -186,7 +198,7 @@ def GPTrain(features, targets, meanPrior):
     likelihood.noise = 1e-4
     likelihood.noise_covar.raw_noise.requires_grad_(False)
 
-    training_iter = 250
+    training_iter = 200
     # Find optimal model hyperparameters
     model.train()
     likelihood.train()
@@ -2576,9 +2588,9 @@ class bayesianOptimiser:
             # plt.clim(0, len(self.scalarisedTargets))
             # plt.xlabel("f2(x)")
             # plt.ylabel("f1(x)")
-            # # plt.savefig("BOPareto.png")
-            # # plt.close()
-            # plt.show()
+            # plt.savefig("BOPareto.png")
+            # plt.close()
+            plt.show()
 
             np.savetxt("BOFeatures.txt", self.feFeatures)
             np.savetxt("BOScalarisedTargets.txt", self.scalarisedTargets)
