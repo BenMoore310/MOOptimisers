@@ -18,6 +18,7 @@ n_obj = 3
 s = 8
 
 scalarisingList = [
+    func.APD,
     func.HypI,
     func.chebyshev,
     func.weightedSum,
