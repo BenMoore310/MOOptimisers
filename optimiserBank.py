@@ -11,7 +11,6 @@ from datetime import datetime
 import functionBank as func
 # import scienceplots
 from scipy.stats import norm
-import functionBank as func
 from sklearn.preprocessing import MinMaxScaler
 import inspect
 from pymoo.core.problem import Problem  # PyMoo Problem base class
