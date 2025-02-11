@@ -21,11 +21,11 @@ scalarisingList = [
     func.APD,
     func.HypI,
     func.chebyshev,
-    # func.weightedSum,
-    # func.EWC,
-    # func.weightedPower,
+    func.weightedSum,
+    func.EWC,
+    func.weightedPower,
     func.weightedNorm,
-    # func.augmentedChebychev,
+    func.augmentedChebychev,
     func.modifiedChebychev,
     func.PBI,
     func.PAPBI,
@@ -72,21 +72,18 @@ for function in dtlzProblems:
 
         print(scalarisingFunction.__name__)
 
-        try:
-            LSADE = opt.LSADE(
-                bounds,
-                initSampleSize,
-                problem,
-                scalarisingFunction,
-                n_obj,
-                weightVectors,
-                useInitialPopulation=True,
-                initialPopulation=initPopulation,
-                initialObjvValues=initialObjvTargets
-            )
-            LSADE.optimizerStep()
-        except TypeError:
-            print('Error during optimisation, skipping...')
+        LSADE = opt.LSADE(
+            bounds,
+            initSampleSize,
+            problem,
+            scalarisingFunction,
+            n_obj,
+            weightVectors,
+            useInitialPopulation=True,
+            initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets
+        )
+        LSADE.optimizerStep()
 
         features = np.loadtxt("LSADEFeatures.txt")
         np.savetxt(
@@ -105,23 +102,19 @@ for function in dtlzProblems:
             objtTargets,
         )
 
-        try:
-            PSO = opt.TS_DDEO(
-                bounds,
-                initSampleSize,
-                problem,
-                scalarisingFunction,
-                n_obj,
-                weightVectors,
-                useInitialPopulation=True,
-                initialPopulation=initPopulation,
-                initialObjvValues=initialObjvTargets
-            )
-            PSO.stage1()
-            PSO.stage2()
-
-        except TypeError:
-            print('Error during optimisation, skipping...')
+        PSO = opt.TS_DDEO(
+            bounds,
+            initSampleSize,
+            problem,
+            scalarisingFunction,
+            n_obj,
+            weightVectors,
+            useInitialPopulation=True,
+            initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets
+        )
+        PSO.stage1()
+        PSO.stage2()
 
         features = np.loadtxt("TSDDEOFeatures.txt")
         np.savetxt(
@@ -171,6 +164,7 @@ for function in dtlzProblems:
         #     objtTargets,
         # )
         try:
+
             bayesianRun = opt.bayesianOptimiser(
                 bounds,
                 initSampleSize,
@@ -186,6 +180,7 @@ for function in dtlzProblems:
             bayesianRun.runOptimiser()
         except TypeError:
             print('Error during optimisation, skipping...')
+
 
         features = np.loadtxt("BOFeatures.txt")
         np.savetxt(
@@ -204,25 +199,22 @@ for function in dtlzProblems:
             objtTargets,
         )
 
-        try:
-            ESA = opt.ESA(
-                bounds,
-                initSampleSize,
-                initSampleSize,
-                0.25,
-                problem,
-                scalarisingFunction,
-                n_obj,
-                weightVectors,
-                0.9,
-                250,
-                useInitialPopulation=True,
-                initialPopulation=initPopulation,
-                initialObjvValues=initialObjvTargets
-            )
-            ESA.mainMenu(initialAction=1)
-        except TypeError:
-            print('Error during optimisation, skipping...')
+        ESA = opt.ESA(
+            bounds,
+            initSampleSize,
+            initSampleSize,
+            0.25,
+            problem,
+            scalarisingFunction,
+            n_obj,
+            weightVectors,
+            0.9,
+            250,
+            useInitialPopulation=True,
+            initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets
+        )
+        ESA.mainMenu(initialAction=1)
 
         features = np.loadtxt("ESAFeatures.txt")
         np.savetxt(
