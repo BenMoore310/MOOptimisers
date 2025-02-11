@@ -45,7 +45,7 @@ def scalariseValues(
 
     # print(objsNormalised)
 
-    weightVector = weights
+    weightVector = func.sampleWeightVector(weights)
     print(f'New weight vector = {weightVector}')
 
     z0 = np.zeros_like(zBests)
@@ -477,10 +477,10 @@ n_obj = 2
 # 'granularity' of weight vector spacing
 s = 8
 
-# weightVectors = func.generateWeightVectors(n_obj, s)
-# print(f'Generated {len(weightVectors)} weight vectors.')
+weightVectors = func.generateWeightVectors(n_obj, s)
+print(f'Generated {len(weightVectors)} weight vectors.')
 
-weightVectors = np.array((0.5, 0.5))
+# weightVectors = np.array((0.5, 0.5))
 
 
 print('current function  = ', function)
