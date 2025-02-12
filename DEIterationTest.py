@@ -16,6 +16,7 @@ import inspect
 from pymoo.core.problem import Problem  # PyMoo Problem base class
 from pymoo.util.ref_dirs import get_reference_directions
 from pymoo.problems import get_problem
+import subprocess
 
 
 def MOobjective_function(vec, currentFunction, nObjectives):
@@ -468,12 +469,13 @@ class bayesianOptimiser:
 
 
 
-function = 'dtlz2'
+function = 'dtlz1'
 
 DEIter = [10, 25, 50, 75, 100, 200, 500]
+# DEIter = [10]
 
-n_var = 6
-n_obj = 2
+n_var = 9
+n_obj = 5
 # 'granularity' of weight vector spacing
 s = 8
 
@@ -486,70 +488,72 @@ print(f'Generated {len(weightVectors)} weight vectors.')
 print('current function  = ', function)
 
 problem, bounds = func.getPyMooProblem(function, n_var, n_obj)
+for run in range(10):
+    initSampleSize = 50
+    # bounds = np.array(value)
+    lowBounds = bounds[:, 0]
+    highBounds = bounds[:, 1]
 
-initSampleSize = 50
-# bounds = np.array(value)
-lowBounds = bounds[:, 0]
-highBounds = bounds[:, 1]
+    # Generate one Latin Hypercube Sample (LHS) for each test function,
+    # to be used for all optimisers/scalarisers using a population size of 20
+    sampler = qmc.LatinHypercube(
+        d=bounds.shape[0]
+    )  # Dimension is determined from bounds
+    sample = sampler.random(n=initSampleSize)
+    initPopulation = qmc.scale(sample, lowBounds, highBounds)
 
-# Generate one Latin Hypercube Sample (LHS) for each test function,
-# to be used for all optimisers/scalarisers using a population size of 20
-sampler = qmc.LatinHypercube(
-    d=bounds.shape[0]
-)  # Dimension is determined from bounds
-sample = sampler.random(n=initSampleSize)
-initPopulation = qmc.scale(sample, lowBounds, highBounds)
-
-# Check for and systematically replace NaN values in initial population
-# Requires evaluating initial population
-initialObjvTargets = np.empty((0, n_obj))
-
-
-for i in range(initSampleSize):
-
-    newObjvTgt = MOobjective_function(initPopulation[i], problem, n_obj)
-    initialObjvTargets = np.vstack((initialObjvTargets, newObjvTgt))
-
-print("Initial Population:")
-print(initPopulation)
-print("initial targets:\n", initialObjvTargets )
-
-for iterNum in DEIter:
-
-    # try:
-
-    bayesianRun = bayesianOptimiser(
-        bounds,
-        initSampleSize,
-        problem,
-        func.chebyshev,
-        n_obj,
-        weightVectors,
-        DEIter=iterNum,
-        useInitialPopulation=True,
-        initialPopulation=initPopulation,
-        initialObjvValues=initialObjvTargets,
-        maxFE=100
-    )
-    bayesianRun.runOptimiser()
-    # except TypeError:
-        # print('Error during optimisation, skipping...')
+    # Check for and systematically replace NaN values in initial population
+    # Requires evaluating initial population
+    initialObjvTargets = np.empty((0, n_obj))
 
 
-    features = np.loadtxt("BOFeatures.txt")
-    np.savetxt(
-        f"BOFeatures{function}{iterNum}Iter.txt", features
-    )
+    for i in range(initSampleSize):
 
-    scalarisedTargets = np.loadtxt("BOScalarisedTargets.txt")
-    np.savetxt(
-        f"BOScalarisedTargets{function}{iterNum}Iter.txt",
-        scalarisedTargets,
-    )
+        newObjvTgt = MOobjective_function(initPopulation[i], problem, n_obj)
+        initialObjvTargets = np.vstack((initialObjvTargets, newObjvTgt))
 
-    objtTargets = np.loadtxt("BOObjectiveTargets.txt")
-    np.savetxt(
-        f"BOObjtvTargets{function}{iterNum}Iter.txt",
-        objtTargets,
-    )
+    print("Initial Population:")
+    print(initPopulation)
+    print("initial targets:\n", initialObjvTargets )
+
+    for iterNum in DEIter:
+
+        # try:
+
+        bayesianRun = bayesianOptimiser(
+            bounds,
+            initSampleSize,
+            problem,
+            func.chebyshev,
+            n_obj,
+            weightVectors,
+            DEIter=iterNum,
+            useInitialPopulation=True,
+            initialPopulation=initPopulation,
+            initialObjvValues=initialObjvTargets,
+            maxFE=100
+        )
+        bayesianRun.runOptimiser()
+        # except TypeError:
+            # print('Error during optimisation, skipping...')
+
+
+        features = np.loadtxt("BOFeatures.txt")
+        np.savetxt(
+            f"BOFeatures{function}{iterNum}Iter.txt", features
+        )
+
+        scalarisedTargets = np.loadtxt("BOScalarisedTargets.txt")
+        np.savetxt(
+            f"BOScalarisedTargets{function}{iterNum}Iter.txt",
+            scalarisedTargets,
+        )
+
+        objtTargets = np.loadtxt("BOObjectiveTargets.txt")
+        np.savetxt(
+            f"BOObjtvTargets{function}{iterNum}Iter.txt",
+            objtTargets,
+        )
+    subprocess.run(f"mkdir DE{function}Run{n_obj}Obj{run+1}", shell=True, check=True)
+    subprocess.run(f"mv *.txt DE{function}Run{n_obj}Obj{run+1}", shell=True, check=True)
 
