@@ -247,7 +247,7 @@ class DifferentialEvolution:
         pop_size=50,
         mutation_factor=0.8,
         crossover_prob=0.7,
-        max_generations=200,
+        max_generations=50,
         method="random",
     ):
         """
@@ -433,10 +433,10 @@ class BayesianDifferentialEvolution:
         surrogateModel,
         bounds,
         bestTarget,
-        pop_size=75,
+        pop_size=50,
         mutation_factor=0.8,
         crossover_prob=0.7,
-        max_generations=40,
+        max_generations=50,
         method="random",
     ):
         """
