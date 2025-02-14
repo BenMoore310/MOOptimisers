@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import qmc 
 from itertools import product
 from pymoo.problems import get_problem
+import subprocess
 
 dtlzProblems = ['dtlz1','dtlz2','dtlz5','dtlz7']
 
@@ -22,7 +23,7 @@ scalarisingList = [
     func.HypI,
     func.chebyshev,
     # func.weightedSum,
-    # func.EWC,
+    func.EWC,
     # func.weightedPower,
     func.weightedNorm,
     # func.augmentedChebychev,
@@ -34,209 +35,214 @@ scalarisingList = [
 weightVectors = func.generateWeightVectors(n_obj, s)
 print(f'Generated {len(weightVectors)} weight vectors.')
 
+for run in range(10):
+    for function in dtlzProblems:
 
-for function in dtlzProblems:
+        print('current function  = ', function)
 
-    print('current function  = ', function)
+        problem, bounds = func.getPyMooProblem(function, n_var, n_obj)
 
-    problem, bounds = func.getPyMooProblem(function, n_var, n_obj)
+        initSampleSize = 50
+        # bounds = np.array(value)
+        lowBounds = bounds[:, 0]
+        highBounds = bounds[:, 1]
 
-    initSampleSize = 50
-    # bounds = np.array(value)
-    lowBounds = bounds[:, 0]
-    highBounds = bounds[:, 1]
+        # Generate one Latin Hypercube Sample (LHS) for each test function,
+        # to be used for all optimisers/scalarisers using a population size of 20
+        sampler = qmc.LatinHypercube(
+            d=bounds.shape[0]
+        )  # Dimension is determined from bounds
+        sample = sampler.random(n=initSampleSize)
+        initPopulation = qmc.scale(sample, lowBounds, highBounds)
 
-    # Generate one Latin Hypercube Sample (LHS) for each test function,
-    # to be used for all optimisers/scalarisers using a population size of 20
-    sampler = qmc.LatinHypercube(
-        d=bounds.shape[0]
-    )  # Dimension is determined from bounds
-    sample = sampler.random(n=initSampleSize)
-    initPopulation = qmc.scale(sample, lowBounds, highBounds)
-
-    # Check for and systematically replace NaN values in initial population
-    # Requires evaluating initial population
-    initialObjvTargets = np.empty((0, n_obj))
+        # Check for and systematically replace NaN values in initial population
+        # Requires evaluating initial population
+        initialObjvTargets = np.empty((0, n_obj))
 
 
-    for i in range(initSampleSize):
+        for i in range(initSampleSize):
 
-        newObjvTgt = opt.MOobjective_function(initPopulation[i], problem, n_obj)
-        initialObjvTargets = np.vstack((initialObjvTargets, newObjvTgt))
+            newObjvTgt = opt.MOobjective_function(initPopulation[i], problem, n_obj)
+            initialObjvTargets = np.vstack((initialObjvTargets, newObjvTgt))
 
-    print("Initial Population:")
-    print(initPopulation)
-    print("initial targets:\n", initialObjvTargets )
+        print("Initial Population:")
+        print(initPopulation)
+        print("initial targets:\n", initialObjvTargets )
 
-    for scalarisingFunction in scalarisingList:
+        for scalarisingFunction in scalarisingList:
 
-        print(scalarisingFunction.__name__)
+            print(scalarisingFunction.__name__)
 
-        try:
-            LSADE = opt.LSADE(
-                bounds,
-                initSampleSize,
-                problem,
-                scalarisingFunction,
-                n_obj,
-                weightVectors,
-                useInitialPopulation=True,
-                initialPopulation=initPopulation,
-                initialObjvValues=initialObjvTargets
+            try:
+                LSADE = opt.LSADE(
+                    bounds,
+                    initSampleSize,
+                    problem,
+                    scalarisingFunction,
+                    n_obj,
+                    weightVectors,
+                    useInitialPopulation=True,
+                    initialPopulation=initPopulation,
+                    initialObjvValues=initialObjvTargets
+                )
+                LSADE.optimizerStep()
+            except TypeError:
+                print('Error during optimisation, skipping...')
+
+            features = np.loadtxt("LSADEFeatures.txt")
+            np.savetxt(
+                f"LSADEFeatures{function}{scalarisingFunction.__name__}{run+1}.txt", features
             )
-            LSADE.optimizerStep()
-        except TypeError:
-            print('Error during optimisation, skipping...')
 
-        features = np.loadtxt("LSADEFeatures.txt")
-        np.savetxt(
-            f"LSADEFeatures{function}{scalarisingFunction.__name__}.txt", features
-        )
-
-        scalarisedTargets = np.loadtxt("LSADEScalarisedTargets.txt")
-        np.savetxt(
-            f"LSADEScalarisedTargets{function}{scalarisingFunction.__name__}.txt",
-            scalarisedTargets,
-        )
-
-        objtTargets = np.loadtxt("LSADEObjectiveTargets.txt")
-        np.savetxt(
-            f"LSADEObjtvTargets{function}{scalarisingFunction.__name__}.txt",
-            objtTargets,
-        )
-
-        try:
-            PSO = opt.TS_DDEO(
-                bounds,
-                initSampleSize,
-                problem,
-                scalarisingFunction,
-                n_obj,
-                weightVectors,
-                useInitialPopulation=True,
-                initialPopulation=initPopulation,
-                initialObjvValues=initialObjvTargets
+            scalarisedTargets = np.loadtxt("LSADEScalarisedTargets.txt")
+            np.savetxt(
+                f"LSADEScalarisedTargets{function}{scalarisingFunction.__name__}{run+1}.txt",
+                scalarisedTargets,
             )
-            PSO.stage1()
-            PSO.stage2()
 
-        except TypeError:
-            print('Error during optimisation, skipping...')
-
-        features = np.loadtxt("TSDDEOFeatures.txt")
-        np.savetxt(
-            f"TSDDEOFeatures{function}{scalarisingFunction.__name__}.txt", features
-        )
-
-        scalarisedTargets = np.loadtxt("TSDDEOTargets.txt")
-        np.savetxt(
-            f"TSDDEOScalarisedTargets{function}{scalarisingFunction.__name__}.txt",
-            scalarisedTargets,
-        )
-
-        objtTargets = np.loadtxt("TSDDEOObjectiveTargets.txt")
-        np.savetxt(
-            f"TSDDEOObjtvTargets{function}{scalarisingFunction.__name__}.txt",
-            objtTargets,
-        )
-
-        # bayesianRun = opt.BOZeroMax(
-        #     bounds,
-        #     initSampleSize,
-        #     problem,
-        #     scalarisingFunction,
-        #     n_obj,
-        #     weights,
-        #     useInitialPopulation=True,
-        #     initialPopulation=initPopulation,
-        #     initialObjvValues=initialObjvTargets,
-        #     maxFE=250
-        # )
-        # bayesianRun.runOptimiser()
-
-        # features = np.loadtxt("BOMinMaxFeatures.txt")
-        # np.savetxt(
-        #     f"BOMinMaxFeatures{function}{scalarisingFunction.__name__}.txt", features
-        # )
-
-        # scalarisedTargets = np.loadtxt("BOMinMaxScalarisedTargets.txt")
-        # np.savetxt(
-        #     f"BOMinMaxScalarisedTargets{function}{scalarisingFunction.__name__}.txt",
-        #     scalarisedTargets,
-        # )
-
-        # objtTargets = np.loadtxt("BOMinMaxObjectiveTargets.txt")
-        # np.savetxt(
-        #     f"BOMinMaxObjtvTargets{function}{scalarisingFunction.__name__}.txt",
-        #     objtTargets,
-        # )
-        try:
-            bayesianRun = opt.bayesianOptimiser(
-                bounds,
-                initSampleSize,
-                problem,
-                scalarisingFunction,
-                n_obj,
-                weightVectors,
-                useInitialPopulation=True,
-                initialPopulation=initPopulation,
-                initialObjvValues=initialObjvTargets,
-                maxFE=250
+            objtTargets = np.loadtxt("LSADEObjectiveTargets.txt")
+            np.savetxt(
+                f"LSADEObjtvTargets{function}{scalarisingFunction.__name__}{run+1}.txt",
+                objtTargets,
             )
-            bayesianRun.runOptimiser()
-        except TypeError:
-            print('Error during optimisation, skipping...')
 
-        features = np.loadtxt("BOFeatures.txt")
-        np.savetxt(
-            f"BOFeatures{function}{scalarisingFunction.__name__}.txt", features
-        )
+            try:
+                PSO = opt.TS_DDEO(
+                    bounds,
+                    initSampleSize,
+                    problem,
+                    scalarisingFunction,
+                    n_obj,
+                    weightVectors,
+                    useInitialPopulation=True,
+                    initialPopulation=initPopulation,
+                    initialObjvValues=initialObjvTargets
+                )
+                PSO.stage1()
+                PSO.stage2()
 
-        scalarisedTargets = np.loadtxt("BOScalarisedTargets.txt")
-        np.savetxt(
-            f"BOScalarisedTargets{function}{scalarisingFunction.__name__}.txt",
-            scalarisedTargets,
-        )
+            except TypeError:
+                print('Error during optimisation, skipping...')
 
-        objtTargets = np.loadtxt("BOObjectiveTargets.txt")
-        np.savetxt(
-            f"BOObjtvTargets{function}{scalarisingFunction.__name__}.txt",
-            objtTargets,
-        )
-
-        try:
-            ESA = opt.ESA(
-                bounds,
-                initSampleSize,
-                initSampleSize,
-                0.25,
-                problem,
-                scalarisingFunction,
-                n_obj,
-                weightVectors,
-                0.9,
-                250,
-                useInitialPopulation=True,
-                initialPopulation=initPopulation,
-                initialObjvValues=initialObjvTargets
+            features = np.loadtxt("TSDDEOFeatures.txt")
+            np.savetxt(
+                f"TSDDEOFeatures{function}{scalarisingFunction.__name__}{run+1}.txt", features
             )
-            ESA.mainMenu(initialAction=1)
-        except TypeError:
-            print('Error during optimisation, skipping...')
 
-        features = np.loadtxt("ESAFeatures.txt")
-        np.savetxt(
-            f"ESAFeatures{function}{scalarisingFunction.__name__}.txt", features
-        )
+            scalarisedTargets = np.loadtxt("TSDDEOTargets.txt")
+            np.savetxt(
+                f"TSDDEOScalarisedTargets{function}{scalarisingFunction.__name__}{run+1}.txt",
+                scalarisedTargets,
+            )
 
-        scalarisedTargets = np.loadtxt("ESAScalarisedTargets.txt")
-        np.savetxt(
-            f"ESAScalarisedTargets{function}{scalarisingFunction.__name__}.txt",
-            scalarisedTargets,
-        )
+            objtTargets = np.loadtxt("TSDDEOObjectiveTargets.txt")
+            np.savetxt(
+                f"TSDDEOObjtvTargets{function}{scalarisingFunction.__name__}{run+1}.txt",
+                objtTargets,
+            )
 
-        objtTargets = np.loadtxt("ESAObjectiveTargets.txt")
-        np.savetxt(
-            f"ESAObjtvTargets{function}{scalarisingFunction.__name__}.txt",
-            objtTargets,
-        )
+            # bayesianRun = opt.BOZeroMax(
+            #     bounds,
+            #     initSampleSize,
+            #     problem,
+            #     scalarisingFunction,
+            #     n_obj,
+            #     weights,
+            #     useInitialPopulation=True,
+            #     initialPopulation=initPopulation,
+            #     initialObjvValues=initialObjvTargets,
+            #     maxFE=250
+            # )
+            # bayesianRun.runOptimiser()
+
+            # features = np.loadtxt("BOMinMaxFeatures.txt")
+            # np.savetxt(
+            #     f"BOMinMaxFeatures{function}{scalarisingFunction.__name__}.txt", features
+            # )
+
+            # scalarisedTargets = np.loadtxt("BOMinMaxScalarisedTargets.txt")
+            # np.savetxt(
+            #     f"BOMinMaxScalarisedTargets{function}{scalarisingFunction.__name__}.txt",
+            #     scalarisedTargets,
+            # )
+
+            # objtTargets = np.loadtxt("BOMinMaxObjectiveTargets.txt")
+            # np.savetxt(
+            #     f"BOMinMaxObjtvTargets{function}{scalarisingFunction.__name__}.txt",
+            #     objtTargets,
+            # )
+            try:
+                bayesianRun = opt.bayesianOptimiser(
+                    bounds,
+                    initSampleSize,
+                    problem,
+                    scalarisingFunction,
+                    n_obj,
+                    weightVectors,
+                    useInitialPopulation=True,
+                    initialPopulation=initPopulation,
+                    initialObjvValues=initialObjvTargets,
+                    maxFE=250
+                )
+                bayesianRun.runOptimiser()
+            except TypeError:
+                print('Error during optimisation, skipping...')
+
+            features = np.loadtxt("BOFeatures.txt")
+            np.savetxt(
+                f"BOFeatures{function}{scalarisingFunction.__name__}{run+1}.txt", features
+            )
+
+            scalarisedTargets = np.loadtxt("BOScalarisedTargets.txt")
+            np.savetxt(
+                f"BOScalarisedTargets{function}{scalarisingFunction.__name__}{run+1}.txt",
+                scalarisedTargets,
+            )
+
+            objtTargets = np.loadtxt("BOObjectiveTargets.txt")
+            np.savetxt(
+                f"BOObjtvTargets{function}{scalarisingFunction.__name__}{run+1}.txt",
+                objtTargets,
+            )
+
+            try:
+                ESA = opt.ESA(
+                    bounds,
+                    initSampleSize,
+                    initSampleSize,
+                    0.25,
+                    problem,
+                    scalarisingFunction,
+                    n_obj,
+                    weightVectors,
+                    0.9,
+                    250,
+                    useInitialPopulation=True,
+                    initialPopulation=initPopulation,
+                    initialObjvValues=initialObjvTargets
+                )
+                ESA.mainMenu(initialAction=1)
+            except TypeError:
+                print('Error during optimisation, skipping...')
+
+            features = np.loadtxt("ESAFeatures.txt")
+            np.savetxt(
+                f"ESAFeatures{function}{scalarisingFunction.__name__}{run+1}.txt", features
+            )
+
+            scalarisedTargets = np.loadtxt("ESAScalarisedTargets.txt")
+            np.savetxt(
+                f"ESAScalarisedTargets{function}{scalarisingFunction.__name__}{run+1}.txt",
+                scalarisedTargets,
+            )
+
+            objtTargets = np.loadtxt("ESAObjectiveTargets.txt")
+            np.savetxt(
+                f"ESAObjtvTargets{function}{scalarisingFunction.__name__}{run+1}.txt",
+                objtTargets,
+            )
+    subprocess.run(f"mkdir dtlzMulti{n_obj}Obj{run+1}", shell=True, check=True)
+    subprocess.run(f"mv *.txt dtlzMulti{n_obj}Obj{run+1}", shell=True, check=True)
+
+subprocess.run(f"mkdir dtlzMultiRun{n_obj}ObjI", shell=True, check=True)
+subprocess.run(f"mv dtlzMulti{n_obj}* dtlzMultiRun{n_obj}ObjI", shell=True, check=True)
